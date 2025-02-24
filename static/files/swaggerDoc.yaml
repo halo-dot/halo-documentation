@@ -1,0 +1,4339 @@
+openapi: 3.0.3
+info:
+  title: Kernelserver swagger document generator
+  description: Swagger documents for working with the Halo_backend code. The
+    endpoints show the required parameters and the format of custom objects.
+  termsOfService: http://halo.co.za
+  contact:
+    email: halo@halo.com
+  license:
+    name: Apache 2.0
+    url: http://apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Halo
+  url: https://www.halodot.io/
+servers:
+  - url: http://halo.co.za
+paths:
+  "/acquirers/{acquirerId}/paymentproviders:":
+    get:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of getPaymentproviders method endpoint.
+      description: A description of getPaymentproviders method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of addPaymentProvidersToAcquirer method endpoint.
+      description: A description of addPaymentProvidersToAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addPaymentProvidersToAcquirer
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                paymentproviders:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: number
+                      priority:
+                        type: number
+              required:
+                - paymentproviders
+              type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of setPaymentProvidersOnAcquirer method endpoint.
+      description: A description of setPaymentProvidersOnAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for setPaymentProvidersOnAcquirer
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                paymentproviders:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: number
+                      priority:
+                        type: number
+              required:
+                - paymentproviders
+              type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/acquirers/{acquirerId}/paymentbrands:":
+    get:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of getAcquirerPaymentBrands method endpoint.
+      description: A description of getAcquirerPaymentBrands method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/acquirers/{acquirerId}/paymentproviders/{paymentproviderid}:":
+    delete:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of removePaymentProviderFromAcquirer method endpoint.
+      description: A description of removePaymentProviderFromAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: paymentproviderid
+          description: Path parameter paymentproviderid
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/acquirers/{acquirerId}/jwtkeys:":
+    get:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of getJWTKeysForAcquirer method endpoint.
+      description: A description of getJWTKeysForAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of addJWTKeyToAcquirer method endpoint.
+      description: A description of addJWTKeyToAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addJWTKeyToAcquirer
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JWTKey"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/acquirers/{acquirerId}/pinassets:":
+    post:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of addPinAssetsToAcquirer method endpoint.
+      description: A description of addPinAssetsToAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    delete:
+      tags:
+        - "kernelserver: acquirers"
+      summary: A summary of deletePinAssetsFromAcquirer method endpoint.
+      description: A description of deletePinAssetsFromAcquirer method endpoint.
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Path parameter acquirerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/minAppVersion/merchant:":
+    get:
+      tags:
+        - "kernelserver: minAppVersion"
+      summary: A summary of getMinAppVersionMerchant method endpoint.
+      description: A description of getMinAppVersionMerchant method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: minAppVersion"
+      summary: A summary of updateMinAppVersionMerchant method endpoint.
+      description: A description of updateMinAppVersionMerchant method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/minAppVersion/consumer:":
+    get:
+      tags:
+        - "kernelserver: minAppVersion"
+      summary: A summary of getMinAppVersionConsumer method endpoint.
+      description: A description of getMinAppVersionConsumer method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: minAppVersion"
+      summary: A summary of updateMinAppVersionConsumer method endpoint.
+      description: A description of updateMinAppVersionConsumer method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/attestation/:":
+    post:
+      tags:
+        - "kernelserver: attestation"
+      summary: A summary of getNonce method endpoint.
+      description: A description of getNonce method endpoint.
+      requestBody:
+        description: Request Body for getNonce
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComponentDetails"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/attestation/{nonceId}:":
+    post:
+      tags:
+        - "kernelserver: attestation"
+      summary: A summary of validateAttestation method endpoint.
+      description: A description of validateAttestation method endpoint.
+      parameters:
+        - in: path
+          name: nonceId
+          description: Path parameter nonceId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for validateAttestation
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Attestation"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/attestation/{nonceId}/combined:":
+    post:
+      tags:
+        - "kernelserver: attestation"
+      summary: A summary of validateAttestationAndTaAttestation method endpoint.
+      description: A description of validateAttestationAndTaAttestation method endpoint.
+      parameters:
+        - in: path
+          name: nonceId
+          description: Path parameter nonceId
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: configHash
+          description: Query parameter configHash
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for validateAttestationAndTaAttestation
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attestation:
+                  type: object
+                  properties:
+                    schema:
+                      $ref: "#/components/schemas/Attestation"
+                taAttestation:
+                  type: object
+                  properties:
+                    schema:
+                      $ref: "#/components/schemas/TARegistration"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/auditlogs/:":
+    post:
+      tags:
+        - "kernelserver: auditlogs"
+      summary: A summary of submitAuditLogs method endpoint.
+      description: A description of submitAuditLogs method endpoint.
+      requestBody:
+        description: Request Body for submitAuditLogs
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                logs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      schema:
+                        $ref: "#/components/schemas/AuditLog"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/configs/:":
+    get:
+      tags:
+        - "kernelserver: configs"
+      summary: A summary of getConfigs method endpoint.
+      description: A description of getConfigs method endpoint.
+      parameters:
+        - in: query
+          name: configHash
+          description: Query parameter configHash
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/qrCode:":
+    post:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of generateQRCode method endpoint.
+      description: A description of generateQRCode method endpoint.
+      requestBody:
+        description: Request Body for generateQRCode
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TapQrCodeTransactionRequestDetailsSchema"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/qrCode/{id}:":
+    get:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of getConsumerTransactionStatus method endpoint.
+      description: A description of getConsumerTransactionStatus method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/tt3QRCode/{id}:":
+    get:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of getConsumerTT3TransactionStatus method endpoint.
+      description: A description of getConsumerTT3TransactionStatus method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/tt3QRCode:":
+    post:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of tt3GenerateQRCode method endpoint.
+      description: A description of tt3GenerateQRCode method endpoint.
+      requestBody:
+        description: Request Body for tt3GenerateQRCode
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tt3QrCodeTransactionRequestDetailsSchema"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/intentTransaction:":
+    post:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of intentTransaction method endpoint.
+      description: A description of intentTransaction method endpoint.
+      requestBody:
+        description: Request Body for intentTransaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TapIntentTransactionRequestDetailsSchema"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/tt3IntentTransaction:":
+    post:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of tt3IntentTransaction method endpoint.
+      description: A description of tt3IntentTransaction method endpoint.
+      requestBody:
+        description: Request Body for tt3IntentTransaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Tt3IntentTransactionRequestDetailsSchema"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/qrCodeDetails/{id}:":
+    get:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of getQRCodeData method endpoint.
+      description: A description of getQRCodeData method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/acknowledge:":
+    post:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of acknowledgeResponse method endpoint.
+      description: A description of acknowledgeResponse method endpoint.
+      requestBody:
+        description: Request Body for acknowledgeResponse
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - qrCodeId
+                - status
+              additionalProperties: false
+              properties:
+                transactionId:
+                  type: string
+                qrCodeId:
+                  type: string
+                status:
+                  type: number
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/consumer/report/transactions:":
+    get:
+      tags:
+        - "kernelserver: consumer"
+      summary: A summary of getConsumerTransactions method endpoint.
+      description: A description of getConsumerTransactions method endpoint.
+      parameters:
+        - in: query
+          name: startDate
+          description: Query parameter startDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: endDate
+          description: Query parameter endDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/datakeks/:":
+    get:
+      tags:
+        - "iveriprocessor: datakeks"
+      summary: A summary of getDataKek method endpoint.
+      description: A description of getDataKek method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/v2/datakeks/:":
+    get:
+      tags:
+        - "iveriprocessor: v2/datakeks"
+      summary: A summary of getDataKek method endpoint.
+      description: A description of getDataKek method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/deviceinstallations/firebaseToken:":
+    post:
+      tags:
+        - "kernelserver: deviceinstallations"
+      summary: A summary of registerFirebaseToken method endpoint.
+      description: A description of registerFirebaseToken method endpoint.
+      requestBody:
+        description: Request Body for registerFirebaseToken
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FirebaseTokenRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/deviceinstallations/{keyId}:":
+    get:
+      tags:
+        - "kernelserver: deviceinstallations"
+      summary: A summary of checkRegistration method endpoint.
+      description: A description of checkRegistration method endpoint.
+      parameters:
+        - in: path
+          name: keyId
+          description: Path parameter keyId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: assetsSignatureKeyVersion
+          description: Query parameter assetsSignatureKeyVersion
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: getEntropy
+          description: Query parameter getEntropy
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: deviceinstallations"
+      summary: A summary of register method endpoint.
+      description: A description of register method endpoint.
+      parameters:
+        - in: path
+          name: keyId
+          description: Path parameter keyId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: getNonce
+          description: Query parameter getNonce
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: getEntropy
+          description: Query parameter getEntropy
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for register
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Registration"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/deviceinstallations/{keyId}/nonce:":
+    post:
+      tags:
+        - "kernelserver: deviceinstallations"
+      summary: A summary of checkRegistrationWithNonce method endpoint.
+      description: A description of checkRegistrationWithNonce method endpoint.
+      parameters:
+        - in: path
+          name: keyId
+          description: Path parameter keyId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: assetsSignatureKeyVersion
+          description: Query parameter assetsSignatureKeyVersion
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: getEntropy
+          description: Query parameter getEntropy
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/deviceinstallations/{keyId}/keys:":
+    get:
+      tags:
+        - "kernelserver: deviceinstallations"
+      summary: A summary of getKeys method endpoint.
+      description: A description of getKeys method endpoint.
+      parameters:
+        - in: path
+          name: keyId
+          description: Path parameter keyId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: numOfKeys
+          description: Query parameter numOfKeys
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/documenttemplate/{documentTemplateId}/merchanttemplate/:":
+    get:
+      tags:
+        - "kernelserver: documenttemplate"
+      summary: A summary of getMerchantTemplate method endpoint.
+      description: A description of getMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: documentTemplateId
+          description: Path parameter documentTemplateId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: documenttemplate"
+      summary: A summary of addMerchantTemplate method endpoint.
+      description: A description of addMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: documentTemplateId
+          description: Path parameter documentTemplateId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addMerchantTemplate
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - typeId
+                - merchantId
+              additionalProperties: false
+              properties:
+                typeId:
+                  type: number
+                merchantId:
+                  type: number
+                templateDetails:
+                  type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: documenttemplate"
+      summary: A summary of updateMerchantTemplate method endpoint.
+      description: A description of updateMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: documentTemplateId
+          description: Path parameter documentTemplateId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for updateMerchantTemplate
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              additionalProperties: true
+              properties:
+                id:
+                  type: number
+                typeId:
+                  type: number
+                merchantId:
+                  type: number
+                templateDetails:
+                  type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/documenttemplate/{documentTemplateId}/merchanttemplate/{merchantId}:":
+    delete:
+      tags:
+        - "kernelserver: documenttemplate"
+      summary: A summary of removeMerchantTemplate method endpoint.
+      description: A description of removeMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: documentTemplateId
+          description: Path parameter documentTemplateId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/entropy/:":
+    get:
+      tags:
+        - "kernelserver: entropy"
+      summary: A summary of getEntropy method endpoint.
+      description: A description of getEntropy method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/healthz/:":
+    get:
+      tags:
+        - "kernelserver: healthz"
+      summary: A summary of doHealthCheck method endpoint.
+      description: A description of doHealthCheck method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/masterpass/:":
+    post:
+      tags:
+        - "kernelserver: masterpass"
+      summary: A summary of generateCode method endpoint.
+      description: A description of generateCode method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: masterpass"
+      summary: A summary of createMerchant method endpoint.
+      description: A description of createMerchant method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/masterpass/notify:":
+    post:
+      tags:
+        - "kernelserver: masterpass"
+      summary: A summary of NotifyPostBack method endpoint.
+      description: A description of NotifyPostBack method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/{id}/users/:":
+    post:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of addMerchantUser method endpoint.
+      description: A description of addMerchantUser method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addMerchantUser
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/{merchantId}/users/{userId}:":
+    put:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of updateMerchantUser method endpoint.
+      description: A description of updateMerchantUser method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for updateMerchantUser
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    delete:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of removeMerchantUser method endpoint.
+      description: A description of removeMerchantUser method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getOneMerchantUser method endpoint.
+      description: A description of getOneMerchantUser method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/{merchantId}/users:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantUsers method endpoint.
+      description: A description of getMerchantUsers method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/reports/transactions:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantTransactions method endpoint.
+      description: A description of getMerchantTransactions method endpoint.
+      parameters:
+        - in: query
+          name: startDate
+          description: Query parameter startDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: endDate
+          description: Query parameter endDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: minAmount
+          description: Query parameter minAmount
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: maxAmount
+          description: Query parameter maxAmount
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: merchantReference
+          description: Query parameter merchantReference
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: transactionDisposition
+          description: Query parameter transactionDisposition
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/reports/capabilities:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantCapabilities method endpoint.
+      description: A description of getMerchantCapabilities method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/reports/transactionStatistics:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantTransactionStatistics method endpoint.
+      description: A description of getMerchantTransactionStatistics method endpoint.
+      parameters:
+        - in: query
+          name: startDate
+          description: Query parameter startDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: endDate
+          description: Query parameter endDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: interval
+          description: Query parameter interval
+          schema:
+            $ref: "#/components/schemas/TransactionInterval"
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/{merchantId}/merchanttemplate:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantTemplate method endpoint.
+      description: A description of getMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of addMerchantTemplate method endpoint.
+      description: A description of addMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addMerchantTemplate
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - documentTemplateId
+                - typeId
+              additionalProperties: false
+              properties:
+                typeId:
+                  type: number
+                documentTemplateId:
+                  type: number
+                templateDetails:
+                  type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of updateMerchantTemplate method endpoint.
+      description: A description of updateMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for updateMerchantTemplate
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - documentTemplateId
+                - id
+              additionalProperties: false
+              properties:
+                id:
+                  type: number
+                typeId:
+                  type: number
+                documentTemplateId:
+                  type: number
+                templateDetails:
+                  type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    delete:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of removeMerchantTemplate method endpoint.
+      description: A description of removeMerchantTemplate method endpoint.
+      parameters:
+        - in: path
+          name: merchantId
+          description: Path parameter merchantId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/payout/request:":
+    post:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of payoutRequest method endpoint.
+      description: A description of payoutRequest method endpoint.
+      requestBody:
+        description: Request Body for payoutRequest
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - payoutDate
+              properties:
+                amount:
+                  type: number
+                payoutDate:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/balance:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantBalance method endpoint.
+      description: A description of getMerchantBalance method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchants/payoutRequests:":
+    get:
+      tags:
+        - "kernelserver: merchants"
+      summary: A summary of getMerchantPayoutRequests method endpoint.
+      description: A description of getMerchantPayoutRequests method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/dashboard:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of dashboardInfo method endpoint.
+      description: A description of dashboardInfo method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/terminals:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getTerminals method endpoint.
+      description: A description of getTerminals method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/terminal/{deviceInstallationId}:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getSingleTerminal method endpoint.
+      description: A description of getSingleTerminal method endpoint.
+      parameters:
+        - in: path
+          name: deviceInstallationId
+          description: Path parameter deviceInstallationId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/blockTerminal/{deviceInstallationId}:":
+    post:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of blockMerchantTerminal method endpoint.
+      description: A description of blockMerchantTerminal method endpoint.
+      parameters:
+        - in: path
+          name: deviceInstallationId
+          description: Path parameter deviceInstallationId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for blockMerchantTerminal
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              additionalProperties: false
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/unblockTerminal/{deviceInstallationId}:":
+    post:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of unblockMerchantTerminal method endpoint.
+      description: A description of unblockMerchantTerminal method endpoint.
+      parameters:
+        - in: path
+          name: deviceInstallationId
+          description: Path parameter deviceInstallationId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for unblockMerchantTerminal
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              additionalProperties: false
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/transaction/{transactionId}:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getOneMerchantTransaction method endpoint.
+      description: A description of getOneMerchantTransaction method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/statement:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getStatement method endpoint.
+      description: A description of getStatement method endpoint.
+      parameters:
+        - in: query
+          name: fromDate
+          description: Query parameter fromDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: toDate
+          description: Query parameter toDate
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/statement/pdf:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getStatementPdf method endpoint.
+      description: A description of getStatementPdf method endpoint.
+      parameters:
+        - in: query
+          name: fromDate
+          description: Query parameter fromDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: toDate
+          description: Query parameter toDate
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/statement/email:":
+    post:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of sendStatementEmail method endpoint.
+      description: A description of sendStatementEmail method endpoint.
+      requestBody:
+        description: Request Body for sendStatementEmail
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailStatementRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/integratorUsers:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getMyIntegratorUsers method endpoint.
+      description: A description of getMyIntegratorUsers method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/integrators:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getIntegrators method endpoint.
+      description: A description of getIntegrators method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/integrator/{integratorId}:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getOneIntegrator method endpoint.
+      description: A description of getOneIntegrator method endpoint.
+      parameters:
+        - in: path
+          name: integratorId
+          description: Path parameter integratorId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/integrator/updateStatus/{integratorId}:":
+    post:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of updateIntegratorStatus method endpoint.
+      description: A description of updateIntegratorStatus method endpoint.
+      parameters:
+        - in: path
+          name: integratorId
+          description: Path parameter integratorId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for updateIntegratorStatus
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/integratorUsers/{userId}:":
+    get:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of getOneMyIntegratorUsers method endpoint.
+      description: A description of getOneMyIntegratorUsers method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/merchantPortal/exchangeKeys:":
+    post:
+      tags:
+        - "kernelserver: merchantPortal"
+      summary: A summary of setMerchantPortalEncryptionKey method endpoint.
+      description: A description of setMerchantPortalEncryptionKey method endpoint.
+      requestBody:
+        description: Request Body for setMerchantPortalEncryptionKey
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - siteKey
+              additionalProperties: false
+              properties:
+                siteKey:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/monitoring/:":
+    post:
+      tags:
+        - "kernelserver: monitoring"
+      summary: A summary of reportError method endpoint.
+      description: A description of reportError method endpoint.
+      requestBody:
+        description: Request Body for reportError
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - errorCode
+              additionalProperties: false
+              properties:
+                errorCode:
+                  type: number
+                message:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/paymentproviders/{paymentproviderId}/acquirers:":
+    get:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of getAcquirers method endpoint.
+      description: A description of getAcquirers method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of addAcquirersToPaymentProvider method endpoint.
+      description: A description of addAcquirersToPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addAcquirersToPaymentProvider
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - acquirers
+              additionalProperties: false
+              properties:
+                acquirers:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: number
+                      priority:
+                        type: number
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of setAcquirersOnPaymentProvider method endpoint.
+      description: A description of setAcquirersOnPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for setAcquirersOnPaymentProvider
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - acquirers
+              additionalProperties: false
+              properties:
+                acquirers:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: number
+                      priority:
+                        type: number
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/paymentproviders/{paymentproviderId}/acquirers/{acquirerid}:":
+    delete:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of removeAcquirerFromPaymentProvider method endpoint.
+      description: A description of removeAcquirerFromPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: acquirerid
+          description: Path parameter acquirerid
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/paymentproviders/{paymentproviderId}/merchantusers:":
+    post:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of addMerchantsToPaymentProvider method endpoint.
+      description: A description of addMerchantsToPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addMerchantsToPaymentProvider
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - merchants
+              additionalProperties: true
+              properties:
+                merchantUsers:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - merchantId
+                    additionalProperties: true
+                    properties:
+                      id:
+                        type: number
+                      identifier:
+                        type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/paymentproviders/{paymentproviderId}/encryptionkeys:":
+    get:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of getEncryptionKeysForPaymentProvider method endpoint.
+      description: A description of getEncryptionKeysForPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: paymentproviders"
+      summary: A summary of addEncryptionKeyToPaymentProvider method endpoint.
+      description: A description of addEncryptionKeyToPaymentProvider method endpoint.
+      parameters:
+        - in: path
+          name: paymentproviderId
+          description: Path parameter paymentproviderId
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addEncryptionKeyToPaymentProvider
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EncryptionKey"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/pinassets/:":
+    get:
+      tags:
+        - "kernelserver: pinassets"
+      summary: A summary of getAllPinAssetPrefixes method endpoint.
+      description: A description of getAllPinAssetPrefixes method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/pinassets/{prefix}:":
+    get:
+      tags:
+        - "kernelserver: pinassets"
+      summary: A summary of getPinAsset method endpoint.
+      description: A description of getPinAsset method endpoint.
+      parameters:
+        - in: path
+          name: prefix
+          description: Path parameter prefix
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: pinassets"
+      summary: A summary of addPinAsset method endpoint.
+      description: A description of addPinAsset method endpoint.
+      parameters:
+        - in: path
+          name: prefix
+          description: Path parameter prefix
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for addPinAsset
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fontColour
+                - fontColour2
+                - font1
+                - font2
+                - logo
+                - okButton
+                - okButtonPressed
+                - backButton
+              properties:
+                fontColour:
+                  type: string
+                fontColour2:
+                  type: string
+                font1:
+                  type: string
+                font2:
+                  type: string
+                logo:
+                  type: string
+                okButton:
+                  type: string
+                okButtonPressed:
+                  type: string
+                backButton:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    delete:
+      tags:
+        - "kernelserver: pinassets"
+      summary: A summary of deletePinAsset method endpoint.
+      description: A description of deletePinAsset method endpoint.
+      parameters:
+        - in: path
+          name: prefix
+          description: Path parameter prefix
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/pinkeys/:":
+    get:
+      tags:
+        - "iveriprocessor: pinkeys"
+      summary: A summary of getPinKey method endpoint.
+      description: A description of getPinKey method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/v2/pinkeys/:":
+    get:
+      tags:
+        - "iveriprocessor: v2/pinkeys"
+      summary: A summary of getPinKey method endpoint.
+      description: A description of getPinKey method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/pinksks/:":
+    get:
+      tags:
+        - "kernelserver: pinksks"
+      summary: A summary of getPinKsks method endpoint.
+      description: A description of getPinKsks method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    post:
+      tags:
+        - "kernelserver: pinksks"
+      summary: A summary of generatePinKsk method endpoint.
+      description: A description of generatePinKsk method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/pinksks/{id}:":
+    post:
+      tags:
+        - "kernelserver: pinksks"
+      summary: A summary of activatePinKsk method endpoint.
+      description: A description of activatePinKsk method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/rapidpay/paybylink:":
+    post:
+      tags:
+        - "kernelserver: rapidpay"
+      summary: A summary of payByLink method endpoint.
+      description: A description of payByLink method endpoint.
+      requestBody:
+        description: Request Body for payByLink
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayByLinkRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/rapidpay/paybylink/postback:":
+    post:
+      tags:
+        - "kernelserver: rapidpay"
+      summary: A summary of paybyLinkPostBack method endpoint.
+      description: A description of paybyLinkPostBack method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/registeredapplicationsigners/{id}/registeredapplications:":
+    post:
+      tags:
+        - "kernelserver: registeredapplicationsigners"
+      summary: A summary of addApplicationToSigners method endpoint.
+      description: A description of addApplicationToSigners method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: number
+          required: true
+      requestBody:
+        description: Request Body for addApplicationToSigners
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                registeredApplications:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: number
+              required:
+                - registeredApplications
+              type: object
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: registeredapplicationsigners"
+      summary: A summary of getApplications method endpoint.
+      description: A description of getApplications method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/registeredapplicationsigners/{id}/registeredapplications/{registeredapplicationid}:":
+    delete:
+      tags:
+        - "kernelserver: registeredapplicationsigners"
+      summary: A summary of removeApplication method endpoint.
+      description: A description of removeApplication method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: registeredapplicationid
+          description: Path parameter registeredapplicationid
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/registeredapplicationsigners/{id}/registeredapplications/{applicationSignerId}:":
+    get:
+      tags:
+        - "kernelserver: registeredapplicationsigners"
+      summary: A summary of getOneApplication method endpoint.
+      description: A description of getOneApplication method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: number
+          required: true
+        - in: path
+          name: applicationSignerId
+          description: Path parameter applicationSignerId
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/blockedusers:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getBlockedUsers method endpoint.
+      description: A description of getBlockedUsers method endpoint.
+      parameters:
+        - in: query
+          name: search
+          description: Query parameter search
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: order
+          description: Query parameter order
+          schema:
+            type: array
+            items:
+              type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/blockedusers/searchable:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getBlockedUserSearchable method endpoint.
+      description: A description of getBlockedUserSearchable method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/deviceinstallations:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getDeviceInstallations method endpoint.
+      description: A description of getDeviceInstallations method endpoint.
+      parameters:
+        - in: query
+          name: search
+          description: Query parameter search
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: order
+          description: Query parameter order
+          schema:
+            type: array
+            items:
+              type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/deviceinstallations/searchable:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getDeviceInstallationSearchable method endpoint.
+      description: A description of getDeviceInstallationSearchable method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/attestations:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getAttestations method endpoint.
+      description: A description of getAttestations method endpoint.
+      parameters:
+        - in: query
+          name: search
+          description: Query parameter search
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: order
+          description: Query parameter order
+          schema:
+            type: array
+            items:
+              type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/attestations/searchable:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getAttestationSearchable method endpoint.
+      description: A description of getAttestationSearchable method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/transactions:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getTransactions method endpoint.
+      description: A description of getTransactions method endpoint.
+      parameters:
+        - in: query
+          name: search
+          description: Query parameter search
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: order
+          description: Query parameter order
+          schema:
+            type: array
+            items:
+              type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/transactions/searchable:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getTransactionSearchable method endpoint.
+      description: A description of getTransactionSearchable method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/reports/paymentproviders/names:":
+    get:
+      tags:
+        - "kernelserver: reports"
+      summary: A summary of getProviderNames method endpoint.
+      description: A description of getProviderNames method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/report/:":
+    post:
+      tags:
+        - "kernelserver: report"
+      summary: A summary of reportIssue method endpoint.
+      description: A description of reportIssue method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/securecardreader/status:":
+    post:
+      tags:
+        - "kernelserver: securecardreader"
+      summary: A summary of getSecureCardReaderStatus method endpoint.
+      description: A description of getSecureCardReaderStatus method endpoint.
+      requestBody:
+        description: Request Body for getSecureCardReaderStatus
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureCardReaderStatusReq"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/securecardreader/config/confirm:":
+    put:
+      tags:
+        - "kernelserver: securecardreader"
+      summary: A summary of confirmSecureCardReaderConfig method endpoint.
+      description: A description of confirmSecureCardReaderConfig method endpoint.
+      requestBody:
+        description: Request Body for confirmSecureCardReaderConfig
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureCardReaderConfigConfirmReq"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/securecardreader/rki:":
+    post:
+      tags:
+        - "kernelserver: securecardreader"
+      summary: A summary of performRki method endpoint.
+      description: A description of performRki method endpoint.
+      requestBody:
+        description: Request Body for performRki
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureCardReaderRkiReq"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/securecardreader/rki/confirm:":
+    put:
+      tags:
+        - "kernelserver: securecardreader"
+      summary: A summary of configRki method endpoint.
+      description: A description of configRki method endpoint.
+      requestBody:
+        description: Request Body for configRki
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecureCardReaderRkiConfirmReq"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/securecardreader/terminal-allocations/{merchantName}:":
+    get:
+      tags:
+        - "kernelserver: securecardreader"
+      summary: A summary of getTerminalAllocations method endpoint.
+      description: A description of getTerminalAllocations method endpoint.
+      parameters:
+        - in: path
+          name: merchantName
+          description: Path parameter merchantName
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/merchants/total:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getTotatMerchants method endpoint.
+      description: A description of getTotatMerchants method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/transactions/total:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getTotalTransactions method endpoint.
+      description: A description of getTotalTransactions method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/transactions/average:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getAverageTransactionValue method endpoint.
+      description: A description of getAverageTransactionValue method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/deviceinstallations:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getDeviceInstallationStats method endpoint.
+      description: A description of getDeviceInstallationStats method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/attestations:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getAttestationStats method endpoint.
+      description: A description of getAttestationStats method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/statistics/transactions:":
+    get:
+      tags:
+        - "kernelserver: statistics"
+      summary: A summary of getTransactionStats method endpoint.
+      description: A description of getTransactionStats method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/tainstallations/{keyId}:":
+    get:
+      tags:
+        - "kernelserver: tainstallations"
+      summary: A summary of checkRegistration method endpoint.
+      description: A description of checkRegistration method endpoint.
+      parameters:
+        - in: path
+          name: keyId
+          description: Path parameter keyId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/tainstallations/:":
+    post:
+      tags:
+        - "kernelserver: tainstallations"
+      summary: A summary of register method endpoint.
+      description: A description of register method endpoint.
+      requestBody:
+        description: Request Body for register
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TARegistration"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/tokens/:":
+    get:
+      tags:
+        - "kernelserver: tokens"
+      summary: A summary of getVerificationId method endpoint.
+      description: A description of getVerificationId method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/tokens/checkjwt:":
+    post:
+      tags:
+        - "kernelserver: tokens"
+      summary: A summary of checkJwt method endpoint.
+      description: A description of checkJwt method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of submit method endpoint.
+      description: A description of submit method endpoint.
+      requestBody:
+        description: Request Body for submit
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Transaction"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of getMerchantTransactions method endpoint.
+      description: A description of getMerchantTransactions method endpoint.
+      parameters:
+        - in: query
+          name: startDate
+          description: Query parameter startDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: endDate
+          description: Query parameter endDate
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: limit
+          description: Query parameter limit
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: offset
+          description: Query parameter offset
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: minAmount
+          description: Query parameter minAmount
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: maxAmount
+          description: Query parameter maxAmount
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: merchantReference
+          description: Query parameter merchantReference
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: transactionDisposition
+          description: Query parameter transactionDisposition
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: user
+          description: Query parameter user
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: merchant
+          description: Query parameter merchant
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/tt3:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of submitTt3Transaction method endpoint.
+      description: A description of submitTt3Transaction method endpoint.
+      requestBody:
+        description: Request Body for submitTt3Transaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Transaction"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{transactionId}/refund:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of refundTransaction method endpoint.
+      description: A description of refundTransaction method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for refundTransaction
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                amount:
+                  type: number
+                refundReference:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/cash:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of cashTransaction method endpoint.
+      description: A description of cashTransaction method endpoint.
+      requestBody:
+        description: Request Body for cashTransaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CashTransactionRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{transactionId}:":
+    post:
+      operatorId: "getTransactionById"
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of acknowledgeResponse method endpoint.
+      description: A description of acknowledgeResponse method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for acknowledgeResponse
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcknowledgeRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of getOneTransaction method endpoint.
+      description: A description of getOneTransaction method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{transactionId}/receipt:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of sendReceipt method endpoint.
+      description: A description of sendReceipt method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of getPrintReceiptText method endpoint.
+      description: A description of getPrintReceiptText method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: logoHash
+          description: Query parameter logoHash
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/receipt/pdf/{id}:":
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of getReceiptPdf method endpoint.
+      description: A description of getReceiptPdf method endpoint.
+      parameters:
+        - in: path
+          name: id
+          description: Path parameter id
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{transactionId}/receipt/pdf:":
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of getReceiptPdfId method endpoint.
+      description: A description of getReceiptPdfId method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/references/check:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of checkTransactionReference method endpoint.
+      description: A description of checkTransactionReference method endpoint.
+      requestBody:
+        description: Request Body for checkTransactionReference
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - merchantReference
+              properties:
+                merchantReference:
+                  type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/fees/config:":
+    post:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of submitFeesConfig method endpoint.
+      description: A description of submitFeesConfig method endpoint.
+      requestBody:
+        description: Request Body for submitFeesConfig
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionFeesConfig"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/fees/config/{transactionFeesConfigId}:":
+    delete:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of deleteFeesConfig method endpoint.
+      description: A description of deleteFeesConfig method endpoint.
+      parameters:
+        - in: path
+          name: transactionFeesConfigId
+          description: Path parameter transactionFeesConfigId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    put:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of updateFeesConfig method endpoint.
+      description: A description of updateFeesConfig method endpoint.
+      parameters:
+        - in: path
+          name: transactionFeesConfigId
+          description: Path parameter transactionFeesConfigId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for updateFeesConfig
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionFeesConfig"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of fetchFeesConfig method endpoint.
+      description: A description of fetchFeesConfig method endpoint.
+      parameters:
+        - in: path
+          name: transactionFeesConfigId
+          description: Path parameter transactionFeesConfigId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/fees/configs:":
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of fetchFeesConfigs method endpoint.
+      description: A description of fetchFeesConfigs method endpoint.
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{transactionId}/fees/breakdown:":
+    get:
+      tags:
+        - "kernelserver: transactions"
+      summary: A summary of fetchFeesBreakdown method endpoint.
+      description: A description of fetchFeesBreakdown method endpoint.
+      parameters:
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{userId}:":
+    post:
+      tags:
+        - "iveriprocessor: transactions"
+      summary: A summary of postTransaction method endpoint.
+      description: A description of postTransaction method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for postTransaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/tt3/{userId}:":
+    post:
+      tags:
+        - "iveriprocessor: transactions"
+      summary: A summary of postTt3Transaction method endpoint.
+      description: A description of postTt3Transaction method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for postTt3Transaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{userId}/{transactionId}/refund:":
+    post:
+      tags:
+        - "iveriprocessor: transactions"
+      summary: A summary of refundTransaction method endpoint.
+      description: A description of refundTransaction method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Request Body for refundTransaction
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{userId}/{transactionId}:":
+    delete:
+      tags:
+        - "iveriprocessor: transactions"
+      summary: A summary of voidTransaction method endpoint.
+      description: A description of voidTransaction method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+  "/transactions/{userId}/{transactionId}/acknowledge:":
+    post:
+      tags:
+        - "iveriprocessor: transactions"
+      summary: A summary of confirmTransaction method endpoint.
+      description: A description of confirmTransaction method endpoint.
+      parameters:
+        - in: path
+          name: userId
+          description: Path parameter userId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: transactionId
+          description: Path parameter transactionId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Pet not found
+        "405":
+          description: Validation exception
+components:
+  schemas:
+    RefundRequest:
+      type: object
+      required:
+        - paymentProviderTransactionId
+        - merchantTransactionReference
+      properties:
+        amount:
+          type: string
+        paymentProviderTransactionId:
+          type: string
+        merchantTransactionReference:
+          type: string
+    TransactionRequest:
+      type: object
+      required:
+        - details
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        merchantTransactionReference:
+          type: string
+        dataRecord:
+          type: string
+        details:
+          $ref: "#/components/schemas/TransactionDetails"
+        longitude:
+          type: string
+        latitude:
+          type: string
+        identifier: {}
+        pinblockData:
+          type: object
+          additionalProperties: true
+          properties:
+            pindata:
+              type: string
+            keyVersion:
+              type: string
+            ksn:
+              type: string
+            ksnSignature:
+              type: string
+        sdkVersion:
+          type: string
+        tt3Fields:
+          type: object
+          additionalProperties: true
+          properties:
+            accountNumber:
+              type: string
+            id:
+              type: string
+            maxCollectionAmount:
+              type: string
+    TransactionFeesConfig:
+      type: object
+      required:
+        - name
+        - cardScheme
+        - cardType
+        - startDate
+        - config
+        - defaultFee
+      properties:
+        name:
+          type: string
+        cardScheme:
+          type: string
+          enum:
+            - Visa
+            - AmericanExpress
+            - Mastercard
+            - Discover
+            - Unknown
+        cardType:
+          type: string
+          enum:
+            - Credit
+            - Debit
+            - Unknown
+        startDate:
+          type: string
+        config:
+          type: array
+          items:
+            type: object
+            properties:
+              schema:
+                $ref: "#/components/schemas/TransactionProcessingFees"
+    TransactionProcessingFees:
+      type: object
+      required:
+        - key
+        - value
+        - type
+      properties:
+        key:
+          type: string
+        value:
+          type: number
+        type:
+          type: string
+    AcknowledgeRequest:
+      type: object
+      nullable: true
+      additionalProperties: true
+      properties:
+        type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              schema:
+                $ref: "#/components/schemas/TagValue"
+    TagValue:
+      type: object
+      required:
+        - tag
+        - value
+      additionalProperties: false
+      properties:
+        tag:
+          type: string
+          pattern: ^([a-f0-9A-F][a-f0-9A-F])*$
+        value:
+          type: string
+          nullable: true
+          pattern: ^([a-f0-9A-F][a-f0-9A-F])*$
+    CashTransactionRequest:
+      type: object
+      required:
+        - amount
+        - currency
+        - transactionMetaData
+      additionalProperties: false
+      properties:
+        transactionMetaData:
+          type: object
+        amount:
+          type: number
+        currency:
+          type: string
+        transactionReference:
+          type: string
+    Transaction:
+      type: object
+      required:
+        - details
+      additionalProperties: true
+      properties:
+        merchantTransactionReference:
+          type: string
+        tip:
+          type: number
+        dataRecord:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              schema:
+                $ref: "#/components/schemas/TransactionDetails"
+            required:
+              - tags
+          minItems: 1
+        pinData:
+          type: object
+          additionalProperties: true
+          required:
+            - pinblock
+            - keyVersion
+          properties:
+            pinblock:
+              type: string
+            pinblockSignature:
+              type: string
+            keyVersion:
+              type: string
+            ksn:
+              type: string
+            ksnSignature:
+              type: string
+        qrCodeId:
+          type: string
+        sdkVersion:
+          type: string
+        tt3Fields:
+          type: object
+          additionalProperties: true
+          properties:
+            accountNumber:
+              type: string
+            id:
+              type: string
+            maxCollectionAmount:
+              type: string
+        secureCardReader:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Miura
+            serialNumber:
+              type: string
+    TransactionDetails:
+      type: object
+      additionalProperties: true
+      properties:
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              schema:
+                $ref: "#/components/schemas/TagValue"
+        encryptedV2:
+          type: object
+          additionalProperties: true
+          properties:
+            jwe:
+              type: string
+            encryptedSessionKey:
+              type: string
+            encryptedCardData:
+              type: string
+            iv:
+              type: string
+            authTag:
+              type: string
+            fingerprint:
+              type: string
+            keyVersion:
+              type: string
+        encrypted:
+          type: object
+          additionalProperties: true
+          properties:
+            encryptionKeyId:
+              type: number
+            jwe:
+              type: string
+            clientSideEncCardData:
+              required:
+                - sessionKey
+                - fingerprint
+                - encryptedCardData
+              properties:
+                sessionKey:
+                  type: string
+                fingerprint:
+                  type: string
+                encryptedCardData:
+                  type: string
+        encryptedData:
+          type: object
+          required:
+            - encryptedData
+          additionalProperties: true
+          properties:
+            wrappedKey:
+              type: string
+            encryptedData:
+              type: string
+            keyVersion:
+              type: string
+            ksn:
+              type: string
+            ksnSignature:
+              type: string
+        maskedPAN:
+          type: string
+        paymentProviderId:
+          type: number
+        amount:
+          type: number
+    SecureCardReaderRkiConfirmReq:
+      type: object
+      required:
+        - serialNumber
+        - type
+      additionalProperties: true
+      properties:
+        serialNumber:
+          type: string
+        type:
+          type: string
+          enum:
+            - Miura
+        ipekPinKcv:
+          type: string
+        ipekSredKcv:
+          type: string
+        tmkKcv:
+          type: string
+    SecureCardReaderRkiReq:
+      type: object
+      required:
+        - serialNumber
+        - type
+        - suggestedIksn
+        - prodSign
+        - terminalCert
+        - tempKeyload
+      additionalProperties: true
+      properties:
+        serialNumber:
+          type: string
+        type:
+          type: string
+          enum:
+            - Miura
+        suggestedIksn:
+          type: string
+        prodSign:
+          type: string
+        terminalCert:
+          type: string
+        tempKeyload:
+          type: string
+    SecureCardReaderConfigConfirmReq:
+      type: object
+      required:
+        - serialNumber
+        - type
+        - configId
+      additionalProperties: true
+      properties:
+        serialNumber:
+          type: string
+        configId:
+          type: string
+        type:
+          type: string
+          enum:
+            - Miura
+    SecureCardReaderStatusReq:
+      type: object
+      required:
+        - serialNumber
+        - type
+        - osVersion
+        - mpiVersion
+      additionalProperties: true
+      properties:
+        serialNumber:
+          type: string
+        type:
+          type: string
+          enum:
+            - Miura
+        osVersion:
+          type: string
+        mpiVersion:
+          type: string
+    PayByLinkRequest:
+      type: object
+      required:
+        - amount
+        - username
+        - password
+      oneOf:
+        - required:
+            - smsNumber
+        - required:
+            - emailAddress
+      properties:
+        amount:
+          type: number
+        merchantTransactionReference:
+          type: string
+        transactionMetaData:
+          type: object
+        emailAddress:
+          type: string
+          pattern: ^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$
+        smsNumber:
+          type: string
+          pattern: ^(\+\d{1,2}\s?)?\(?\d{2,3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$
+        username:
+          type: string
+        password:
+          type: string
+    EncryptionKey:
+      type: object
+      required:
+        - publicKeyPem
+        - keyIdentifier
+        - paymentproviderId
+      additionalProperties: false
+      properties:
+        publicKeyPem:
+          type: string
+        keyIdentifier:
+          type: string
+        paymentproviderId:
+          type: number
+    EmailStatementRequest:
+      type: object
+      properties:
+        address:
+          type: string
+        fromDate:
+          type: string
+        toDate:
+          type: string
+      required:
+        - address
+      additionalProperties: false
+    TransactionInterval:
+      type: string
+      enum:
+        - Daily
+        - Weekly
+        - Monthly
+    User:
+      type: object
+      required:
+        - username
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
+        lastname:
+          type: string
+        temporaryPassword:
+          type: boolean
+        email:
+          type: string
+        phonenumber:
+          type: string
+    Registration:
+      type: object
+      required:
+        - signingCertificateChain
+        - encryptionCertificateChain
+        - signedKeyId
+        - deviceId
+        - signedDeviceId
+      additionalProperties: true
+      properties:
+        signingCertificateChain:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        encryptionCertificateChain:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        signedKeyId:
+          type: string
+        deviceId:
+          type: string
+        signedDeviceId:
+          type: string
+        firebaseToken:
+          type: string
+        componentDetails:
+          type: object
+          properties:
+            schema:
+              $ref: "#/components/schemas/ComponentDetails"
+        responseKey:
+          type: string
+    FirebaseTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    Tt3IntentTransactionRequestDetailsSchema:
+      type: object
+      required:
+        - timestamp
+        - accountNumber
+        - id
+        - maxCollectionAmount
+        - contractReference
+      properties:
+        merchantId:
+          type: number
+        timestamp:
+          type: string
+        isConsumerApp:
+          type: boolean
+        accountNumber:
+          type: string
+        id:
+          type: string
+        maxCollectionAmount:
+          type: string
+        contractReference:
+          type: string
+        creditorABSN:
+          type: string
+        collectionDay:
+          type: string
+    TapIntentTransactionRequestDetailsSchema:
+      type: object
+      required:
+        - timestamp
+        - paymentReference
+        - amount
+        - currencyCode
+      properties:
+        merchantId:
+          type: number
+        timestamp:
+          type: string
+        isConsumerApp:
+          type: boolean
+        paymentReference:
+          type: string
+        amount:
+          type: number
+        currencyCode:
+          type: string
+    Tt3QrCodeTransactionRequestDetailsSchema:
+      type: object
+      required:
+        - timestamp
+        - merchantId
+        - image
+        - isConsumerApp
+        - accountNumber
+        - id
+        - maxCollectionAmount
+        - contractReference
+      properties:
+        merchantId:
+          type: number
+        timestamp:
+          type: string
+        isConsumerApp:
+          type: boolean
+        image:
+          type: object
+          required:
+            - required
+          additionalProperties: true
+          properties:
+            required:
+              type: boolean
+            size:
+              type: number
+        accountNumber:
+          type: string
+        id:
+          type: string
+        maxCollectionAmount:
+          type: string
+        contractReference:
+          type: string
+        creditorABSN:
+          type: string
+        collectionDay:
+          type: string
+    TapQrCodeTransactionRequestDetailsSchema:
+      type: object
+      required:
+        - timestamp
+        - merchantId
+        - image
+        - isConsumerApp
+        - paymentReference
+        - amount
+        - currencyCode
+      properties:
+        merchantId:
+          type: number
+        timestamp:
+          type: string
+        isConsumerApp:
+          type: boolean
+        image:
+          type: object
+          required:
+            - required
+          additionalProperties: true
+          properties:
+            required:
+              type: boolean
+            size:
+              type: number
+        paymentReference:
+          type: string
+        amount:
+          type: number
+        currencyCode:
+          type: string
+    AuditLog:
+      type: object
+      required:
+        - androidId
+        - deviceId
+        - eventType
+        - target
+        - source
+        - success
+        - timestamp
+        - drift
+      additionalProperties: false
+      properties:
+        androidId:
+          type: string
+        deviceId:
+          type: string
+        eventType:
+          type: string
+          enum:
+            - SensitiveDataAccess
+            - SecurityFunction
+            - AuditTrailAccess
+            - IdAndAuthentication
+            - LoggingSystem
+            - SendMessage
+        eventAction:
+          type: string
+          enum:
+            - Create
+            - Update
+            - Delete
+        target:
+          type: string
+        source:
+          type: string
+        success:
+          type: boolean
+        timestamp:
+          type: string
+        message:
+          type: string
+        drift:
+          type: number
+    TARegistration:
+      type: object
+      required:
+        - certificateChain
+      additionalProperties: false
+      properties:
+        certificateChain:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        deviceInstallationId:
+          type: string
+    Attestation:
+      type: object
+      required:
+        - attestation
+        - appInstaller
+        - appId
+        - appVersion
+        - numTransactions
+      additionalProperties: false
+      properties:
+        userId:
+          type: string
+        attestation:
+          type: string
+        succeeded:
+          type: boolean
+        appInstaller:
+          type: string
+        appId:
+          type: string
+        appVersion:
+          type: string
+        numTransactions:
+          type: number
+        type:
+          type: string
+          enum:
+            - SafetyNet
+            - PlayIntegrity
+    ComponentDetails:
+      type: object
+      required:
+        - za.co.synthesis.halo.common
+        - za.co.synthesis.halo.entrypoint
+        - za.co.synthesis.halo.kernel2
+        - za.co.synthesis.halo.kernel3
+        - za.co.synthesis.halo.terminal
+        - za.co.synthesis.halo.sdk
+        - za.co.synthesis.halo.config
+      additionalProperties: false
+      properties:
+        za.co.synthesis.halo.common:
+          type: string
+        za.co.synthesis.halo.entrypoint:
+          type: string
+        za.co.synthesis.halo.kernel2:
+          type: string
+        za.co.synthesis.halo.kernel3:
+          type: string
+        za.co.synthesis.halo.terminal:
+          type: string
+        za.co.synthesis.halo.sdk:
+          type: string
+        za.co.synthesis.halo.config:
+          type: string
+    JWTKey:
+      type: object
+      required:
+        - key
+        - acquirerId
+      additionalProperties: false
+      properties:
+        key:
+          type: string
+        acquirerId:
+          type: number

@@ -1,0 +1,53 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+---
+title: Refunds
+description: Refund a transaction
+---
+
+# Refunds
+
+<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/transactions/{transactionId}`
+
+Asynchronously get details about transactions
+
+## Path Parameters
+
+|                 **Name**                  | **Type** | **Description**                         |
+|:-----------------------------------------:|----------|-----------------------------------------|
+| env <mark style={{color:'red'}}>\*</mark> | String   | The backend environment [dev, qa, prod] |
+
+## Headers
+
+
+|                              **Name**              | **Type** | **Description**                       |
+|:--------------------------------------------------:|----------|---------------------------------------|
+ | x-api-header <mark style={{color:'red'}}>\*</mark> | String   | The API Key retrieved from the Portal |
+<br/>
+
+## Request Body
+
+|                        **Name**                       | **Type** | **Description**                   |
+|:-----------------------------------------------------:|----------|-----------------------------------|
+|     amount <mark style={{color:'red'}}>\*</mark>      | Number   | Monetary value of the transaction |
+| refundReference <mark style={{color:'red'}}>\*</mark> | String   | Reference of the refund           |
+
+<Tabs>
+    <TabItem value="200" label="200: OK Status of the transaction">
+```jsscript
+{
+    type: "Approved",
+    authorizationCode: "asdflk",
+    tags: [{ "tag": "9F1E", "33333333"}],
+    haloReference: "5cb6a780-f3bc-45b6-b1ef-bf7fe5e41fbf",  
+    errorMessage: "Ok",
+    errorCode: 0,
+    isoResponseCode: 0,
+    association: "Visa",
+    expiryDate: "07/24",
+    paymentProviderReference: "5cb6a780-f3bc-45b6-b1ef-bf7fe5e41fbf"
+}
+```
+    </TabItem>
+</Tabs>
