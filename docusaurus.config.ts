@@ -7,7 +7,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 const config: Config = {
   title: 'Halodot.io',
   tagline: 'SDK Documentation',
-  favicon: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64b9326f031bd8c2c2c37ba5_FAVICON.png',
+  favicon: '/img/favicon-32x32.png',
 
   // Set the production url of your site here
   url: 'https://docs.halodot.io/',
@@ -39,7 +39,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/halo-dot/halo_sdk_docusaurus',
+          editUrl: 'https://github.com/halo-dot/halo-documentation',
         },
         blog: {
           showReadingTime: true,
@@ -49,7 +49,7 @@ const config: Config = {
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/halo-dot/halo_sdk_docusaurus',
+          editUrl: 'https://github.com/halo-dot/halo-documentation',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -79,15 +79,15 @@ const config: Config = {
           position: 'left',
           label: 'Documentation',
         },
+        // {
+        //   type: 'docSidebar',
+        //   sidebarId: 'tutorialSidebar',
+        //   position: 'left',
+        //   label: 'Tutorial',
+        // },
+        // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        {
-          href: 'https://github.com/halo-dot/halo_sdk_docusaurus',
+          href: 'https://github.com/halo-dot/halo-documentation',
           label: 'GitHub',
           position: 'right',
         },
@@ -135,7 +135,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              href: 'https://github.com/halo-dot/halo-documentation',
             },
           ],
         },
