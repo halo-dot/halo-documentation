@@ -26,6 +26,7 @@ The following attestation payload field must be configured in the Halo server wi
 | apkCertificateDigestSha256 | base64 encoded, SHA-256 hash of the certifi cate used to sign requesting app |
 | applicationVersion         | version number of application of host application                            |
 
+
 ## 2. Requirements on the Mobile Back-End
 
 **JWT**
@@ -73,7 +74,16 @@ The JWT must make a number of claims - all of them standard except for aud\_fing
 |        exp        | NumericDate | The UTC time of expiration of the JWT.                                                                                                                                                                                                                                                                                                                    |
 | aud\_fingerprints |    String   | a CSV list of expected SHA-256 fingerprints for the Kernel Server TLS endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writting this would be: "sha256/zc6c97JhKPZUa+rIrVqjknDE1lDcDK77G41sDo+1ay0="                                                                      |
 
-All these values can be validated by making a POST request to "https://kernelserver.qa.haloplus.io/\{sdk-version\}/tokens/checkjwt". Your JWT should be added as header (Bearer Auth).
+**If using the Halo Dot Adaptor, the following additional fields are required**
+
+These are only supported from SDK version 4.0.2.
+
+       field       |     type    | Note                                                                                                                                                                                                                                                                                                                                                      |
+| :---------------: | :---------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| x-am-endpoint| String | URL of Halo A&M endpoint, e.g. 'kernelserver.qa.haloplus.io'. |
+| x-am-endpoint-fingerprints | String | a CSV list of expected SHA-256 fingerprints for the A&M endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writting this would be: "sha256/zc6c97JhKPZUa+rIrVqjknDE1lDcDK77G41sDo+1ay0=" |
+
+All these values can be validated by making a POST request to "https://kernelserver.qa.haloplus.io/tokens/checkjwt". Your JWT should be added as header (Bearer Auth).
 
 ## 3. SDK Binary
 
