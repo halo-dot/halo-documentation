@@ -46,7 +46,7 @@ Once the consumer transaction ID and the JWT are received by the Halo.Go/Halo.Li
 
 > Note: This approach is useful for customers that have a single merchant account that can receive a transaction request. This is only available for tap intent transactions, not TT3 and deeplinking as of yet.
 
-1. Customer app makes a call to the customer backend to get an intent session token which will be used for all transactions.
+1. Customer app makes a call to the customer backend to get an intent session token which will be used for all transactions, if it has not already been fetched. This token has a min expiry of 1 hour and a max expiry of 12 hours.
 2. Customer app checks if the session token has not expired and then creates an intent to the Halo.Go/Halo.Link app with the transaction details:
 
 * unique transaction reference
@@ -70,10 +70,6 @@ Steps in this section:
 * Retrieve a `Transaction ID` and payment `JWT` from the Halo Backend.
 * Retrieve an `Intent Session Token` from the Halo Backend.
 * Send an Intent request to the Halo.Go/Halo.Link application.
-
-1\. Retrieve a `Transaction ID` and payment `JWT` from the Halo Backend.
-
-2\. Send an Intent Request to the Halo Dot Go application.
 
 **1. Retrieve a Transaction ID and JWT from Halo Backend**
 
