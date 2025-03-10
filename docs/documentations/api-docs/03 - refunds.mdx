@@ -33,7 +33,7 @@ This endpoint allows you to initiate a refund for a previously processed transac
 | refundReference <mark style={{color:'red'}}>\*</mark> | String   | Reference of the refund           |
 
 <Tabs>
-    <TabItem value="request:200" label="Request">
+    <TabItem value="request:200" label="Request body">
 ```json
 { 
     "amount": 5,
@@ -41,7 +41,7 @@ This endpoint allows you to initiate a refund for a previously processed transac
 }
 ```
     </TabItem>
-    <TabItem value="response:200" label="200: OK Status of the transaction">
+    <TabItem value="response:200" label="200: OK Status response of the transaction">
 ```jsscript
 {
     type: "Approved",
