@@ -223,20 +223,67 @@ Here are the key components of the code as a simple guide:
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == HALO_REQUEST_CODE) {
+            val transactionId = data?.getStringExtra("result_transaction_id")
+            val transactionResultType = data?.getStringExtra("result_transaction_type")
+            val transactionErrorCode = data?.getStringExtra("result_transaction_error_code")
+
             if (resultCode == Activity.RESULT_OK) {
-                val transactionId = data?.getStringExtra("result_transaction_id")
                 Toast.makeText(
                     this,
                     "Transaction success, transactionId = $transactionId",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                Toast.makeText(this, "Transaction cancelled or declined", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Transaction Result: $transactionResultType with Error Code: $transactionErrorCode", Toast.LENGTH_SHORT).show()
             }
             return
         }
     }
 ```
+The transaction result intent will have the following extras:
+
+| Extra Name | Extra Value | Description |
+|------------|-------------|-------------|
+| "result_transaction_id" | A UUID transaction reference. Returned when available. | This the Halo transaction reference that is used in the get transaction status endpoint call. |
+| "result_transaction_type" | The transaction result type returned as a string. | The transaction result type may have the following values: Approved, Declined, CardTapTimeOutExpired, NetworkError, ProcessingError, Cancelled, TryAnotherCard, NFCDisabledError, NotAuthenticated, Indeterminate, DuplicateMerchantTransactionReferenceSupplied, InvalidJWT. |
+| "result_transaction_error_code" | The Halo Transaction Error Code as an Integer. | The Halo Error Code may be created by the Halo.Link app, Halo.SDK or the Halo Backend. Please see the table below as reference. |
+
+A reference to the relevant Halo Error codes for this integration:
+
+| Error Code | Description |
+| ---------- | ----------- |
+| 0 | OK |
+| 1 | Declined |
+| 2 | DeclinedOffline |
+| 3 - 100 | Device Security Errors |
+| 100 | Unauthorised |
+| 105 | BlockedUser |
+| 106 - 116 | Device Security Errors |
+| 117 | JWTInvalid |
+| 118 | JWTExpired |
+| 119 - 123 | Merchant Errors |
+| 124 | DuplicateMerchantReference |
+| 125 - 299 | Server Errors |
+| 300 | NFCDisabled |
+| 301 | InvalidSystemState |
+| 302 | InvalidCurrency |
+| 303 | InvalidAndroidVersion |
+| 304 | ErrorParsingJWT |
+| 305 | NetworkError |
+| 306 - 310 | Server Security Errors |
+| 311 | GooglePlayUnavailable |
+| 312 - 316 | Device Security Errors |
+| 317 | CancelledTransaction |
+| 318 | CardTapTimeoutExpired |
+| 319 | TransactionError |
+| 320 - 323 | Device Security Errors |
+| 399 | SystemNotInitialised |
+| 401 | CameraPermissionNotGranted |
+| 402 | AccessibilityServiceBlocksPin e.g. a screen overlay has been detected. |
+| 403 | DeveloperOptionsBlockPin |
+| 404 - 405 | Server and Device Errors |
+| 410 | InvalidTransactionReference |
+| 500 and over | Out of Scope |
 
 ## 3. Deeplinking
 

@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 # Refunds
 
-<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/transactions/{transactionId}`
+<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/transactions/{transactionId}/refund`
 
 This endpoint allows you to initiate a refund for a previously processed transaction.
 
@@ -16,6 +16,7 @@ This endpoint allows you to initiate a refund for a previously processed transac
 |                 **Name**                  | **Type** | **Description**                         |
 |:-----------------------------------------:|----------|-----------------------------------------|
 | env <mark style={{color:'red'}}>\*</mark> | String   | The backend environment [dev, qa, prod] |
+| transactionId <mark style={{color:'red'}}>\*</mark> | String   | This is a placeholder for the unique identifier of the transaction you want to refund. You must replace it with the actual transaction ID |
 
 ## Headers
 
