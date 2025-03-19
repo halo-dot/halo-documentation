@@ -39,7 +39,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/halo-dot/halo-documentation',
+          // editUrl: 'https://github.com/halo-dot/halo-documentation',
         },
         blog: {
           showReadingTime: true,
@@ -67,7 +67,6 @@ const config: Config = {
   themeConfig: {
     image: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/67ac8d81adc0bbd4b1e9e0dc_Image.png',
     navbar: {
-      title: 'Halo Dot',
       logo: {
         alt: 'halo dot Logo',
         src: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/63fdb37c730d1f0e75df5d44_Logo.svg',
@@ -87,7 +86,7 @@ const config: Config = {
         // },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/halo-dot/halo-documentation',
+          href: 'https://github.com/halo-dot/test_app-android_sdk',
           label: 'GitHub',
           position: 'right',
         },
@@ -103,10 +102,10 @@ const config: Config = {
               label: 'Documentation',
               to: '/docs/documentations/intro',
             },
-            {
-              label: 'Tutorials',
-              to: '/docs/tutorials/intro',
-            },
+            // {
+            //   label: 'Tutorials',
+            //   to: '/docs/tutorials/intro',
+            // },
           ],
         },
         {
@@ -129,13 +128,13 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
+            // {
+            //   label: 'Blog',
+            //   to: '/blog',
+            // },
             {
               label: 'GitHub',
-              href: 'https://github.com/halo-dot/halo-documentation',
+              href: 'https://github.com/halo-dot/test_app-android_sdk',
             },
           ],
         },

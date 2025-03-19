@@ -7,7 +7,7 @@ Halo Dot empowers businesses with certified SoftPOS technology, enabling seamles
 
 Halo Dot is a mobile app that allows businesses to accept contactless payments without the need for extra hardware.
 
-Halo Dot is a mobile app that allows businesses to accept contactless payments without the need for extra hardware. The app is available globally and runs on all operating systems. Halo Dot offers various implementation options, ranging from stand-alone white-label apps to fully integrated SDKs.
+The app is available globally and runs on all operating systems. Halo Dot offers various implementation options, ranging from stand-alone white-label apps to fully integrated SDKs.
 
 ### Key features
 
