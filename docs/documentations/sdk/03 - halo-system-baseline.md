@@ -40,6 +40,14 @@ Google-certified device
 
 All devices that are currently compatible for the Halo Dot Solution are defined and managed in the [Google Play Console Device Catalogue](https://play.google.com/console/u/0/developers/7094180247634818303/app/4974352686746815262/devices).
 
+In addition to being compatible with our solution, we will need your device to grant the below permissions:
+
+* Location
+* Bluetooth
+* Camera
+* Microphone
+* Storage
+
 ### SCRP Devices Supported <a href="#scrp-devices-supported" id="scrp-devices-supported"></a>
 
 |   | **Manufacturer** | **Model** | **Supported EMVco Kernels**                  | **PCI Listed** |
