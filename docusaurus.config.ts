@@ -10,7 +10,7 @@ const config: Config = {
   favicon: '/img/favicon-32x32.png',
 
   // Set the production url of your site here
-  url: 'https://docs.halodot.io/',
+  url: 'http://docs.halodot.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
