@@ -64,6 +64,12 @@ const config: Config = {
 
   plugins: [],
   themeConfig: {
+    metadata:[
+      {
+        name: 'algolia-site-verification',
+        content: 'EC2FE34B58BA9FB0'
+      }
+    ],
     image: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/67ac8d81adc0bbd4b1e9e0dc_Image.png',
     navbar: {
       logo: {
