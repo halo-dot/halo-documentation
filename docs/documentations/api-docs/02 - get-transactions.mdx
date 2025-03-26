@@ -358,13 +358,17 @@ _**Let’s take a closer look at the API request.**_&#x20;
 | Authorization Bearer<mark style={{color:'red'}}>\*</mark> | String | The JWT received using the developer portal credentials (username and password) |
 | x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API key retrieved from the developer portal |
 
+```json title="Json body Request"
+{
+  "callbackUrl": "https://your-integrator-callback.top-level-domain",
+}
+```
+
 <Tabs>
     <TabItem value="ok:200" label="200: OK Status">
 
 ```javascript
-{
-
-}
+{}
 ```
     </TabItem>
     <TabItem value="error:400" label="400: Bad Request">
@@ -387,7 +391,19 @@ _**Let’s take a closer look at the API request.**_&#x20;
     </TabItem>
 </Tabs>
 
+### 3. Webhook response
+
 The webhook will be called with a JSON body with following information:
+
+```json title="Webhook JSON body response"
+{
+  "id": "string",
+  "merchantReference": "string",
+  "disposition": "string",
+  "errorCode": "number"
+  "paymentProviderReference": "string",
+}
+```
 
 | Field | Description | Type |
 | ---------------------------- | --------------------- | ---------------- |
@@ -396,6 +412,8 @@ The webhook will be called with a JSON body with following information:
 | disposition | <p>The outcome of the transaction (e.g. Approved)<br/><br/></p><p>There are 5 possible values for <code>disposition</code>​:</p><ul><li><code>Approved</code>​ - this means we got an approved message back from the processor </li><li><code>Declined</code>​ - this means we received a decline from the processor</li><li><code>UnableToGoOnline</code>​ - this means we couldn't connect to the processor. Essentially a decline, but it tells us the decline is due to a network error, and not a card issue</li><li><code>Indeterminate</code>​ - this means we either received an error from the processor or no response. This means we are unable to determine the status of the transaction. Typically, we treat these as declines and then we attempt to void the transaction in the background, in the event that the processor got the message but we just didn't get the response</li><li><code>Voided</code>​ - the transaction was reversed.</li></ul> | String (32) |
 | errorCode | Halo backend error code (optional) | Number |
 | paymentProviderReference | A reference received from the payment processor (optional) | String |
+
+### 4. Retieve your Webhook
 
 The callback url can be queried using an API call as well:
 
