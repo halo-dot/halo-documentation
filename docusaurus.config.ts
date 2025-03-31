@@ -155,7 +155,7 @@ const config: Config = {
       appId: 'S2W3MQE857',
 
       // Public API key: it is safe to commit it
-      apiKey: 'debcf123a744245b897ab5eeddfeab31',
+      apiKey: '30114c9f8022e361f11991f495f93d1a',
 
       indexName: 'halo',
 
