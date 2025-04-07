@@ -97,8 +97,6 @@ The `AndroidManifest.xml` application manifest file of the mobile application mu
 
 * `android.permission.INTERNET` - call out to the backend over the internet
 * `android.permission.NFC`- use the NFC module
-* `android.permission.BLUETOOTH_SCAN` - Bluetooth scan permissions
-* `android.permission.BLUETOOTH_CONNECT` - Bluetooth connect permissions
 
 In addition, in order to indicate to the Play store that this is an NFC-enabled app, the `android.hardware.nfc` the feature needs to be specifi ed, with `required=false` . If required is set to true then the mobile app itself will not be allowed to be installed on devices that don't support NFC, which is presumed to not be the desired behavior.
 

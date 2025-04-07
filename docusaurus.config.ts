@@ -40,9 +40,20 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl: 'https://github.com/halo-dot/halo-documentation',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: '4.0'
+            },
+            '2.1': {
+              label: '2.1',
+              path: 'versioned_docs/version-2.1',
+              banner: 'none'
+            }
+          }
         },
         blog: {
-          showReadingTime: true,
+          showReadingTime: true,  
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,
@@ -82,6 +93,11 @@ const config: Config = {
           sidebarId: 'documentationSidebar',
           position: 'left',
           label: 'Documentation',
+        },
+        {
+          type: 'docsVersionDropdown',
+          position: 'left',
+          dropdownActiveClassDisabled: true,
         },
         // {
         //   type: 'docSidebar',
