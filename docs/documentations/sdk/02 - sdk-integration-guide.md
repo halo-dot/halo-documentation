@@ -104,14 +104,6 @@ In addition, in order to indicate to the Play store that this is an NFC-enabled 
 
 \* Permissions required for the MPOC certfication and are used to detect any malicious devices.
 
-**Android Gradle Plugin > 3.4.2**
-
-Due to a limitation with the TEE library that is used, if the Android Gradle Plugin (`classpath 'com.android.tools.build:gradle'`) is greater than 3.4.2, the following attribute needs to be added to the application element inside the Android Manifest application
-
-```
-android:extractNativeLibs="true"
-```
-
 ## 5. Life-Cycle Methods
 
 In order for the SDK to properly handle the Android application life cycle, the host app needs to add hooks into the following Android lifecycle methods on the `MAIN activity`.

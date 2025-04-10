@@ -73,22 +73,8 @@ repositories {
 }
 
 dependencies {
-    releaseImplementation group: "za.co.synthesis.halo", name: "sdk", version: "2.1.26"
-    debugImplementation group: "za.co.synthesis.halo", name: "sdk", version: "2.1.26-debug"
-}
-```
-
-4. Finally, also please add the following to your `build.gradle`:
-
-```
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 1, 'days'
-    resolutionStrategy.dependencySubstitution {
-        substitute(module("androidx.core:core-ktx")).with(module("androidx.core:core-ktx:(*, 1.3.2]"))
-        substitute(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7")).with(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7:(*, 1.3.72]"))
-        substitute(module("org.jetbrains.kotlin:kotlin-stdlib-jdk8")).with(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7:(*, 1.3.72]"))
-        substitute(module("org.jetbrains.kotlin:kotlin-stdlib-common")).with(module("org.jetbrains.kotlin:kotlin-stdlib-common:(*, 1.3.72]"))
-    }
+    releaseImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.3"
+    debugImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.3-debug"
 }
 ```
 
