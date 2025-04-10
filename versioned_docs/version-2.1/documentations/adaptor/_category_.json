@@ -1,0 +1,8 @@
+{
+  "label": "The Adaptor",
+  "position": 6,
+  "link": {
+    "type": "generated-index",
+    "description": "An alternative hosting approach for a SoftPOS solution. The Adaptor empowers customers to deploy the solution within their own environment to support SoftPOS terminals. By leveraging their existing services and infrastructure, the adaptor provides full control and visibility enabling scalability, while maintaining security and compliance."
+  }
+}
