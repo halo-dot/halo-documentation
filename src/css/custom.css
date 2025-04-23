@@ -73,7 +73,7 @@ img {
  box-shadow: 5px 10px 5px #888888;
 }
 
-img[alt="halo dot Logo"], #trusted-by ~ p>img {
+img[alt="halo dot Logo"], #trusted-by ~ p>img, .noShadow img {
   box-shadow: none;
 }
 

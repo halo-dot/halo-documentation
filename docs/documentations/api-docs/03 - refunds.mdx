@@ -7,6 +7,26 @@ import TabItem from '@theme/TabItem';
 
 # Refunds
 
+## Void
+
+Cancels a transaction before it has been finalized or settled. No money is moved. Typically used within the same day or session.<br/>
+Use when: The transaction was made in error and needs to be stopped before processing.
+
+## Reversal
+
+Undoes a transaction before settlement but after authorization. The funds are returned to the cardholder as if the transaction never happened.<br/>
+Use when: The transaction was authorized, but something failed before settlement (e.g. a system error or a customer changes their mind immediately).
+
+## Refund
+Returns money after a transaction has been settled. The funds are sent back to the cardholder’s account. <br/>
+Use when: A customer returns a product or service after the transaction has gone through.
+
+## Prevention on transaction
+
+Transaction are processed by the SDK to the payment processor and to the bank.<br/>
+If either of those channel failed the transaction would be voided and no payment would occur.<br/>
+The client can then again try the transaction again.
+
 <mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/transactions/{transactionId}/refund`
 
 This endpoint allows you to initiate a refund for a previously processed transaction.

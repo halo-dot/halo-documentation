@@ -14,7 +14,7 @@ The Halo Dot Solution is an Android Application that enables the process tap on 
 * Devices supported
 * SCRP devices supported
 
-### Operating Systems <a href="#operating-systems" id="operating-systems"></a>
+## Operating Systems <a href="#operating-systems" id="operating-systems"></a>
 
 **Operating System Baseline**
 
@@ -34,7 +34,7 @@ Android version 10
 |               iOS               | Not applicable        | NOT SUPPORTED        |                                           |
 |            Harmony OS           | Not supported         | In development       |                                           |
 
-### Devices Supported <a href="#devices-supported" id="devices-supported"></a>
+## Devices Supported <a href="#devices-supported" id="devices-supported"></a>
 
 Google-certified device
 
@@ -48,10 +48,23 @@ In addition to being compatible with our solution, we will need your device to g
 * Microphone
 * Storage
 
-### SCRP Devices Supported <a href="#scrp-devices-supported" id="scrp-devices-supported"></a>
+## SCRP Devices Supported <a href="#scrp-devices-supported" id="scrp-devices-supported"></a>
 
 |   | **Manufacturer** | **Model** | **Supported EMVco Kernels**                  | **PCI Listed** |
 | - | ---------------- | --------- | -------------------------------------------- | -------------- |
 | 1 | Wiseasy          | R1        | Mastercard, Visa, American Express, Discover |                |
 
 The [Acceptance Process to Update COTS platform to Baseline](https://synthesis-software.atlassian.net/wiki/x/J4A0\_/) page identifies and process for making updates to the COTS. This also describes the frequency of Changes to the system baseline and how they are implemented on an ad hoc basis. The depreciation of operating systems and devices are communicated according to the [non-functional](https://synthesis-software.atlassian.net/wiki/spaces/H/pages/2411921411/Communication+Schedule#Manual-Communication-Channels) communication in the Halo communication schedule.
+
+
+## Supported Card Type
+
+<p class="noShadow">
+- ![visa](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee03db594661e1e7e3_visa-logo.svg)
+- ![Mastercard](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee6bfb3ab3c036d1b7_Mastercard.svg)
+- ![Amex](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee81ed6b3bdc49e89d_Amex.svg)
+- ![Discover](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee4af603717c6f273b_Discover.svg)
+- ![GooglePay](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee08036a558138db64_Google_pay.svg)
+- ![ApplePay](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eeecd9e7bbd6e87737e_Apple_pay.svg)
+- ![Samsungpat](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eef5ee9e1391db5d595_Samsung_pay.svg)
+</p>
