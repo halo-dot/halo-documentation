@@ -116,19 +116,19 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
-        {
-          title: 'Docs',
-          items: [
-            {
-              label: 'Documentation',
-              to: '/docs/documentations/intro',
-            },
-            // {
-            //   label: 'Tutorials',
-            //   to: '/docs/tutorials/intro',
-            // },
-          ],
-        },
+        // {
+        //   title: 'Docs',
+        //   items: [
+        //     {
+        //       label: 'Documentation',
+        //       to: '/docs/documentations/intro',
+        //     },
+        //     // {
+        //     //   label: 'Tutorials',
+        //     //   to: '/docs/tutorials/intro',
+        //     // },
+        //   ],
+        // },
         {
           title: 'Community',
           items: [
