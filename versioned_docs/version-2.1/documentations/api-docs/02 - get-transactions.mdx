@@ -13,7 +13,7 @@ import TabItem from '@theme/TabItem';
 
 <mark style={{color:'blue'}}>`GET`</mark> `https://kernelserver.{env}.haloplus.io/consumer/QRCode/:reference`
 
-Asynchronously get Status of a transactions invoked through a link.
+Asynchronously get the status of transaction invoked through a link.
 
 #### Path Parameters
 
@@ -76,7 +76,7 @@ Asynchronously get Status of a transactions invoked through a link.
 
 <mark style={{color:'blue'}}>`GET`</mark> `https://kernelserver.{env}.haloplus.io/consumer/tt3QRCode/:reference`
 
-Asynchronously get Status about TT3 transactions invoked through a link.
+Asynchronously get the status of a TT3 transaction invoked through a link.
 
 #### Path Parameters
 
@@ -325,7 +325,7 @@ To obtain this token you may need to make a POST call to `https://authserver.{en
 
 ## Get and Set Post Transaction Webhook
 
-Get the status information of a transaction if you are a Halo.SDK integrator or are performing intent (excluding faster flow) and deeplink transactions - otherwise known as app-to-app transactions.
+Get the status information of a transaction if you are a Halo.SDK integrator or are performing intent (excluding the constant merchant id transaction [flow](/docs/documentations/intents/transaction-app2app-integration-guide#approach-12-constant-merchant-id-transaction)) and deeplink transactions - otherwise known as app-to-app transactions.
 
 ### 1. App to App Transactions
 
