@@ -135,7 +135,73 @@ The call to the Halo Dot Backend to initiate an Intent Transaction and retrieve 
 
 The generated link returned by the API call can then be used to invoke the Halo Dot Go application and start processing the transaction.
 
-## 3. Conclusion
+## 3. Deeplinking Mechanism
+
+Steps in this section:
+
+1. Retrieve the `Transaction URL` from the Halo Backend
+2. Use the Generated URL to call the Halo Dot Go application.
+
+**1. Retrieve the Transaction URL from the Halo Backend**
+
+The last step of Deeplinking integration is to retrieve the URL from the Halo Dot backend through an API request. You will need the `API Key` and `Merchant ID` from Getting Started for this API call.
+
+_**Let’s take a closer look at the API request.**_
+
+
+
+## Transaction URL
+
+<mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/tt3Applink`
+
+The call to the Halo Dot Backend to initiate an Applink Transaction and retrieve a Transaction URL that can be used to invoke the Halo Dot Link application
+
+#### Path Parameters
+
+| Name                                      | Type   | Description                              |
+| ----------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark>     | String | The backend environment \[dev, qa, prod] |
+
+#### Headers
+
+| Name                                           | Type   | Description                                    |
+| ---------------------------------------------- | ------ | ---------------------------------------------- |
+| Content-Type<mark style={{color:'red'}}>\*</mark> | String | Content Type of the Request: application/json  |
+| x-api-key<mark style={{color:'red'}}>\*</mark>    | String | The API Key retrieved from the Merchant Portal |
+
+#### Request Body
+
+| Name                                                  | Type    | Description                                                                                  |
+| ----------------------------------------------------- | ------- |----------------------------------------------------------------------------------------------|
+| merchantId<mark style={{color:'red'}}>\*</mark>          | Integer | Merchant ID from Merchant Portal                                                             |
+| id<mark style={{color:'red'}}>\*</mark>                  | String  | ID number of the account holder                                                              |
+| accountNumber<mark style={{color:'red'}}>\*</mark>       | String  | Account Number of the Debit Order                                                            |
+| maxCollectionAmount<mark style={{color:'red'}}>\*</mark> | String  | Max amount of the Debit Order (e.g. 100.01)                                                  |
+| timestamp<mark style={{color:'red'}}>\*</mark>           | String  | ISO Standard Timestamp                                                                       |
+| contractReference<mark style={{color:'red'}}>\*</mark>   | String  | contractReference                                                                            |
+| image<mark style={{color:'red'}}>\*</mark>               | JSON    | Set to true to generate a QR code - \{"required": false\}                                    |
+| isConsumerApp                                         | Boolean | Indicate if the call is for a Consumer App                                                   |
+| collectionDay<mark style={{color:'red'}}>\*</mark>       | Number  | Debit order day                                                                              |
+| CreditorABSN<mark style={{color:'red'}}>\*</mark>        | String  | Description of Insurer (e.g. Name of insurer)                                                |
+| instalmentAmount                                      | String  | Instalment amount of the Debit Order (e.g. 100.01)                                           |
+| instalmentVisibility                                  | Enum    | This field is to set what should be displayed to the user: both, maximumOnly, instalmentOnly |
+
+
+
+```json
+{
+    "url": "https://go.merchantportal.dev.haloplus.io/?uuid=c89f9e26-7adc-4b99-813e-8cb7870f8013&maxCollectionAmount=15.00&instalmentAmount=5.00&instalmentVisibility=both&accountNumber=12345678912&id=1234567891234&contractReference=TT3Applink&configJwt=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9&type=TT3&collectionDay=25&creditorABSN=RealCreditor",
+    "reference": "c9e1debe-8156-444c-894d-e065d7169aa6"
+}
+```
+
+
+
+**2. Use the Generated URL to call the Halo Dot Go application**
+
+The generated link returned by the API call can then be used to invoke the Halo Dot Go application and start processing the transaction.
+
+## 4. Conclusion
 
 That concludes the guide to integrating the Halo Dot Go into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
