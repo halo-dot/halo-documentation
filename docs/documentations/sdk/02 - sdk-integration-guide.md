@@ -268,18 +268,30 @@ Notes on `HaloInitializationResult`:
 
     Here is a list of possible values for `HaloInitializationResultType`
 
-    | Value                             | Meaning                                                        |
-    | --------------------------------- | -------------------------------------------------------------- |
-    | Initialized                       | Success                                                        |
-    | AuthenticationError               | Error occurred during authentication                           |
-    | NetworkError                      | Network socket error during connection to server               |
-    | UnsupportedOperatingSystemVersion | Android OS too low                                             |
-    | RootedDevice                      | Device rooting detected                                        |
-    | InstrumentedDevice                | Runtime instrumentation detected                               |
-    | DebuggedDevice                    | Debug mode detected                                            |
-    | GeneralError                      | General failure                                                |
-    | RemoteAttestationFailure          | Device failed remote leg of Android Play Integrity attestation |
-    | NFCDisabledError                  | NFC either absent, turned off, or NFC permission not granted   |
+    | Value                             | Meaning                                                             |
+    | --------------------------------- | ------------------------------------------------------------------- |
+    | AuthenticationError               | Error occurred during authentication                                |
+    | AttestationFailure                | Attestation failed                                                  |
+    | AttestationSystemNotInitialised   | Initialisation failed because attestation system is not initialised |
+    | CameraPermissionNotGranted        | No camera permission                                                |
+    | ConfigFetchError                  | Unable to fetch terminal config                                     |
+    | DebuggedDevice                    | Debug mode detected                                                 |
+    | GeneralError                      | General failure                                                     |
+    | HttpClientError                   | Unable to open web connection                                       |
+    | Initialized                       | Success                                                             |
+    | InitializedWithoutConfigs         | Success status (without using terminal configs)                     |
+    | InstrumentedDevice                | Runtime instrumentation detected                                    |
+    | NetworkError                      | Network socket error during connection to server                    |
+    | NFCDisabledError                  | NFC either absent, turned off, or NFC permission not granted        |
+    | NoAppContext                      | Appcontext is null - did you call onCreate()?                       |
+    | NoTerminalContainer               | TerminalContainer is null - did you call onCreate()?                |
+    | RemoteAttestationFailure          | Device failed remote leg of Android Play Integrity attestation      |
+    | RootedDevice                      | Device rooting detected                                             |
+    | TEEAttestationFailure             | Tee attestation failed                                              |
+    | UnableToConfigureTerminal         | Error occurred configuring terminal                                 |
+    | UnsupportedDevice                 | The current device is unsupported - usually due to NFC              |
+    | UnsupportedOperatingSystemVersion | Android OS too low                                                  |
+    | 
 2.  Terminal Localisation Information Returned in `HaloInitializationResult`
 
     As part of initialization, the SDK will fetch its pre-defined terminal configuration from the Halo server - and this includes localization data which should be checked by the host application to ensure that the terminal is transacting in the expected currency, which is required for the limit checks done as part of kernel processing to be performed in the correct matching currency. In addition, these values should be used to determine the correct currency symbol and a number of decimal points to use when displaying the transaction amount to the cardholder.
