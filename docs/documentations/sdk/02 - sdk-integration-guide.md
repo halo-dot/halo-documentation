@@ -291,7 +291,6 @@ Notes on `HaloInitializationResult`:
     | UnableToConfigureTerminal         | Error occurred configuring terminal                                 |
     | UnsupportedDevice                 | The current device is unsupported - usually due to NFC              |
     | UnsupportedOperatingSystemVersion | Android OS too low                                                  |
-    | 
 2.  Terminal Localisation Information Returned in `HaloInitializationResult`
 
     As part of initialization, the SDK will fetch its pre-defined terminal configuration from the Halo server - and this includes localization data which should be checked by the host application to ensure that the terminal is transacting in the expected currency, which is required for the limit checks done as part of kernel processing to be performed in the correct matching currency. In addition, these values should be used to determine the correct currency symbol and a number of decimal points to use when displaying the transaction amount to the cardholder.
