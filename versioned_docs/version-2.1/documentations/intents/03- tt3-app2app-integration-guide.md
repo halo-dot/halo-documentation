@@ -12,7 +12,7 @@ A **TT3 transaction**, in the context of banking, refers to a specific type of *
 
 Steps in this section:
 
-1. Retrieve a `Transaction ID` and payment `JWT`from the Halo Backend (see [here](https://halo-dot-developer-docs.gitbook.io/halo-dot/readme/1.-getting-started#id-2.-intent-authorization) how to get them).
+1. Retrieve a `Transaction ID` and payment `JWT` from the Halo Backend (see [here](https://halo-dot-developer-docs.gitbook.io/halo-dot/readme/1.-getting-started#id-2.-intent-authorization) how to get them).
 2. Send an Intent Request to the Halo Dot Go application.
 
 **1. Retrieve Transaction ID and JWT from Halo Backend**
@@ -21,7 +21,7 @@ Step two of Android Intents Mechanism integration is to initialize the transacti
 
 _**Let’s take a closer look at the API request.**_&#x20;
 
-## Intent Transaction
+### Intent Transaction
 
 <mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/tt3IntentTransaction`
 
@@ -84,7 +84,7 @@ _**Let’s take a closer look at the API request.**_
 
 
 
-## Transaction URL
+### Transaction URL
 
 <mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/tt3QRCode`
 
@@ -135,7 +135,7 @@ The call to the Halo Dot Backend to initiate an Intent Transaction and retrieve 
 
 The generated link returned by the API call can then be used to invoke the Halo Dot Go application and start processing the transaction.
 
-## 3. Deeplinking Mechanism
+## 3. Applinking Mechanism
 
 Steps in this section:
 
@@ -144,13 +144,15 @@ Steps in this section:
 
 **1. Retrieve the Transaction URL from the Halo Backend**
 
-The last step of Deeplinking integration is to retrieve the URL from the Halo Dot backend through an API request. You will need the `API Key` and `Merchant ID` from Getting Started for this API call.
+> **Note:** This endpoint replaces the deprecated `/consumer/tt3QRCode` endpoint.
+
+The last step of the Applink integration is to retrieve the URL from the Halo Dot backend through an API request. You will need the `API Key` and `Merchant ID` from Getting Started for this API call.
 
 _**Let’s take a closer look at the API request.**_
 
 
 
-## Transaction URL
+### Transaction URL
 
 <mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/tt3Applink`
 
@@ -190,7 +192,7 @@ The call to the Halo Dot Backend to initiate an Applink Transaction and retrieve
 
 ```json
 {
-    "url": "https://go.merchantportal.dev.haloplus.io/?uuid=c89f9e26-7adc-4b99-813e-8cb7870f8013&maxCollectionAmount=15.00&instalmentAmount=5.00&instalmentVisibility=both&accountNumber=12345678912&id=1234567891234&contractReference=TT3Applink&configJwt=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9&type=TT3&collectionDay=25&creditorABSN=RealCreditor",
+    "url": "https://go.merchantportal.dev.haloplus.io/c9e1debe-8156-444c-894d-e065d7169aa6?env=kernelserver.{env}.haloplus.io",
     "reference": "c9e1debe-8156-444c-894d-e065d7169aa6"
 }
 ```
@@ -205,4 +207,4 @@ The generated link returned by the API call can then be used to invoke the Halo 
 
 That concludes the guide to integrating the Halo Dot Go into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
-Not what you were looking for? If you are looking for the TT3 Intent Integration guide, it is over [here](/docs/documentations/intents/transaction-app2app-integration-guide)
+Not what you were looking for? If you are looking for the Transaction Integration guide, it is over [here](/docs/versioned_docs/version-2.1/documentations/intents/transaction-app2app-integration-guide)

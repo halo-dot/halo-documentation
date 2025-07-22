@@ -141,7 +141,7 @@ The call to the Halo backend to retrieve an Intent Session Token.
 
 | Name          | Type   | Description                                                                                                                                                                                                                                   |
 | ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| expiryMinutes | Number | Duration for which the intent session token should last before it expires. If not provided, the session token will expire after 1 hour/60 minutes. If specified please note the the min value is 60 minutes and the max value is 720 minutes. |
+| expiryMinutes | Number | Duration for which the intent session token should last before it expires. If not provided, the session token will expire after 1 hour/60 minutes. If specified please note the min value is 60 minutes and the max value is 720 minutes. |
 
 
 <Tabs>
@@ -357,13 +357,15 @@ Should you pass in the `image` param in the body, you will then be able to retri
 
 **1. Retrieve a Transaction Applink from the Halo Backend**
 
+> **Note:** This endpoint replaces the deprecated `/consumer/qrCode` endpoint.
+
 You will need an `API Key` and a `Merchant ID` from the [Merchant Portal](https://go.merchantportal.prod.haloplus.io/) for this API call. The response will contain a deep link that can be used to invoke the Halo.Go/Halo.Link app.
 
 _**Let’s take a closer look at the API request.**_
 
 <mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/applink`
 
-The call to the Halo backend to retrieve a àpplink.
+The call to the Halo backend to retrieve an Applink.
 
 **Path Parameters**
 
@@ -396,7 +398,7 @@ The call to the Halo backend to retrieve a àpplink.
     <TabItem value="OkApp" label="200: Ok Applink to invoke Halo.Go/Halo.Link">
 ```json
 {
-    "url": "https://go.merchantportal.dev.haloplus.io/?id=b94396af-32bc-4615-9e60-76526020d8fe&amount=10&merchantReference=ApplinkTransaction&currency=ZAR&configJwt=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9&type=Tap",
+    "url": "https://go.merchantportal.dev.haloplus.io/c9e1were-8156-444c-894d-e065d71366a6?env=kernelserver.{env}.haloplus.io",
     "reference": "c9e1were-8156-444c-894d-e065d71366a6"
 }
 ```
@@ -406,8 +408,8 @@ The call to the Halo backend to retrieve a àpplink.
 ```json
 {
     "qrCode": "data:image/png;base64,..."
-    "url": "https://go.merchantportal.dev.haloplus.io/?id=b94396af-32bc-4615-9e60-76526020d8fe&amount=10&merchantReference=ApplinkTransaction&currency=ZAR&configJwt=eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9&type=Tap",
-    "reference": "c9e1were-8156-444c-894d-e065d71366a6"   
+    "url": "https://go.merchantportal.dev.haloplus.io/c9e1were-8156-444c-894d-e065d71366a6?env=kernelserver.{env}.haloplus.io",
+    "reference": "c9e1were-8156-444c-894d-e065d71366a6"
 }
 ```
     </TabItem>
@@ -417,7 +419,7 @@ The call to the Halo backend to retrieve a àpplink.
 
 **2. Use the Generated URL to call the Halo Dot Go application**
 
-The generated link returned by the API call can then be used to invoke the Halo.Go/Halo.Link application and start process transactions.
+The generated link returned by the API call can then be used to invoke the Halo.Go/Halo.Link application and start processing transactions.
 
 Should you pass in the `image` param in the body, you will then be able to retrieve the base64 encoded QrCode image. This can be used to scan the image and open the payment application with the payment details specified in the request.
 
