@@ -60,9 +60,9 @@ The payment flow is the same for all payments:
 
 ## Steps
 
-1. [Create the Checkout](create-the-checkout.md#id-1.-create-the-checkout)
+1. [Create the Checkout](create-the-checkout.md#1-create-the-checkout)
    * Display QR code
-2. [Verify the payment is successful](create-the-checkout.md#id-2.-verify-that-the-payment-is-successful)
+2. [Verify the payment is successful](create-the-checkout.md#2-verify-that-the-payment-is-successful)
 
 ### 1. Create the Checkout
 

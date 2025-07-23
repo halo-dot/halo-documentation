@@ -360,7 +360,7 @@ imageCredentials:
 
 ### Run the Bootstrapping Job
 
-Running the boostrapping job is described on the [bootstrapping guide](./02%20-%20Bootstrapping.md). 
+Running the boostrapping job is described on the [bootstrapping guide](./bootstrapping). 
 This will setup the database with the initial config values required for running the adaptor.
 
 ### Provide Halo Dot with your JWT issuer name and public key
@@ -406,7 +406,7 @@ spec:
 ## SoftPOS Integration
 
 To integrate the HaloDot SDK into your SoftPOS mobile applications, follow the
-[SDK Integration Guide](../sdk/02%20-%20sdk-integration-guide.md). When configuring the SDK for use
+[SDK Integration Guide](../sdk/sdk-integration-guide). When configuring the SDK for use
 with your Adaptor deployment, you'll need to set the following claims:
 
 ### SDK JWT Configuration

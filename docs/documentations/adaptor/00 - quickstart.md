@@ -14,7 +14,7 @@ helm repo update
 ```
 
 Create a config file to set the required config for your deployment. For more details on how to setup
-the Adaptor refer to the [Adaptor setup guide](./Adaptor)
+the Adaptor refer to the [Adaptor setup guide](./adaptor)
 
 ```yaml
 version: latest

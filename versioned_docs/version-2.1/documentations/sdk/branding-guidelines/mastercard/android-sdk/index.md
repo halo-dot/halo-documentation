@@ -67,4 +67,4 @@ dependencies {
 
 ## Next Step <a href="#next-step" id="next-step"></a>
 
-For detailed integration guide, see [Steps to Integrate](steps-to-integrate/)
+For detailed integration guide, see [Steps to Integrate](./android-sdk/steps-to-integrate/)
