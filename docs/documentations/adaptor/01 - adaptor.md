@@ -1,0 +1,589 @@
+# Halo Dot Adaptor Setup Guide
+
+## Overview
+
+Halo Dot is a Software Point of Sale (SoftPOS) provider that enables secure payment acceptance on
+mobile devices. The Halo Dot Adaptor is a self-hosted service that allows you to process SoftPOS
+payments within your own infrastructure while maintaining the security and compliance benefits of
+the Halo Dot platform.
+
+By deploying the Adaptor in your environment, you gain full control over payment data flow and
+customer information and direct integration with your existing payment infrastructure.
+
+The Adaptor maintains a secure connection to Halo Dot's attestation and monitoring (A&M) service to
+ensure device security and compliance while processing payments locally.
+
+## Architecture Overview
+
+The Adaptor deployment creates a secure payment processing environment within your infrastructure:
+
+```mermaid
+architecture-beta
+    group halo(cloud)[Halo Dot Backend]
+    group client(cloud)[Your Backend]
+    group outside
+    service am(server)[Halo Dot Attestation Service] in halo
+    service adaptor(server)[Adaptor] in client
+    service paymentprovider(server)[Halo Dot Payment Provider] in client
+    service paymentswitch(server)[Your Payment Switch] in client
+    service hsmService(server)[HSM Service] in client
+    service hsm(server)[HSM] in client
+    service sdk(internet)[Halo Dot SDK] in outside
+    adaptor:R -- L:am
+    adaptor:L -- R:paymentprovider
+    paymentprovider:L -- R:paymentswitch
+    paymentprovider:T -- B:hsmService
+    adaptor:L -- R:hsmService
+    hsm:R -- L:hsmService
+    sdk:B -- T:adaptor
+    sdk:B -- T:am
+```
+
+### Component Responsibilities
+
+- **Adaptor Service**:
+
+  - Processes payment requests from SoftPOS devices
+  - Manages secure key generation and storage
+  - Handles device attestation verification
+  - Orchestrates transaction flow
+  - Health checks include verification of A&M server connectivity
+
+- **Payment Provider**:
+
+  - Translates between Halo Dot protocol and your payment switch
+
+- **HSM Service**:
+
+  - Provides cryptographic operations for payment processing
+
+- **Attestation & Monitoring (Halo Dot)**:
+
+  - Verifies device integrity and security
+  - Monitors for security threats
+
+## Prerequisites
+
+### Infrastructure Requirements
+
+#### Kubernetes Cluster
+
+- **Version**: 1.24 or higher
+- **Nodes**: Minimum 3 nodes for production high availability
+- **Resources**:
+  - Minimum 4 vCPU and 8GB RAM available for Halo Dot services
+  - Additional capacity for traffic spikes
+
+#### PostgreSQL Database
+
+- **Version**: 13 or higher
+- **Configuration**:
+  - SSL/TLS enabled (required for PCI compliance)
+  - Connection pooling recommended
+  - Backup strategy in place
+
+#### Redis
+
+- **Version**: 6.2 or higher
+- **Purpose**: Session management, caching, and temporary transaction data
+- **Configuration**:
+  - Authentication enabled
+  - Persistence configured (AOF or RDB)
+  - Memory limits set appropriately
+
+#### Hardware Security Module
+
+- **Supported**: Thales PayShield 10K
+- **Network**: Accessible from Kubernetes cluster
+- **Configuration**: Pre-configured with required LMKs
+
+### AWS Requirements
+
+The Adaptor automatically provisions its own KMS keys and secrets. You need:
+
+- **IAM Role/User** with the following permissions:
+  ```json
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "kms:CreateKey",
+          "kms:CreateAlias",
+          "kms:DescribeKey",
+          "kms:GenerateDataKey",
+          "kms:Decrypt"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:CreateSecret",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:UpdateSecret"
+        ],
+        "Resource": "arn:aws:secretsmanager:*:*:secret:halo-*"
+      }
+    ]
+  }
+  ```
+
+### Network Requirements
+
+- **Outbound HTTPS (443)** to:
+  - Halo Dot A&M service (will be provided)
+  - AWS KMS and Secrets Manager endpoints
+- **Inbound HTTPS (443)** from:
+  - Your SoftPOS mobile applications
+  - Your monitoring/operations tools
+
+### Access Requirements
+
+- **Container Registry**: Credentials for Halo Dot private registry
+- **Halo Dot Tenant ID**: Provided during onboarding
+- **A&M Service Endpoint**: Provided during onboarding
+- **Helm 3.x**: Installed on deployment machine
+
+## Installation Steps
+
+### Step 1: Configure Database and Redis
+
+1. **Create PostgreSQL database**:
+
+   ```sql
+   CREATE DATABASE halodot_adaptor;
+   CREATE USER halodot_user WITH ENCRYPTED PASSWORD '<secure-password>';
+   GRANT ALL PRIVILEGES ON DATABASE halodot_adaptor TO halodot_user;
+   ```
+
+1. **Verify Redis authentication**:
+
+   ```bash
+   redis-cli -h <redis-host> -a <redis-password> ping
+   # Should return: PONG
+   ```
+
+### Step 2: Add Helm Repository
+
+```bash
+helm repo add halodot https://halo-dot.github.io/helm-charts
+helm repo update
+```
+
+### Step 3: Create Values Configuration
+
+Create a `values.yaml` file tailored to your environment:
+
+```yaml
+# Version provided by Halo Dot
+version: "<provided-version>"
+
+# Adaptor configuration
+adaptor:
+  image:
+    repository: <Either your repository, or the repository provided by Halo Dot>
+    pullPolicy: Always
+  
+  # High availability configuration
+  replicaCount: 3
+  namespace: halo
+  
+  # Logging configuration
+  jsonLogs: true  # Required for log aggregation
+  logLevel: "LogInfo"  # Use LogDebug only in non-production
+  
+  # The Adaptor will auto-generate this if not provided
+  # jwtSigningSecret: "<auto-generated>"
+  
+  # Service configuration
+  service:
+    listeningPort: 443
+    targetPort: 9000
+  
+  # TLS Configuration
+  tls:
+    enabled: true
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      <your-tls-certificate>
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN ENCRYPTED PRIVATE KEY-----
+      <your-tls-key>
+      -----END ENCRYPTED PRIVATE KEY-----
+    ca: |
+      -----BEGIN CERTIFICATE-----
+      <your-ca-certificate>
+      -----END CERTIFICATE-----
+    passphrase: "<key-passphrase>"  # If key is encrypted
+  
+  # Health monitoring
+  # The readiness probe verifies both service health and A&M server connectivity
+  readinessProbe:
+    enabled: true
+    periodSeconds: 30
+
+# Payment Provider configuration
+paymentProvider:
+  image:
+    repository: <Either your repository, or the repository provided by Halo Dot>
+    pullPolicy: Always
+  
+  replicaCount: 2
+  
+  # Config provided by Halo Dot, based on your payment provider
+  config:
+  
+  service:
+    listeningPort: 80
+    targetPort: 7000 #Provided by Halo Dot, based on your payment provider
+
+# Database configuration
+database:
+  host: "<your-postgres-host>"
+  port: 5432
+  databaseName: "halodot_adaptor"
+  user: "halodot_user"
+  password: "<secure-password>"
+
+# Redis configuration
+redis:
+  host: "<your-redis-host>"
+  port: 6379
+  user: "default"  # or your Redis ACL user
+  password: "<redis-password>"
+
+# AWS configuration
+aws:
+  region: "<your-aws-region>"
+  accessKeyId: "<aws-access-key>"
+  secretAccessKey: "<aws-secret-key>"
+
+# Key configuration - Adaptor will auto-create these
+keys:
+  cmk: "halodot-adaptor-cmk"  # Will be created automatically
+  dbEncryptionKey: "halo-db-encryption"
+  dbIntegrity: "halo-db-integrity"
+  transactionSigning: "halo-transaction-signing"
+
+# Halo Dot A&M service endpoint
+attestation:
+  # Production endpoint provided during onboarding
+  host: "<provided-am-endpoint>"
+
+# Observability (Recommended)
+openTelemetry:
+  metricsEndpoint: "http://otel-collector.monitoring:4317/v1/metrics"
+  tracesEndpoint: "http://otel-collector.monitoring:4317/v1/traces"
+
+# Private registry authentication
+imageCredentials:
+  enabled: true
+  registry: "<provided-registry>"
+  username: "<provided-username>"
+  password: "<provided-password>"
+  email: "ops@yourcompany.com"
+```
+
+### Step 4: Deploy the Adaptor
+
+1. **Dry run to validate configuration**:
+
+   ```bash
+   helm install halodot-adaptor halodot/adaptor \
+     -f values.yaml \
+     --namespace halo \
+     --dry-run --debug
+   ```
+
+1. **Deploy to your cluster**:
+
+   ```bash
+   helm install halodot-adaptor halodot/adaptor \
+     -f values.yaml \
+     --namespace halo \
+     --wait \
+     --timeout 10m
+   ```
+
+1. **Monitor deployment progress**:
+
+   ```bash
+   # Watch pod creation
+   kubectl get pods -n halo -w
+
+   # Check events for any issues
+   kubectl get events -n halo --sort-by='.lastTimestamp'
+   ```
+
+### Step 5: Verify Deployment
+
+1. **Check pod status**:
+
+   ```bash
+   kubectl get pods -n halo
+   ```
+
+   All pods should be in `Running` state with readiness probes passing.
+
+1. **Verify automatic secret creation**:
+
+   ```bash
+   # Check AWS Secrets Manager
+   aws secretsmanager list-secrets --filters Key=name,Values=halo
+   ```
+
+   You should see the three auto-created secrets.
+
+1. **Check KMS key creation**:
+
+   ```bash
+   aws kms list-aliases | grep halodot-adaptor-cmk
+   ```
+
+1. **Verify A&M server connectivity**: The Adaptor's readiness probe automatically verifies
+   connectivity to the Halo Dot A&M server. If pods are in `Ready` state, the A&M connection is
+   working correctly.
+
+1. **Test health endpoint**:
+
+   ```bash
+   kubectl port-forward -n halo svc/adaptor 8443:443
+   # In another terminal:
+   curl -k https://localhost:8443/healthz
+   ```
+
+## Post-Installation Configuration
+
+### Run the Bootstrapping Job
+
+Running the boostrapping job is described on the [bootstrapping guide](./02%20-%20Bootstrapping.md). 
+This will setup the database with the initial config values required for running the adaptor.
+
+### Provide Halo Dot with your JWT issuer name and public key
+
+The Halo Dot A&M server uses the JWTs you issue to authenticate requests from your adaptor deployment. 
+You will have to provide Halo Dot with your JWT signing public key.
+
+### Configure Ingress for External Access
+
+Create an ingress resource for SoftPOS devices to reach the Adaptor:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adaptor-ingress
+  namespace: halo
+  annotations:
+    # Adjust based on your ingress controller
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2,TLSv1.3"
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - softpos-api.yourdomain.com
+    secretName: adaptor-tls
+  rules:
+  - host: softpos-api.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: adaptor
+            port:
+              number: 443
+```
+
+## SoftPOS Integration
+
+To integrate the HaloDot SDK into your SoftPOS mobile applications, follow the
+[SDK Integration Guide](../sdk/02%20-%20sdk-integration-guide.md). When configuring the SDK for use
+with your Adaptor deployment, you'll need to set the following claims:
+
+### SDK JWT Configuration
+
+Configure the JWT claims in your mobile application:
+
+- **`aud` and `aud_fingerprint`**: Point to your Adaptor's endpoint (e.g.,
+  `softpos-api.yourdomain.com`)
+- **`x-am-endpoint` and `x-am-endpoint-fingerprints`**: Set to the HaloDot A&M service endpoint
+  provided during onboarding
+
+## Troubleshooting
+
+### Initial Deployment Issues
+
+#### Adaptor Fails to Start
+
+**Check logs**:
+
+```bash
+kubectl logs -n halo -l app=adaptor --tail=100
+```
+
+**Common issues**:
+
+- **"Failed to create KMS key"**: Check AWS IAM permissions
+- **"Database connection failed"**: Verify PostgreSQL connectivity and credentials
+- **"Redis connection refused"**: Check Redis host and authentication
+- **"Cannot reach A&M service"**: Verify network egress and endpoint URL
+
+#### Secret Creation Failures
+
+**Verify AWS credentials**:
+
+```bash
+kubectl exec -n halo deploy/adaptor -- aws sts get-caller-identity
+```
+
+**Check KMS key creation**:
+
+```bash
+kubectl exec -n halo deploy/adaptor -- aws kms describe-key --key-id alias/halodot-adaptor-cmk
+```
+
+#### Readiness Probe Failures
+
+**Symptom**: Pods remain in `Not Ready` state
+
+**Check**:
+
+```bash
+kubectl logs -n halo -l app=adaptor | grep -i health
+```
+
+**Common causes**:
+
+- Cannot reach A&M server (most common)
+- Incorrect A&M endpoint URL
+- Network policy blocking egress to A&M service
+
+**Verify A&M connectivity specifically**:
+
+```bash
+# Check if the configured A&M endpoint is reachable
+kubectl exec -n halo deploy/adaptor -- nslookup <am-endpoint-domain>
+kubectl exec -n halo deploy/adaptor -- curl -v <am-endpoint>/healthz
+```
+
+## Maintenance
+
+### Upgrade Process
+
+1. **Check for updates**:
+
+   ```bash
+   helm repo update
+   helm search repo halodot/adaptor --versions
+   ```
+
+1. **Review changelog** and update `values.yaml` if needed
+
+1. **Perform rolling upgrade**:
+
+   ```bash
+   helm upgrade halodot-adaptor halodot/adaptor \
+     -f values.yaml \
+     --namespace halo \
+     --wait
+   ```
+
+## Support
+
+For support:
+
+1. Collect diagnostic information:
+
+   ```bash
+   kubectl get all -n halo
+   kubectl describe pods -n halo
+   kubectl logs -n halo --tail=1000 > halo-logs.txt
+   ```
+
+1. Include:
+
+   - Helm values (sanitized)
+   - Error messages
+   - Transaction IDs for specific issues
+
+1. Contact Halo Dot support with your issuer name and diagnostic bundle
+
+## Helm values 
+
+The following table lists the configurable parameters and their default values.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| adaptor.image.pullPolicy  | `"Always"` |  |
+| adaptor.image.repository  | `nil` | Image repository for the adaptor image, required |
+| adaptor.image.tag  | `nil` | Tag for the adaptor image, this overrides the version setting |
+| adaptor.jsonLogs  | `true` | JSON formatted logs, should be set to true when using logging tooling such as Grafana Loki or ELK. Can be useful to turn off when testing locally |
+| adaptor.jwtSigningSecret  | `nil` | HS256 Secret used for issuing tokens for admin users, if not set a random value will be generated |
+| adaptor.logLevel  | `"LogInfo"` | Logging level for the adaptor. Choices are LogDebug, LogInfo, LogWarn and LogError LogDebug provides full logging, including requests, responses and all card details LogInfo provides some logging, useful for investigating the state of the system without leaking card data Should be set to LogInfo in production and LogDebug in nonprod |
+| adaptor.name  | `"adaptor"` | Name of the adaptor deployment and service |
+| adaptor.namespace  | `"halo"` | K8s namespace to deploy the adaptor into |
+| adaptor.readinessProbe  | `{"enabled":true,"periodSeconds":30}` | Readiness probe settings for adaptor, the adaptor readiness probe checks that the service is up,  as well as checking that the A&M server is up and reachable |
+| adaptor.readinessProbe.enabled  | `true` | Enable the readiness probe, you might want to disable this if you are testing without  access to the A&M server |
+| adaptor.readinessProbe.periodSeconds  | `30` | How often to run the readiness probe |
+| adaptor.replicaCount  | `1` | Replica count of the adaptor, you should probably set this to your at least your node count |
+| adaptor.resources  | `{"limits":{"cpu":"500m","memory":"1G"},"requests":{"cpu":"100m","memory":"1G"}}` | Resource limits and requests, these values can be tuned based on your volumes, it is recommended to set memory limits and requests to the same value |
+| adaptor.service.listeningPort  | `80` | Port that the adaptor service exposes, if HTTPS is enabled, this should be set to 443 |
+| adaptor.service.targetPort  | `9000` | Port the adaptor listens on |
+| adaptor.tls.ca  | `"-----BEGIN CERTIFICATE-----\nca data\n-----END CERTIFICATE-----\n"` | The TLS server CA |
+| adaptor.tls.cert  | `"-----BEGIN CERTIFICATE-----\ncert data\n-----END CERTIFICATE-----\n"` | The TLS server certificate |
+| adaptor.tls.enabled  | `false` | Whether to enable TLS on the adaptor |
+| adaptor.tls.key  | `"-----BEGIN ENCRYPTED PRIVATE KEY-----\nkey data\n-----END ENCRYPTED PRIVATE KEY-----\n"` | The TLS server key, sensitive |
+| adaptor.tls.passphrase  | `nil` | Optional passphrase for encrypting the TLS key, sensitive |
+| attestation.host  | `"https://kernelserver.qa.haloplus.io"` | Remote attestation hostname, for non prod you can use the QA endpoint set here, for production you will be provided with a URL specifically for you, required |
+| aws.accessKeyId  | `nil` | Access key ID for your AWS IAM user, required |
+| aws.region  | `"us-west-2"` | AWS region, required |
+| aws.secretAccessKey  | `nil` | Secret access key for your AWS IAM user, required and sensitive |
+| database.databaseName  | `nil` | PostgreSQL database name, required |
+| database.host  | `nil` | PostgreSQL database hostname, required |
+| database.password  | `nil` | PostgreSQL database password, required and sensitive |
+| database.port  | `5432` | PostgreSQL database port |
+| database.user  | `nil` | PostgreSQL database user, required |
+| imageCredentials.email  | `"someone@host.com"` | Sets the email address for logging into the private registry |
+| imageCredentials.enabled  | `false` | Enables using private registries with authentication |
+| imageCredentials.password  | `"sillyness"` | Sets the password for logging into the private registry, sensitive |
+| imageCredentials.registry  | `"quay.io"` | Sets the URL for the private registry to login to |
+| imageCredentials.username  | `"someone"` | Sets the username for logging into the private registry |
+| keys.cmk  | `"haloCmk"` | KMS CMK used to encrypt the Secrets manager secrets |
+| keys.dbEncryptionKey  | `"haloDbEncryption"` | Secrets manager secret name for DB encryption secret |
+| keys.dbIntegrity  | `"haloDbIntegrity"` | Secrets manager secret name for DB integrity secret |
+| keys.transactionSigning  | `"haloTransactionSigning"` | Secrets manager secret name for transaction signing secret |
+| openTelemetry.metricsEndpoint  | `"http://otel-collector:4317/v1/metrics"` | Opentelemetry metrics endpoint |
+| openTelemetry.tracesEndpoint  | `"http://otel-collector:4317/v1/traces"` | Opentelemetry traces endpoint |
+| paymentProvider.config  | `nil` | Config for the paymentprovider, this is specific per payment provider and will be provided, required |
+| paymentProvider.image.pullPolicy  | `"Always"` |  |
+| paymentProvider.image.repository  | `nil` | Image repository for the paymentprovider image |
+| paymentProvider.image.tag  | `nil` | Tag for the paymentprovider image, this overrides the version setting |
+| paymentProvider.name  | `"paymentprovider"` | Name of the paymentprovider deployment and service |
+| paymentProvider.readinessProbe.enabled  | `true` | Enables the readiness probe for the payment provider |
+| paymentProvider.readinessProbe.periodSeconds  | `30` | The frequency of readiness probes |
+| paymentProvider.replicaCount  | `1` | Replica count of the payment provider, should probably be set to at least node count |
+| paymentProvider.resources  | `{"limits":{"cpu":"500m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"256Mi"}}` | Resource limits and requests, these values can be tuned based on your volumes, it is recommended to set memory limits and requests to the same value |
+| paymentProvider.service.listeningPort  | `80` | kThe port the paymentprovider service exposes |
+| paymentProvider.service.targetPort  | `nil` | The port the paymentprovider listens on, this will be provided along with the config for the paymentprovider |
+| redis  | `{"host":null,"password":null,"port":6379,"user":"redis"}` | Connection information for Redis |
+| redis.host  | `nil` | Redis hostname, if Redis is deployed in cluster using  the Redis helm chart this should be set to redis-master.default.svc.cluster.local, required |
+| redis.password  | `nil` | Redis password, required and sensitive |
+| redis.port  | `6379` | Redis port |
+| redis.user  | `"redis"` | Redis user |
+| scheduledJobs.voids  | `{"cron":"*/30 * * * *","enabled":true,"maxRetries":10,"runAtStartup":false}` | Job for voiding failed transaction |
+| scheduledJobs.voids.cron  | `"*/30 * * * *"` | How often the void job should run |
+| scheduledJobs.voids.enabled  | `true` | Sets whether voiding failed transactions should run |
+| scheduledJobs.voids.maxRetries  | `10` | How often many times a failed transaction should try be voided before giving up |
+| scheduledJobs.voids.runAtStartup  | `false` | Whether the void job should run when the adaptor starts up |
+| version  | `"latest"` | Container image tag for adaptor and payment provider, required |
+
+

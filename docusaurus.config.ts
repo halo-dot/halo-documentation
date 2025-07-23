@@ -198,8 +198,11 @@ const config: Config = {
 
       //... other Algolia params
     },
-
   } satisfies Preset.ThemeConfig,
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
 };
 
 export default config;
