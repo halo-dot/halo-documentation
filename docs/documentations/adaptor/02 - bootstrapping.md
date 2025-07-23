@@ -346,7 +346,7 @@ The following table lists the configurable parameters and their default values.
 | bootstrap.acquirer.alias  | `"Acquirer"` | Alias of the "Acquirer" (Acquirer is the Halo term for an App) |
 | bootstrap.acquirer.name  | `"Acquirer"` | Name of the "Acquirer" (Acquirer is the Halo term for an App) |
 | bootstrap.backoffLimit  | `1` | How many times the bootstrap job must try to run before failing |
-| bootstrap.configOverride  | `[]` | Terminal config overrides, these must be set to override the default terminal config format for config overrides:  [   {     "aid": "A0000000031010",     "kernelID": 3,     "transactionTypeConfigs": [       {         "tlvDatabase": [           {             "tag": "EF8101",             "value": "999999999998"           }         ],         "transactionType": "00"       }     ]   } ]  |
+| bootstrap.configOverride  | `[]` | Terminal config overrides, these must be set to override the default terminal config format for config overrides:  `[   {     "aid": "A0000000031010",     "kernelID": 3,     "transactionTypeConfigs": [       {         "tlvDatabase": [           {             "tag": "EF8101",             "value": "999999999998"           }         ],         "transactionType": "00"       }     ]   } ]`  |
 | bootstrap.encryptTags  | `"57,5A"` | Tags which must be encrypted by the terminal |
 | bootstrap.image.pullPolicy  | `"Always"` |  |
 | bootstrap.image.repository  | `nil` | Image repository for the bootstrap image, required |
