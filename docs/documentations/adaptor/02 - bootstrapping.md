@@ -331,3 +331,35 @@ For additional support, contact Halo Dot with:
 - Bootstrapper logs
 - Configuration files (sanitized)
 - Your issuer name
+
+## Helm values 
+
+The following table lists the configurable parameters and their default values.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| adaptor.currentPassword  | `"password"` | Set this to the current admin password, you do not necessarily need to update this  value, if the password is changed the bootstrapper will use the newPassword to login, sensitive |
+| adaptor.namespace  | `"halo"` | Set this to the namespace of the halo adaptor |
+| adaptor.newPassword  | `nil` | Set this to a new admin password if you want to change the admin password, required and sensitive |
+| adaptor.url  | `"http://adaptor"` | Set this to the URL of the adaptor's service |
+| adaptor.username  | `"admin"` | Set this to the current admin username |
+| bootstrap.acquirer.alias  | `"Acquirer"` | Alias of the "Acquirer" (Acquirer is the Halo term for an App) |
+| bootstrap.acquirer.name  | `"Acquirer"` | Name of the "Acquirer" (Acquirer is the Halo term for an App) |
+| bootstrap.backoffLimit  | `1` | How many times the bootstrap job must try to run before failing |
+| bootstrap.configOverride  | `[]` | Terminal config overrides, these must be set to override the default terminal config format for config overrides:  [   {     "aid": "A0000000031010",     "kernelID": 3,     "transactionTypeConfigs": [       {         "tlvDatabase": [           {             "tag": "EF8101",             "value": "999999999998"           }         ],         "transactionType": "00"       }     ]   } ]  |
+| bootstrap.encryptTags  | `"57,5A"` | Tags which must be encrypted by the terminal |
+| bootstrap.image.pullPolicy  | `"Always"` |  |
+| bootstrap.image.repository  | `nil` | Image repository for the bootstrap image, required |
+| bootstrap.image.tag  | `"latest"` | Tag for the bootstrap image, this overrides the version setting |
+| bootstrap.jwt.issuerName  | `"jwtIssuer"` | Name for the iss field of the JWT you will issue to the SDK to authenticate your  users to the Adaptor |
+| bootstrap.jwt.key  | `nil` | Public key used to validate the JWTs, required |
+| bootstrap.name  | `"bootstrap"` | Name of the boostrap job |
+| bootstrap.paymentProvider.name  | `"PaymentProvider"` | Name of the paymentprovider, can be left as default |
+| bootstrap.paymentProvider.url  | `"http://paymentprovider"` | URL of the paymentprovider service |
+| bootstrap.terminalCurrencyCode  | `"0710"` | Terminal currency code to set the terminal to |
+| imageCredentials.email  | `"someone@host.com"` | Sets the email address for logging into the private registry |
+| imageCredentials.enabled  | `false` | Enables using private registries with authentication |
+| imageCredentials.password  | `"sillyness"` | Sets the password for logging into the private registry, sensitive |
+| imageCredentials.registry  | `"quay.io"` | Sets the URL for the private registry to login to |
+| imageCredentials.username  | `"someone"` | Sets the username for logging into the private registry |
+
