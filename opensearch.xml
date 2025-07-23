@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>Halodot.io</ShortName>
+  <Description>Search Halodot.io</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image width="16" height="16" type="image/x-icon">http://docs.halodot.io/img/favicon-32x32.png</Image>
+  <Url type="text/html" method="get" template="http://docs.halodot.io/search?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml" rel="self" template="http://docs.halodot.io/opensearch.xml" />
+  <moz:SearchForm>http://docs.halodot.io/</moz:SearchForm>
+</OpenSearchDescription>
