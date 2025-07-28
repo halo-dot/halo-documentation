@@ -30,29 +30,18 @@ helm repo add halodot https://halo-dot.github.io/helm-charts
 helm repo update
 ```
 
-### Step 2: Prepare Configuration Files
-
-The bootstrapper requires the configuration file:
-
-#### config.yaml
+### Step 2: Prepare Configuration File
 
 Create a `config.yaml` file with your configuration:
 
 ```yaml
 # Basic bootstrapper configuration
 bootstrap:
-  # Acquirer configuration (your app identity)
-  acquirer:
-    name: "YourCompanyName"
-    alias: "YourCompanyAlias"
-  
   # Terminal configuration
   terminalCurrencyCode: "0840"  # USD (ISO 4217)
   encryptTags: "57,5A"  # Standard EMV tags for encryption
   
-  # Payment provider configuration
   paymentProvider:
-    name: "PaymentProvider"
     url: "http://paymentprovider.halo.svc.cluster.local"
   
   # JWT configuration for SDK authentication
@@ -60,14 +49,8 @@ bootstrap:
     issuerName: "softpos-api.yourdomain.com"
     key: |
       -----BEGIN PUBLIC KEY-----
-      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
       <your-jwt-public-key>
-      ...
       -----END PUBLIC KEY-----
-  
-  # Job configuration
-  name: "bootstrap"
-  backoffLimit: 3  # Number of retries before failing
   
   image:
     repository: <provided-repository>
@@ -76,9 +59,10 @@ bootstrap:
 
 # Adaptor connection configuration
 adaptor:
-  url: "http://adaptor.halo.svc.cluster.local"
+  url: "https://adaptor.halo.svc.cluster.local" # set to https://adaptor.halo.svc.cluster.local if TLS is disabled
   namespace: "halo"
-  username: "admin"
+  currentPassword: "password"  # Default password
+  newPassword: "<strong-password>"  # Set a strong password
 
 # Image pull secret configuration (if using private registry)
 imageCredentials:
@@ -86,34 +70,13 @@ imageCredentials:
   registry: "<provided-registry>"
   username: "<provided-username>"
   email: "ops@yourcompany.com"
-```
-
-#### secrets.yaml - Sensitive Configuration
-
-Create a `secrets.yaml` file with sensitive values:
-
-```yaml
-# Adaptor admin credentials
-adaptor:
-  currentPassword: "password"  # Default password
-  newPassword: "<strong-password>"  # Set a strong password
-
-# Image registry password
-imageCredentials:
   password: "<registry-password>"
 ```
 
-**Security Best Practice**: Encrypt `secrets.yaml` using a tool like
-[SOPS](https://github.com/getsops/sops) or [Sealed Secrets](https://sealed-secrets.netlify.app/):
 
-```bash
-# Example using SOPS with AWS KMS
-sops --encrypt --kms arn:aws:kms:region:account:key/key-id secrets.yaml > secrets.enc.yaml
-```
+### Step 3: Configure Terminal Configuration Overrides (Optional)
 
-### Step 3: Configure Terminal Overrides (Optional)
-
-If you need to customize terminal behaviour for specific card applications (AIDs), add the
+If you need to customize terminal configuration, add the
 `configOverride` section:
 
 ```yaml
@@ -142,19 +105,8 @@ bootstrap:
 Execute the bootstrapping job:
 
 ```bash
-# If using encrypted secrets
-sops -d secrets.enc.yaml > /tmp/secrets.yaml
 helm install bootstrapper halodot/halo-adaptor-bootstrapper \
   --values config.yaml \
-  --values /tmp/secrets.yaml \
-  --namespace halo \
-  --wait
-rm /tmp/secrets.yaml
-
-# If using plain secrets (not recommended for production)
-helm install bootstrapper halodot/halo-adaptor-bootstrapper \
-  --values config.yaml \
-  --values secrets.yaml \
   --namespace halo \
   --wait
 ```
@@ -174,16 +126,6 @@ helm install bootstrapper halodot/halo-adaptor-bootstrapper \
    kubectl logs -n halo job/bootstrap
    ```
 
-1. **Verify configuration in Adaptor**:
-
-   ```bash
-   # Port-forward to Adaptor
-   kubectl port-forward -n halo svc/adaptor 8443:443
-
-   # In another terminal, check admin access
-   curl -k -u admin:<new-password> https://localhost:8443/api/v1/config
-   ```
-
 ### Step 6: Clean Up
 
 Once bootstrapping is successful, remove the bootstrapper:
@@ -196,11 +138,17 @@ helm uninstall bootstrapper -n halo
 
 ### Currency Codes
 
-Common ISO 4217 currency codes for `terminalCurrencyCode`:
+Common ISO 4217 currency codes for `terminalCurrencyCode`. 
+A full list can be found [here](https://en.wikipedia.org/wiki/ISO_4217):
 
-| Currency | Code | Numeric | |----------|------|---------| | US Dollar | USD | 0840 | | Euro | EUR
-| 0978 | | British Pound | GBP | 0826 | | South African Rand | ZAR | 0710 | | Australian Dollar |
-AUD | 0036 | | Canadian Dollar | CAD | 0124 |
+| Currency | Code | Numeric | 
+|----------|------|---------| 
+| US Dollar | USD | 0840 | 
+| Euro | EUR | 0978 | 
+| British Pound | GBP | 0826 | 
+| South African Rand | ZAR | 0710 | 
+| Australian Dollar | AUD | 0036 | 
+| Canadian Dollar | CAD | 0124 |
 
 ### EMV Tags for Encryption
 
@@ -253,7 +201,7 @@ kubectl logs -n halo job/bootstrap
 **Common issues**:
 
 - **Connection refused**: Verify Adaptor service is running and accessible
-- **Authentication failed**: Check admin credentials in secrets.yaml
+- **Authentication failed**: Check admin credentials in config.yaml
 - **Invalid configuration**: Validate YAML syntax and required fields
 
 ### Configuration Not Applied
@@ -271,7 +219,6 @@ If configuration doesn't appear to take effect:
    ```bash
    helm upgrade bootstrapper halodot/halo-adaptor-bootstrapper \
      --values config.yaml \
-     --values secrets.yaml \
      --namespace halo
    ```
 
@@ -284,14 +231,6 @@ If SDK authentication fails after bootstrapping:
 1. **Validate key pair**: Ensure public key matches the private key used for signing
 
 ## Security Considerations
-
-1. **Secrets Management**:
-
-   - Never commit `secrets.yaml` to version control
-   - Use encryption tools for secrets at rest
-   - Rotate admin password after initial setup
-
-1. **Network Security**:
 
    - Bootstrapper only needs internal cluster access
    - No external network access required
@@ -311,7 +250,21 @@ To re-run:
 ```bash
 helm upgrade --install bootstrapper halodot/halo-adaptor-bootstrapper \
   --values config.yaml \
-  --values secrets.yaml \
+  --namespace halo \
+  --wait
+```
+
+If installing fails, first remove the boostrapper:
+
+```bash
+helm uninstall bootstrapper -n halo
+```
+
+Then reinstall the boostrapper
+
+```bash
+helm upgrade --install bootstrapper halodot/halo-adaptor-bootstrapper \
+  --values config.yaml \
   --namespace halo \
   --wait
 ```

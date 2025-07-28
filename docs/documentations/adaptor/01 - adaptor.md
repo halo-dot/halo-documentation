@@ -17,27 +17,7 @@ ensure device security and compliance while processing payments locally.
 
 The Adaptor deployment creates a secure payment processing environment within your infrastructure:
 
-```mermaid
-architecture-beta
-    group halo(cloud)[Halo Dot Backend]
-    group client(cloud)[Your Backend]
-    group outside
-    service am(server)[Halo Dot Attestation Service] in halo
-    service adaptor(server)[Adaptor] in client
-    service paymentprovider(server)[Halo Dot Payment Provider] in client
-    service paymentswitch(server)[Your Payment Switch] in client
-    service hsmService(server)[HSM Service] in client
-    service hsm(server)[HSM] in client
-    service sdk(internet)[Halo Dot SDK] in outside
-    adaptor:R -- L:am
-    adaptor:L -- R:paymentprovider
-    paymentprovider:L -- R:paymentswitch
-    paymentprovider:T -- B:hsmService
-    adaptor:L -- R:hsmService
-    hsm:R -- L:hsmService
-    sdk:B -- T:adaptor
-    sdk:B -- T:am
-```
+![Adaptor architecture diagram](./adaptor-architecture.svg)
 
 ### Component Responsibilities
 
@@ -200,8 +180,7 @@ adaptor:
   
   # Service configuration
   service:
-    listeningPort: 443
-    targetPort: 9000
+    listeningPort: 443 #Set to 80 when TLS is not enabled
   
   # TLS Configuration
   tls:
@@ -236,6 +215,7 @@ paymentProvider:
   
   # Config provided by Halo Dot, based on your payment provider
   config:
+    <Config provided by Halo Dot for your payment provider>
   
   service:
     listeningPort: 80
@@ -366,7 +346,9 @@ This will setup the database with the initial config values required for running
 ### Provide Halo Dot with your JWT issuer name and public key
 
 The Halo Dot A&M server uses the JWTs you issue to authenticate requests from your adaptor deployment. 
-You will have to provide Halo Dot with your JWT signing public key.
+To get access to the Adaptor you will have had to provide us with your JWT key. If you have not done 
+so yet, or have changed your JWT key, you will have to provide the new key to Halo Dot by either adding 
+it to the developer portal or contacting Halo Dot support.
 
 ### Configure Ingress for External Access
 
@@ -587,3 +569,34 @@ The following table lists the configurable parameters and their default values.
 | version  | `"latest"` | Container image tag for adaptor and payment provider, required |
 
 
+## Support for alternative prerequisites
+
+### Container Orchestration
+
+The Halo Dot Adaptor is packaged as container images that can run on any orchestration platform, including Kubernetes, HashiCorp Nomad, Docker Swarm, and others.
+
+**Current Support**: This guide and the provided Helm charts are designed specifically for Kubernetes deployments. 
+
+**Other Platforms**: While the containers are platform-agnostic, deploying on non-Kubernetes platforms requires manual configuration of the deployment manifests and networking. Native support for additional platforms is planned for future releases.
+
+Contact Halo Dot support if you need assistance with non-Kubernetes deployments
+
+### Networked Cache
+
+Currently only Redis is supported for networked cache, memcached is on our roadmap. 
+
+Contact Halo Dot support if there are alternative network caching services you would like us to support.
+
+### Cloud Providers
+
+The Halo Dot Adaptor uses cloud services for secure key management and secret storage:
+
+**AWS (Currently Supported)**
+- Hardware-backed key generation and entropy via AWS KMS
+- Secure secret storage via AWS Secrets Manager
+
+**Azure (Planned)**
+- Support for Azure Key Vault is on our roadmap
+
+**Other Environments**
+- If AWS or Azure don't meet your requirements, contact Halo Dot support to discuss alternatives for your specific environment

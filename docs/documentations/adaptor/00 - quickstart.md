@@ -1,12 +1,12 @@
 # Quick start
 
-Requirements:
-    - Kubernetes
-    - Redis
+Prerequisites :
+    - Kubernetes  <sup><a href="./adaptor#container-orchestration"> * </a></sup>
+    - Redis <sup><a href="./adaptor#networked-cache"> * </a></sup>
     - PostgreSQL
-    - AWS
+    - AWS <sup><a href="./adaptor#cloud-providers"> * </a></sup>
 
-Add the HaloDot Helm charts
+Add the Halo Dot Helm charts
 
 ```sh
 helm repo add halodot  https://halo-dot.github.io/helm-charts
@@ -36,7 +36,7 @@ redis:
   password: <Redis password>
   
 attestation:
-  host: <HaloDot A&M server hostname, eg https://kernelserver.qa.haloplus.io>
+  host: https://kernelserver.qa.haloplus.io
 
 adaptor:
   image:
@@ -47,10 +47,10 @@ paymentProvider:
     repository: <image registry storing the paymentprovider Docker image>
   service:
     targetPort: <port the payement provider runs on>
-  config: <config for the payment provider, provided by HaloDot>
+  config: <config for the payment provider, provided by Halo Dot>
 ```
 
-Install the HaloDot Adaptor using
+Install the Halo Dot Adaptor using
 
 ```sh
 helm install adaptor halodot/halo-adaptor --values config.yaml
