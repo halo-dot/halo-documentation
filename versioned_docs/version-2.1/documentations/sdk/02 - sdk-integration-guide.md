@@ -551,7 +551,108 @@ In some cases the SDK will determine that the transaction cannot be completed wi
 
 In some unusual cases, the SDK will require the user to present the same card/device again, in order to complete the transaction. In these cases, the SDK will retain control, but will require the mobile application to communicate instructions to the user via ui messages during the transaction. These instructions will either be to tap the same card/device again ( `TryAgain` ), or to first consult their device for instructions, then tap the device again ( `SeePhoneForInstructions_ThenTapAgain` ). It is only when the transaction has been finally concluded that the SDK will communicate a final transaction result as per normal, then terminate.
 
-## 9. Conclusion
+## 9. Integrating the Halo SDK in a Multi-Activity Kotlin Android App
+
+### Overview
+
+This integration demonstrates how to structure a Halo SDK payment flow within an Android app that uses multiple Activity classes. The implementation covers:
+
+- SDK initialization in an Application class
+- Permission management and activity lifecycle callbacks in the Parent Activity
+- Launching a payment flow via an Intent
+- Handling callbacks and results in a custom IHaloCallbacks implementation
+- Displaying transaction results in a dedicated success screen
+
+
+### Initialization and Application Context
+
+The MyApplication class initializes the Halo SDK once per app session using the initializeHaloSdk() method.
+
+```
+class MyApplication: Application() {
+
+    var haloCallbacks: HaloCallbacks? = null
+    var isInitialized = false
+
+    fun initializeHaloSdk(activity: Activity) {
+        HaloSDK.onCreate(this, activity)
+        if (isInitialized) {
+            return
+        }
+
+        Thread {
+            val timer = Timer()
+            haloCallbacks = HaloCallbacks(this, activity, timer) {}
+            timer.start()
+            HaloSDK.initialize(
+                HaloInitializationParameters(
+                    haloCallbacks,
+                    60000,
+                    applicationInfo.packageName,
+                    BuildConfig.VERSION_NAME,
+                )
+            )
+        }.start()
+    }
+}
+```
+An Application class is used so that the initialization state as well as the callbacks can be shared across all activities. The SDK is initialized in a separate thread to avoid blocking the UI thread.
+This function, initializeHaloSdk(), should be called in your parent activity - where the payment methods are shown i.e. 
+
+```
+// Initialize Halo SDK
+if (requestNecessaryPermissions()) {
+        val app = application as MyApplication
+        app.initializeHaloSdk(this)
+}
+```
+
+### Permissions and Entry Point: Parent Activity
+
+The Parent Activity, in this case MainActivity, requests camera and Bluetooth permissions. On success, it initializes the Halo SDK and provides a button to trigger a transaction.
+
+```
+val intent = Intent(this, PayActivity::class.java).apply {
+    putExtra("transactionId", "sometransactionId")
+    putExtra("transactionAmount", "100")
+}
+startActivity(intent)
+```
+
+### Starting a Transaction
+
+On navigation to the PayActivity, the following occurs:
+1. UI elements like amount are updated.
+2. HaloSDK.onCreate() is called again with this new Activity context.
+3. HaloSDK.startTransaction() is called with the amount and transaction ID passed via Intent.
+
+This isolates transaction logic in a focused screen, simplifying UX flow.
+
+### Handling Callbacks: IHaloCallbacks
+
+HaloCallbacks extends IHaloCallbacks and contains detailed logic for:
+
+- Initialization: Verifies result, logs errors, and triggers onInitializationSuccess.
+- Transaction Results: Parses and displays transaction results.
+- JWT: Uses JwtToken to sign and pass a JWT using RSA keys.
+- Health and security monitoring: Handles attestation and verification events.
+
+```
+override fun onHaloTransactionResult(result: HaloTransactionResult) {
+    val intent = Intent(activity, TransactionSuccess::class.java).apply {
+        putExtra("TRANSACTION_ID", result.merchantTransactionReference)
+        putExtra("CARD_NUMBER", result.receipt?.maskedPAN.toString())
+        ...
+    }
+    activity.startActivity(intent)
+    PayActivity.currentInstance?.get()?.finish()
+}
+```
+Route to an activity to display a receipt for your user.
+
+For the full source code, visit: https://github.com/halo-dot/test_app-android_sdk
+
+## 10. Conclusion
 
 That concludes the guide to integrate the Halo.SDK into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
