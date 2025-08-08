@@ -557,9 +557,9 @@ In some unusual cases, the SDK will require the user to present the same card/de
 
 This integration demonstrates how to structure a Halo SDK payment flow within an Android app that uses multiple Activity classes. The implementation covers:
 
-- SDK initialization in Application
+- SDK initialization in an Application class
 - Permission management and activity lifecycle callbacks in the Parent Activity
-- Launching a payment flow via Intent
+- Launching a payment flow via an Intent
 - Handling callbacks and results in a custom IHaloCallbacks implementation
 - Displaying transaction results in a dedicated success screen
 
@@ -633,7 +633,7 @@ This isolates transaction logic in a focused screen, simplifying UX flow.
 HaloCallbacks extends IHaloCallbacks and contains detailed logic for:
 
 - Initialization: Verifies result, logs errors, and triggers onInitializationSuccess.
-- Transaction Results: Parses and displays result via HTML-formatted string and navigates to TransactionSuccessAct.
+- Transaction Results: Parses and displays transaction results.
 - JWT: Uses JwtToken to sign and pass a JWT using RSA keys.
 - Health and security monitoring: Handles attestation and verification events.
 
