@@ -1,10 +1,10 @@
 # Quick start
 
 Prerequisites :
-    - Kubernetes  <sup><a href="./adaptor#container-orchestration"> * </a></sup>
-    - Redis <sup><a href="./adaptor#networked-cache"> * </a></sup>
+    - Kubernetes  <a href="./adaptor#container-orchestration"><sup>†</sup></a>
+    - Redis <a href="./adaptor#networked-cache"><sup>†</sup></a>
     - PostgreSQL
-    - AWS <sup><a href="./adaptor#cloud-providers"> * </a></sup>
+    - AWS <a href="./adaptor#cloud-providers"><sup>†</sup></a>
 
 Add the Halo Dot Helm charts
 
