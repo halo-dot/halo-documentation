@@ -62,9 +62,10 @@ repositories {
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   implementation (name: 'sonic-sdk-release-1.5.0', ext: 'aar')
+  implementation "com.google.code.gson:gson:2.10.1"
 }
 ```
 
 ## Next Step <a href="#next-step" id="next-step"></a>
 
-For detailed integration guide, see [Steps to Integrate](steps-to-integrate/)
+For detailed integration guide, see [Steps to Integrate](./android-sdk/steps-to-integrate/step-1-initialise)

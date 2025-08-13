@@ -16,12 +16,14 @@ const config: Config = {
   baseUrl: '/',
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/username.
-  projectName: 'halo_sdk_docusaurus', // Usually your repo name.
+  organizationName: 'halo-dot', 
+  projectName: 'halo-documentation',
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false,
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenMarkdownLinks: 'throw',
+  onBrokenAnchors: 'throw',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -198,8 +200,11 @@ const config: Config = {
 
       //... other Algolia params
     },
-
   } satisfies Preset.ThemeConfig,
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
 };
 
 export default config;
