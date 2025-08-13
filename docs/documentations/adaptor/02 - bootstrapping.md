@@ -287,7 +287,6 @@ For additional support, contact Halo Dot with:
 
 ## Helm values 
 
-
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `adaptor.namespace` | Set this to the namespace of the halo adaptor | `halo` |
@@ -305,8 +304,8 @@ For additional support, contact Halo Dot with:
 | `bootstrap.terminalCurrencyCode` | Terminal currency code to set the terminal to | `0710` |
 | `bootstrap.encryptTags` | Tags which must be encrypted by the terminal | `57,5A` |
 | `bootstrap.backoffLimit` | How many times the bootstrap job must try to run before failing | `1` |
-| `bootstrap.configOverride` | Terminal config overrides, these must be set to override the default terminal config  [see example 1](#bootstrap-configoverride-example-1).   To remove a config override, add `"remove": true` to the config override object [see example 2](#bootstrap-configoverride-example-2). | `[]` |
-| `bootstrap.caPublicKeyOverride` | CA public keys overrides, these must be set to override the default CA public keys  format for CA public keys overrides  [see example 1](#bootstrap-capublickeyoverride-example-1). | `[]` |
+| `bootstrap.configOverride` | Terminal config overrides, these must be set to override the default terminal config  [see example 1](#bootstrapconfigoverride-example-1).   To remove a config override, add `"remove": true` to the config override object [see example 2](#bootstrapconfigoverride-example-2). | `[]` |
+| `bootstrap.caPublicKeyOverride` | CA public keys overrides, these must be set to override the default CA public keys  format for CA public keys overrides  [see example 1](#bootstrapcapublickeyoverride-example-1). | `[]` |
 | `bootstrap.paymentProvider.name` | Name of the paymentprovider, can be left as default | `PaymentProvider` |
 | `bootstrap.paymentProvider.url` | URL of the paymentprovider service | `http://paymentprovider` |
 | `imageCredentials.enabled` | Enables using private registries with authentication | `false` |
@@ -316,11 +315,7 @@ For additional support, contact Halo Dot with:
 | `imageCredentials.email` | Sets the email address for logging into the private registry | `someone@host.com` |
 
 ## Code Examples
-
-### Examples for `bootstrap.configOverride`
-
-<a id="bootstrap-configoverride-example-1"></a>
-**Example 1:**
+### `bootstrap.configOverride` Example 1
 ```yaml title="Format for configOverride"
  - aid: A0000000031010
    kernelID: 3
@@ -331,8 +326,7 @@ For additional support, contact Halo Dot with:
            value: "200808"
 ```
 
-<a id="bootstrap-configoverride-example-2"></a>
-**Example 2:**
+### `bootstrap.configOverride` Example 2
 ```yaml title="Format for configOverride with remove"
  # Example to remove an AID:
  - aid: A0000000031010
@@ -355,10 +349,7 @@ For additional support, contact Halo Dot with:
          remove: true
 ```
 
-### Examples for `bootstrap.caPublicKeyOverride`
-
-<a id="bootstrap-capublickeyoverride-example-1"></a>
-**Example 1:**
+### `bootstrap.caPublicKeyOverride` Example 1
 ```yaml title="Format for caPublicKeyOverride"
  - hexRID: A000000025
    hexRIDIndex: 01
