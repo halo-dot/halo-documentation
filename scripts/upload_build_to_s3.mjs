@@ -44,6 +44,7 @@ function exitWithError(errorMessage) {
 
 async function S3upload(filepath, target = '', remove = false, s3 = process.env.AWS_S3_BUCKET, region = process.env.AWS_REGION, profile = process.env.AWS_PROFILE) {
   try {
+    console.info(`aws s3 cp ${filepath} "s3://${s3}/${target}" --recursive --region "${region}" --profile "${profile}"`);
     await spinner('Uploading to S3...', () => $`aws s3 cp ${filepath} "s3://${s3}/${target}" --recursive --region "${region}" --profile "${profile}"`);
     if (remove) await $(`rm -f ${filepath}`);
   } catch (error) {
