@@ -4,7 +4,12 @@ This document provides technical guidance for the integration of the Halo.SDK in
 
 | The Halo Dot SDK is an Isolating MPoC SDK payment processing software with Attestation & Monitoring Capabilities. |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The architecture of this isolating MPoC Payment Software is described in the diagram below. The diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary. |
+| The architecture of this isolating MPoC Payment Software is described in the diagram below. The diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary. 
+  Inside: Halo.SDK code + SDK-managed cryptographic material; SDK-managed secure channels (to A&M and external devices where applicable); SDK-managed TUI for PIN.
+  Outside: Host MPoC Application code, UI, and business logic; device NFC interface and touchscreen (as interfaces, not part of SDK); third-party payment host(s).
+  Account-data input paths: COTS-native NFC → SDK; PIN via SDK TUI → SDK.
+  Control/attestation signals: SDK ⇄ A&M back end; SDK → host app (callbacks) without exposing sensitive assets.
+|
 
 <figure><img src="/img/SDKBoundary.png" alt="" /><figcaption><p>SDK Boundary</p></figcaption></figure>
 
@@ -117,6 +122,49 @@ The following attestation payload fields must be configured in the Halo backend 
 | registeredAppInstaller     | The application id or package name of the app that will be used to install the integrating app e.g. com.android.packageinstaller |
 
 These details will need to be communicated to the Halo team so that they can be configured in the Halo backend.
+
+**Attestation and Monitoring Model**
+
+Halo operates the Attestation & Monitoring (A&M) service as part of the Halo MPoC Software. Third-party operation of A&M is not supported. The content below is provided so integrators and assessment laboratories can understand and validate correct A&M operation for MPoC evaluation.
+
+### A&M Operations Model
+
+Halo is the sole operator of the A&M component. Integrators do not deploy, configure, or operate A&M.
+
+### A&M Operations Guidance
+
+**Base configuration**
+- **Endpoints.** The SDK uses the Halo backend **kernel server** for both A&M and transaction processing: `kernelserver.<client>.<prod|dev|qa>.haloplus.io`.
+- **Certificate pinning.** A **base64 SHA-256 certificate fingerprint** of the kernel server must be configured (provided by Halo per environment; it can also be derived from the server TLS certificate).
+- **Time source.** Devices **must not** have significant clock drift; otherwise the Halo SDK will fail attestation.
+
+**Deployment posture**
+- **Builds.** Debug builds of the Halo SDK are **not usable in production** (restricted to QA/Dev environments).
+- **Secrets.** The SDK manages its own secrets internally. For all environments, the **integrator’s JWT signing public key** must be provisioned to Halo.
+- **TLS & JWT pin set.** TLS is enforced in all our environments; the **JWT must include** the base64 SHA-256 fingerprint(s) for the kernel server (supporting certificate rotation).
+
+**Runtime behavior**
+- **Cadence.** After the first initialization, the Halo SDK **performs attestation every 5 minutes**, and also **before each transaction**.
+- **Callbacks.** Any failures are delivered via `IHaloCallbacks.onSecurityError` and `IHaloCallbacks.onAttestationError`.
+- **Fail-closed.** If attestation fails, **no transactions are permitted** by the SDK.
+
+**Configuration surface**
+- **Integrator-provided values (per app release):**
+- Application name and **application ID (package name)**.
+- **Base64 SHA-256 digest** of the signing certificate used for the app.
+- **Installer application ID** (e.g., MDM package name if app is deployed via MDM).
+- **Mandatory checks performed by the SDK/A&M (not configurable):** OS version; device model; installation source; attestation nonce; device key hash; application ID; **OS rollback** status; **hardware-backed** signal checks; **profile** checks; **application recognition**; **Google Play license** checks.
+
+**Operations procedures**
+- For assessment labs, here are links to Halo’s internal policies ([logging](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/2546663444/Logging+Monitoring+and+Alerting), (rollout)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/3453288469/Halo+SDK+Release+and+Promotion+Process], (incident response)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4303880278/Incident+Response+Plan]).
+- All documents have authors and a log of changes. The logging document outlines our full logging and monitoring approach. The rollout document outlines our release and promotion process. The incident response document outlines our incident response plan.
+
+### Integrator Obligations (read-only responsibilities)
+
+- **No A&M API surface.** The integrating app **does not** call A&M APIs; the SDK invokes A&M during initialization, **periodically** (5-minute cadence), and **before each transaction**. Attestation **cannot be avoided**.
+- **Network egress.** Allow egress to the **kernel server** for **both** A&M and transaction processing. Because the same endpoint provides both, integrators **cannot** choose transactions without A&M.
+- **Terminal handling.** Treat any **attestation/security error** as **terminal** for payment flows; the SDK will block transactions in these states.
+- **Configuration control.** **Attestation configuration is not modifiable** by the integrating app or its backend.
 
 ---
 
