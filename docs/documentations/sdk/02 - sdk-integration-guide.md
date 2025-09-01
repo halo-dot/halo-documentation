@@ -1,40 +1,130 @@
 # SDK Mobile Integration Guide
 
-This document provides technical guidance for the integration of the Halo.SDK into a host Android application.&#x20;
+This document provides technical guidance for the integration of the Halo.SDK into a host Android application.
 
-| The Halo Dot SDK is an Isolating MPoC SDK payment processing Software with Attestation & Monitoring Capabilities.                                                                                                                                                                                                                                                                                                                                                     |
+| The Halo Dot SDK is an Isolating MPoC SDK payment processing software with Attestation & Monitoring Capabilities. |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <p>The Architecture of this isolating MPoC Payment Software is described in the diagram below.</p><p></p><p>The below diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary.  </p> |
+| The architecture of this isolating MPoC Payment Software is described in the diagram below. The diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary. |
 
-<figure><img src="/img/SDKBoundry.png" alt="" /><figcaption><p>SDK Boundry</p></figcaption></figure>
+<figure><img src="/img/SDKBoundary.png" alt="" /><figcaption><p>SDK Boundary</p></figcaption></figure>
 
 <figure><img src="/img/halodot-backend.png" alt="" /><figcaption>Halo Backend</figcaption></figure>
 
-The Halo.SDK is an isolated system development kit with A\&M functionality. It operates in an isolated memory space, which provides sufficient separation of data processing between the SDK and other software (including the integrating app).
+The Halo.SDK is an isolated system development kit with A&M functionality. It operates in an isolated memory space, which provides sufficient separation of data processing between the SDK and other software (including the integrating app).
 
-## 1. Remote Attestation of the App by the Halo Backend
+---
 
-In accordance with prescribed security requirements, the Halo backend performs remote attestation of the integrating app using Google's Play Integrity attestation framework.
+# Security Guidance for Integrators
+
+This section provides mandatory security guidance for integrators of the **Halo.SDK**. It supplements the functional integration instructions in this document by explicitly defining **security requirements, prohibitions, and responsibilities**. Failure to follow these requirements may result in failed attestation, blocked terminals, or loss of compliance with PCI MPoC.
+
+## General Do’s
+
+- **Always use server-issued JWTs**: The app must obtain fresh JWTs from its backend.
+- **Keep JWT lifetime short**: The recommended maximum is 15 minutes.
+- **Propagate SDK security callbacks**: The integrator app must always handle `onSecurityError` and `onAttestationError` by alerting the merchant.
+- **Use official SDK builds only**: Integrators must only use Halo-provided, signed AAR packages.
+- **Enforce SDK lifecycle hooks**: Ensure all required `onCreate`, `onStart`, `onResume`, etc. methods are properly wired.
+- **Update regularly**: Always integrate the latest SDK release as soon as published by Halo.
+
+## General Don’ts
+
+- **Do not store or cache JWTs** in local storage, logs, or other persistent locations.
+- **Do not hardcode JWTs** or keys into the application package.
+- **Do not attempt to modify or override the SDK’s Trusted User Interface** for PIN entry.
+- **Do not attempt to intercept or alter SDK API calls** related to security checks (root detection, attestation, debug/instrumentation detection).
+- **Do not silence, suppress, or replace SDK tamper notifications** (e.g. “RootedDevice” or “DebuggedDevice”).
+- **Do not attempt to use the SDK on unsupported platforms** (see Supported Platforms section).
+
+## Platform & OS Dependencies
+
+- The Halo.SDK relies on the host **Android OS security model** (application sandboxing, permissions, and secure process isolation).
+- The SDK requires **Google Play Integrity attestation services** to function; devices where this service is unavailable will fail initialization and attestation.
+- The SDK requires that developer options be disabled, and that no accessibility services are active during PIN entry for its release builds. Debug builds may allow these for testing purposes only but will not be permitted in production.
+- Integrators must ensure that apps request and retain the following permissions:
+  - `INTERNET`
+  - `CAMERA`
+  - `NFC`
+  - `BLUETOOTH_SCAN`
+  - `BLUETOOTH_CONNECT`
+  - `ACCESS_FINE_LOCATION` or `ACCESS_COARSE_LOCATION` (if using Android 11 and below)
+
+## Secure Update Process
+
+- Halo publishes signed AAR builds of the SDK on a monthly basis.
+- Integrators **must not modify** SDK binaries.
+- Each new SDK release contains security patches; integrators are required to upgrade within **30 days of release** to remain compliant.
+- The integrity of the SDK must be verified via SHA-256 hash validation (provided in release notes).
+- Updating the SDK requires full regression testing of app flows to ensure lifecycle and attestation processes remain intact.
+
+### Secure Updates & Verification (Mandatory)
+
+**Manual verification**
+
+- Verify checksums:
+  ```bash
+  shasum -a 256 halo-sdk-<version>.aar
+  ```
+- Verify signature:
+  ```bash
+  gpg --verify halo-sdk-<version>.aar.asc halo-sdk-<version>.aar
+  ```
+- Compare against the hashes and signer fingerprint published in the Halo release notes.
+
+**Maven Repository Access**
+
+- Pull only from the authenticated Maven endpoint provided by Halo.
+- Do **not** mirror artifacts to public repositories.
+- Update to new SDK releases within **30 days** unless otherwise specified by Halo.
+- **Refuse to build** if verification fails (checksums/signatures must match).
+
+## Tamper & Security Event Handling
+
+- When the SDK reports **RootedDevice**, **InstrumentedDevice**, or **DebuggedDevice**, the host application **must immediately display a clear message to the merchant** that the device is not secure and transactions are disabled.
+- Example message (recommended):
+  > “⚠️ This device has been tampered with and is not permitted to process payments. Please use a secure device.”
+- Merchants must not be allowed to override or bypass this error.
+- The host application must log these events (without sensitive data) for operational monitoring.
+
+## Supported Platforms
+
+- The Halo.SDK is certified for **COTS-native NFC Android devices** that support Google Play Integrity API.
+- The SDK is not supported on rooted, emulated, or debugged environments.
+- The SDK is only supported on devices running **Android 10 (API level 29)** and above.
+
+## Key Management Responsibilities
+
+- JWT signing keys must be securely generated and managed by the integrator’s backend.
+- Public keys must be provisioned to Halo in advance, and certificate rotation must follow Halo’s published schedule.
+- Integrators must not generate or manage cryptographic keys within the mobile app.
+
+---
+
+# 1. Remote Attestation of the App by the Halo Backend
+
+In accordance with prescribed security requirements, the Halo backend performs remote attestation of the integrating app using Google’s Play Integrity attestation framework.
 
 **App Values Required by Halo Server for Remote Attestation**
 
 The following attestation payload fields must be configured in the Halo backend with each release of the integrating app so that they can be checked by the backend during remote attestation.
 
 | Field                      | Description                                                                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | applicationName            | The name of the app e.g. "Halo.Dot Go"                                                                                           |
 | apkPackageName             | The application id or package name e.g. za.co.synthesis.halo.mpos.go                                                             |
-| apkCertificateDigestSha256 | The base64 encoded SHA-256 hash of the certificate used to the sign the integrating app                                          |
+| apkCertificateDigestSha256 | The base64 encoded SHA-256 hash of the certificate used to sign the integrating app                                              |
 | applicationVersion         | The version number of the integrating app                                                                                        |
 | registeredAppInstaller     | The application id or package name of the app that will be used to install the integrating app e.g. com.android.packageinstaller |
 
 These details will need to be communicated to the Halo team so that they can be configured in the Halo backend.
 
-## 2. Requirements of the Integrating App's Backend
+---
+
+# 2. Requirements of the Integrating App’s Backend
 
 **JWT**
 
-All calls made to the Halo.SDK require a valid JSON Web Token. The integrating app's backend is expected to supply the integrating app with a JWT that can be used to authenticate with the Halo backend. The SDK provides an interface for a function, `onRequestJWT(callback: (String) -> Unit)`, that it will called whenever a JWT is required.
+All calls made to the Halo.SDK require a valid JSON Web Token. The integrating app’s backend is expected to supply the integrating app with a JWT that can be used to authenticate with the Halo backend. The SDK provides an interface for a function, `onRequestJWT(callback: (String) -> Unit)`, that it will call whenever a JWT is required.
 
 An asymmetric key is used so that the JWT can be issued (signed) by one system (integrating app server), and independently verified by another (Halo backend).
 
@@ -46,11 +136,11 @@ A lifetime of 15 minutes is recommended.
 
 **JWT Signing Public Key Format**
 
-The JWT public key should be published as a certificate in a text-friendly format, e.g. Base64 encoded PEM (.crt, .pem).
+The JWT public key should be published as a certificate in a text-friendly format, e.g., Base64 encoded PEM (.crt, .pem).
 
 **JWT Serialization Format**
 
-The compact serialization format is expected, i.e:
+The compact serialization format is expected, i.e.:
 
 ```
 urlencodedB64(header) + '.' + urlencodedB64(payload) + '.' + urlencodedB64(signature)
@@ -66,56 +156,62 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2dnZWRJbkFzIjoiYWRtaW4iLCJpYXQiOjE0MjI
 
 The JWT must contain a number of claims:
 
-|       Field       |     Type    | Note                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------: | :---------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|        alg        |    String   | The signing algorithm is RSA signed SHA-256 hash, aliased as RS256. An asymmetric encryption(signing) scheme is required to allow the Kernel Server to be able to validate the token without being able to generate it. If symmetric key encryption was used to sign the auth token (e.g., using the HMAC algorithm), then non-repudiation would be lost. |
-|        sub        |    String   | The Payment Processor Merchant-User ID                                                                                                                                                                                                                                                                                                                    |
-|        iss        |    String   | This is a unique (from the perspective of the Halo backend) identifier for the JWT issuer, agreed upon by the JWT issuer and Halo, and configured in advance by Halo in the Halo backend e.g. authserver.haloplus.io.                                                                                                                                     |   
-|        aud        |    String   | The fully qualified domain name of the Halo Kernel server e.g. 'kernelserver.qa.haloplus.io'. This value should be obtained from Halo (different per customer environment).                                                                                                                                                                               |
-|        usr        |    String   | The details of the user performing the transaction, typically the username used to sign into the integrator app.                                                                                                                                                                                                                                          |
-|        iat        | NumericDate | The UTC timestamp of when the JWT was generated.                                                                                                                                                                                                                                                                                                          |
-|        exp        | NumericDate | The UTC time of expiration of the JWT.                                                                                                                                                                                                                                                                                                                    |
-|        x-tid      |    String   | The terminal identifier to be used for transactions (if available).                                                                                                                                                                                                                                                                                       |
-| aud\_fingerprints |    String   | A CSV list of expected SHA-256 fingerprints for the Halo Kernel server. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writting this would be: "sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA="                                                                              |
-|  x-custom-claims  |    String   | A JSON object with keys and values that are strings for custom claims used in your integration. This is custom and should be arranged with the Halo team before use and is option as well.                                                                                                                                                                |
+| Field | Type | Note |
+| :---: | :---: | ---- |
+| alg | String | The signing algorithm is RSA signed SHA-256 hash, aliased as RS256. An asymmetric encryption (signing) scheme is required to allow the Kernel Server to validate the token without being able to generate it. If symmetric key encryption was used to sign the auth token (e.g., using the HMAC algorithm), then non-repudiation would be lost. |
+| sub | String | The Payment Processor Merchant-User ID. |
+| iss | String | A unique identifier for the JWT issuer, agreed upon by the JWT issuer and Halo, and configured in advance by Halo in the backend, e.g., authserver.haloplus.io. |
+| aud | String | The fully qualified domain name of the Halo Kernel server e.g., 'kernelserver.qa.haloplus.io'. This value should be obtained from Halo (different per customer environment). |
+| usr | String | The details of the user performing the transaction, typically the username used to sign into the integrator app. |
+| iat | NumericDate | The UTC timestamp of when the JWT was generated. |
+| exp | NumericDate | The UTC time of expiration of the JWT. |
+| x-tid | String | The terminal identifier to be used for transactions (if available). |
+| aud_fingerprints | String | A CSV list of expected SHA-256 fingerprints for the Halo Kernel server. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writing this would be: "sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA=". |
+| x-custom-claims | String | A JSON object with keys and values that are strings for custom claims used in your integration. This is custom and should be arranged with the Halo team before use and is optional as well. |
 
 **If using the Halo Dot Adaptor, the following additional fields are required**
 
+| Field | Type | Note |
+| :---: | :---: | ---- |
+| x-am-endpoint | String | URL of Halo A&M endpoint, e.g., 'kernelserver.qa.haloplus.io'. |
+| x-am-endpoint-fingerprints | String | A CSV list of expected SHA-256 fingerprints for the A&M endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writing this would be: "sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA=". |
 
-|       Field       |     Type    | Note                                                                                                                                                                                                                                                                                                                                                      |
-| :---------------: | :---------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| x-am-endpoint| String | URL of Halo A&M endpoint, e.g. 'kernelserver.qa.haloplus.io'. |
-| x-am-endpoint-fingerprints | String | A CSV list of expected SHA-256 fingerprints for the A&M endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writting this would be: "sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA=" |
+All these values can be validated by making a POST request to `https://kernelserver.qa.haloplus.io/tokens/checkjwt`. Your JWT should be added as a header (Bearer Auth).
 
-All these values can be validated by making a POST request to "https://kernelserver.qa.haloplus.io/tokens/checkjwt". Your JWT should be added as header (Bearer Auth).
+---
 
-## 3. SDK Binary
+# 3. SDK Binary
 
-The HaloSDK is written in Kotlin and packaged as an AAR (Android Archive Library). For security reasons, the compiled binary has been obfuscated.
+The Halo.SDK is written in Kotlin and packaged as an AAR (Android Archive Library). For security reasons, the compiled binary has been obfuscated.
 
 See the [Getting Started Guide](/docs/documentations/sdk/getting-started-with-sdk) for a detailed guide on accessing and getting started with the SDK.
 
-## 4. Application Manifest
+---
+
+# 4. Application Manifest
 
 The `AndroidManifest.xml` application manifest file of the mobile app must include the following user permissions:
 
-* `android.permission.INTERNET` - call out to the backend over the internet
-* `android.permission.CAMERA` - to prevent third-party apps from using the camera to capture card data
-* `android.permission.NFC`- use the NFC module
-* `android.permission.BLUETOOTH_SCAN` - Bluetooth scan permissions*
-* `android.permission.BLUETOOTH_CONNECT` - Bluetooth connect permissions*
+- `android.permission.INTERNET` – call out to the backend over the internet.
+- `android.permission.CAMERA` – to prevent third-party apps from using the camera to capture card data.
+- `android.permission.NFC` – use the NFC module.
+- `android.permission.BLUETOOTH_SCAN` – Bluetooth scan permissions.*
+- `android.permission.BLUETOOTH_CONNECT` – Bluetooth connect permissions.*
 
-In addition and in order to indicate to the Google Play store that this is an NFC-enabled app the `android.hardware.nfc` the feature needs to be specified with `required=false`. If required is set to true then the mobile app itself will not be allowed to be installed on devices that don't support NFC, which is presumed to not be the desired behavior.
+In addition, to indicate to the Google Play store that this is an NFC-enabled app, the `android.hardware.nfc` feature needs to be specified with `required=false`. If `required` is set to true, then the mobile app itself will not be allowed to be installed on devices that don’t support NFC, which is presumed to not be the desired behavior.
 
-## 5. Life-Cycle Methods
+---
+
+# 5. Life-Cycle Methods
 
 In order for the SDK to properly handle the Android application life cycle the host app needs to add hooks into the following Android lifecycle methods on the `MainActivity` or relevant activity classes.
 
-:warning: **Do not hook up to a Sub activity or a fragment** as this will cause problems, otherwise if you do so please use our multi-activity test app as a reference. [Test App Source](https://github.com/halo-dot/test_app-android_sdk)
+⚠️ **Do not hook up to a sub-activity or a fragment** as this will cause problems. If you do so, please use our multi-activity test app as a reference. [Test App Source](https://github.com/halo-dot/test_app-android_sdk)
 
 List of Android lifecycle methods:
 
 * `onCreate(Bundle savedInstanceState)`
+* `onCreate(Bundle savedInstanceState, PersistableBundle persistentState)`
 * `onStart()`
 * `onResume()`
 * `onPause()`
@@ -134,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
         // your mobile app code here
-        HaloSDK.onCreate(this , this, savedInstanceState, persistentState);
+        HaloSDK.onCreate(this, this, savedInstanceState, persistentState);
     }
 
     @Override
@@ -190,14 +286,16 @@ public class MainActivity extends AppCompatActivity {
 
 ## 6. Initialization of the SDK
 
-Separate from the lifecycle hooks the Halo.SDK must be initialized before transacting by calling the static `initialize` method on the SDK and passing a `HaloInitializationParameters` instance as an argument.
+Separate from the lifecycle hooks, the Halo.SDK must be initialized before any transaction by calling the static `initialize` method on the SDK and passing a `HaloInitializationParameters` instance as an argument. It is sufficient and recommended to call `initialize` once per user session.
+
+```
 
 The SDK will attempt to perform the following sequence of actions:
 
 * Perform runtime checks (checking if device is not rooted, running in debug mode, or under instrumentation)
 * Confirm that the software (Android version) and hardware platform (NFC device) is sufficient
-* Connect to the server and passing on the JWT for verification
-* Confirm that the device has been enrolled and is not blocked otherwise re-enrolling if necessary
+* Connect to the server and pass the JWT for verification
+* Confirm that the device has been enrolled and is not blocked; otherwise re-enroll if necessary
 * Perform device-local Google Play Integrity key attestation actions, and submit results to the server for remote verification
 * Retrieve terminal configuration from the server
 * Initialize the SDK to a state where it will accept transactions
@@ -239,7 +337,7 @@ public interface IHaloCallbacks {
     void onHaloUIMessage(HaloUIMessage message);
     void onHaloTransactionResult(HaloTransactionResult result);
     void onRequestJWT(Function1<? super String, Unit> function1);
-    void onAttestationError(HaloAttesationHealthResult result);
+    void onAttestationError(HaloAttestionHealthResult result);
     void onSecurityError(HaloErrorCode code);
     void onCameraControlLost();
 }
@@ -251,7 +349,7 @@ The `IHaloCallbacks` interface encapsulates the call-back methods that the HaloS
 2. Interim transaction progress (`onHaloUIMessage`)
 3. Final outcome of a transaction (`onHaloTransactionResult`)
 4. Issues with intermittent attestation checks (`onAttestationError`)
-5. Security violation is detected (rooting, debugging, integrity) (`onSecurityError`)
+5. Security violation detected (rooting, debugging, integrity) (`onSecurityError`)
 
 **HaloInitializationResult**
 
@@ -277,7 +375,7 @@ Notes on `HaloInitializationResult`:
     | --------------------------------- | ------------------------------------------------------------------- |
     | AuthenticationError               | Error occurred during authentication                                |
     | AttestationFailure                | Attestation failed                                                  |
-    | AttestationSystemNotInitialised   | Initialisation failed because attestation system is not initialised |
+    | AttestationSystemNotInitialised   | Initialization failed because attestation system is not initialised |
     | CameraPermissionNotGranted        | No camera permission                                                |
     | ConfigFetchError                  | Unable to fetch terminal config                                     |
     | DebuggedDevice                    | Debug mode detected                                                 |
@@ -288,7 +386,7 @@ Notes on `HaloInitializationResult`:
     | InstrumentedDevice                | Runtime instrumentation detected                                    |
     | NetworkError                      | Network socket error during connection to server                    |
     | NFCDisabledError                  | NFC either absent, turned off, or NFC permission not granted        |
-    | NoAppContext                      | Appcontext is null - did you call onCreate()?                       |
+    | NoAppContext                      | App context is null - Did you call onCreate()?                       |
     | NoTerminalContainer               | TerminalContainer is null - did you call onCreate()?                |
     | RemoteAttestationFailure          | Device failed remote leg of Android Play Integrity attestation      |
     | RootedDevice                      | Device rooting detected                                             |
@@ -312,7 +410,7 @@ Notes on `HaloInitializationResult`:
 
 ## 7. Transaction Flow
 
-This section describes the Transaction flow of the SDK in more detail.
+This section describes the SDK transaction flow in more detail.
 
 **HaloSDK.startTransaction**
 
@@ -342,7 +440,7 @@ The `merchantTransactionReference` is a unique-per-merchant transaction referenc
 
 This value needs to be unique per merchant transaction, i.e. different merchants could use the same `merchantTransactionReference` for two different transactions but the value would need to be unique per transaction for a given merchant. In the event that the same `merchantTransactionReference` is supplied for two different transactions for the same merchant, the second transaction will be rejected by the Halo server, and the final transaction result type returned for the second transaction will be `HaloTransactionResultType.DuplicateMerchantTransactionReferenceSupplied`.
 
-In the event of the final transaction result type being `HaloTransactionResultType.Indeterminate` , then it is the `merchantTransactionReference` that should be used to look up and potentially resolve the final transaction outcome - potentially through a manual reversal by the merchant via the web portal (merchant portal (merchant portal).
+If the final transaction result type is `HaloTransactionResultType.Indeterminate`, the `merchantTransactionReference` should be used to look up and potentially resolve the final transaction outcome - potentially through a manual reversal by the merchant via the web portal (merchant portal).
 
 The return type of `startTransaction` is `HaloStartTransactionResult` and is defined as:
 
@@ -478,19 +576,19 @@ And the parameters of `HaloTransactionResult`:
     | Value                                         | Description                                                                                                               |
     | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
     | Approved                                      | Transaction successfully approved online                                                                                  |
-    | Declined                                      | Transaction declined, either offl ine by terminal or card, or onliny by issuer                                            |
+    | Declined                                      | Transaction declined, either offline by terminal or card, or online by issuer                                             |
     | CardTapTimeOutExpired                         | Timed out waiting for a card tap                                                                                          |
     | NetworkError                                  | Network socket communication error                                                                                        |
     | ProcessingError                               | An error occurred during EMV card processing                                                                              |
-    | Cancelled                                     | Transaction called by host application                                                                                    |
-    | TryAnotherCard                                | Transaction failed with this card, but may succeeed with another card                                                     |
+    | Cancelled                                     | Transaction cancelled by host application                                                                                 |
+    | TryAnotherCard                                | Transaction failed with this card, but may succeed with another card                                                      |
     | NFCDisabledError                              | NFC on the device is turned off                                                                                           |
     | NotAuthenticated                              | Invalid JWT token provided                                                                                                |
     | Indeterminate                                 | Unknown transaction status, inform merchant to manually query transaction status via merchant portal before giving goods  |
     | DuplicateMerchantTransactionReferenceSupplied | Transaction rejected by server due to use of duplicate merchant transaction reference. attempt again with a new reference |
     | HealthError                                   | An error occurred while checking the status of the Kernel Server                                                          |
     | InvalidJWT                                    | An error occurred while parsing the JWT                                                                                   |
-    | DeveloperOptionsEnabled                       | Developer options is enabled. Please turn it off and try again.                                                           |
+    | DeveloperOptionsEnabled                       | Developer options are enabled. Please turn them off and try again.                                                        |
 
     Only if a `HaloTransactionResultType` of `Approved` is received should the merchant be instructed that the transaction has been successful. If a result of type `Indeterminate` is returned, then the merchant **MUST** be instructed to query the Payment Processor as to the final transaction outcome - **BEFORE** giving goods/services. This will typically be done either through the host application itself, or via the payment processor's merchant management portal. All other values should be regarded as conclusively indicating that the transaction has failed.
 2.  Transaction References
@@ -570,7 +668,7 @@ Under some situations the attempted online transaction may be declined offline b
 If the transaction amount exceeds the CVM limit and the card supports online PIN, the SDK will request a PIN for the transaction. This is handled transparently by the SDK using a Trusted User Interface, which will briefly assume control of the mobile device screen to capture a PIN.
 
 Once the PIN has been captured control will return to the calling application. If a release version of the HaloSDK is used, this Trusted User Interface will not work on devices that have developer options enabled, or if there are apps with accessibility services installed on the device.
-In such an instance, the SDK will return and error codes of 'DeveloperOptionsBlocksPin' or 'AccessibilityBlocksPin' respectively.
+In such an instance, the SDK will return error codes of 'DeveloperOptionsBlocksPin' or 'AccessibilityBlocksPin', respectively.
 
 **Online Processing**
 
@@ -588,7 +686,7 @@ If the SDK is unable to submit the online authorization request due to network c
 
 **Ambiguous Transaction Outcome**
 
-In the event that the SDK was able to connect and submit an online authorization request, but did not receive a response, it will return a `HaloTransactionResult.resultType` of `Indeterminate`, and abandon the transaction.
+In the event that the SDK was able to connect and submit an online authorization request, but did not receive a response, it will return a `HaloTransactionResult.resultType` of `Indeterminate` and abandon the transaction.
 
 In this case, the SDK integrator must be instructed to consult the transaction back-end in order to determine the final transaction outcome before the merchant is able to hand over the goods/services sold.
 
@@ -649,7 +747,7 @@ class MyApplication: Application() {
     }
 }
 ```
-An Application class is used so that the initialization state as well as the callbacks can be shared across all activities. The SDK is initialized in a separate thread to avoid blocking the UI thread.
+An Application class is used so that the initialization state and callbacks can be shared across all activities. The SDK is initialized in a separate thread to avoid blocking the UI thread.
 This function, initializeHaloSdk(), should be called in your parent activity - where the payment methods are shown i.e. 
 
 ```
@@ -679,7 +777,7 @@ On navigation to the PayActivity, the following occurs:
 2. HaloSDK.onCreate() is called again with this new Activity context.
 3. HaloSDK.startTransaction() is called with the amount and transaction ID passed via Intent.
 
-This isolates transaction logic in a focused screen, simplifying UX flow.
+This isolates transaction logic in a dedicated screen, simplifying the user experience.
 
 ### Handling Callbacks: IHaloCallbacks
 
@@ -707,6 +805,6 @@ For the full source code, visit: https://github.com/halo-dot/test_app-android_sd
 
 ## 10. Conclusion
 
-That concludes the guide to integrate the Halo.SDK into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
+That concludes the guide to integrating the Halo.SDK into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
 Not what you were looking for? If you are looking for the Intent Integration guide, it is over [here](/docs/documentations/sdk/halo-system-baseline)
