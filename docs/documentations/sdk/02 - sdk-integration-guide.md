@@ -16,6 +16,29 @@ This document provides technical guidance for the integration of the Halo.SDK in
 
 The Halo.SDK is an isolated system development kit with A&M functionality. It operates in an isolated memory space, which provides sufficient separation of data processing between the SDK and other software (including the integrating app). The MPoC Application cannot access the SDK's memory or sensitive assets (including cryptographic keys and plaintext account/PIN data). This aligns with the MPoC definition of an Isolating SDK; any access would indicate non-compliant itegration.
 
+**Detailed SDK Boundary Description**
+
+*Inside the SDK boundary:*
+- SDK code and data, including SDK-managed cryptographic material, including the white-box.
+- EMV kernel and payment processing logic which handles account data in the SDK.
+- SDK-managed secure channels (to A&M and external devices where applicable).
+- SDK-managed Trusted User Interface (TUI) for PIN entry.
+
+*Outside the SDK boundary:*
+- Host MPoC Application code, UI, and business logic.
+- Device NFC interface and touchscreen (as interfaces, not part of SDK).
+- Third-party payment providers which transactions are routed to.
+
+*Account-data input paths:*
+- COTS-native NFC → SDK: Contactles PAN/EMV data enters via the device NFC interface and is processed within the SDK.
+- PIN via SDK TUI → SDK: PIN entry is handled by the SDK's TUI, ensuring that the host app cannot access the PIN.
+
+*A&M and attestation signals:*
+- SDK ⇄ A&M back end: The SDK communicates with the A&M backend for attestation and monitoring over secure channels.
+- SDK → host app (callbacks) without exposing sensitive assets: The SDK provides callbacks to the host app for status updates and errors, but does not expose sensitive data.
+
+The Halo.SDK does not output plaintext PAN, PIN or any internal keys. Allowed outputs included a masked PAN (e.g. maskedPAN: 518103******3425 - from the HaloTransactionResult example included in this guide), and transaction status codes. The SDK does not expose any sensitive data to the host app, ensuring compliance with MPoC requirements.
+
 ---
 
 # Security Guidance for Integrators
@@ -678,6 +701,77 @@ And the parameters of `HaloTransactionResult`:
     | currencyCode             | Currency code                                                                        |
     | amountAuthorised         | Amount authorised                                                                    |
     | amountOther              | Additional amount                                                                    |
+
+4. Example HaloTransactionResult
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ onHaloTransactionResult: {
+│   resultType: Approved, 
+│   merchantTransactionReference: 2d3c88e3-a100-4288-a902-87cb43031c37, 
+│   haloTransactionReference: a55dc97e-5d7a-48ae-b3d9-3e7a14b8be2e, 
+│   paymentProviderReference: 000000239368, 
+│   errorCode: 0, 
+│   customTags: {
+│     resultCodeText: Approved, 
+│     originalIsoResponseCode: 00, 
+│     authorisedAmount: 369, 
+│     displayText: Successful Transaction, 
+│     receiptText: Card PAN , 
+│     Successful Transaction, 
+│     maskedPAN: , 
+│     stan: 239368, 
+│     base24Time: 162804, 
+│     base24Date: 0901, 
+│     ICCData: 910ADB924439BA6E9C680012, 
+│     base24RespCode: 000, 
+│     additionalReceiptBodyText: , 
+│     SignedTransaction: eyJhbGciOiJQUzUxMiJ9.eyJpc1NpbmdsZVRhcEFuZFBpbiI6ZmFsc2UsInR5cGUiOiJBcHByb3ZlZCIsImF1dGhvcml6YXRpb25Db2RlIjoiMTUyMDgwIiwidGFncyI6W10sImhhbG9SZWZlcmVuY2UiOiJhNTVkYzk3ZS01ZDdhLTQ4YWUtYjNkOS0zZTdhMTRiOGJlMmUiLCJlcnJvck1lc3NhZ2UiOiIiLCJpc29SZXNwb25zZUNvZGUiOiIwMCIsImFzc29jaWF0aW9uIjoiIiwiZXhwaXJ5RGF0ZSI6IiIsInBheW1lbnRQcm92aWRlclJlZmVyZW5jZSI6IjAwMDAwMDIzOTM2OCIsImN1c3RvbVZhbHVlcyI6eyJyZXN1bHRDb2RlVGV4dCI6IkFwcHJvdmVkIiwib3JpZ2luYWxJc29SZXNgdI6DRKkrzAuqxZsVcYM,
+│     association: , 
+│     mid: , 
+│     transactionTime: 142746, 
+│     applicationPreferredName: , 
+│     tid: , 
+│     merchantName: , 
+│     expiryDate: , 
+│     cryptogramType: ARQC, 
+│     panSequenceNumber: 00, 
+│     cvr: 03A2000400, 
+│     amountAuthorised: 369, 
+│     cryptogram: 31AC1DDFC4528944, 
+│     panEntry: , 
+│     serialisedReceipt: rO0ABXNyAD96YS5jby5zeW50aGVzaXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9UcmFu
+│                        c2FjdGlvblJlY2VpcHRadWGnlac5lgIAGkwAAWF0ABJMamF2YS9sYW5nL1N0cmluZztMAAFicQB+
+│                        AAFMAAFjcQB+AAFMAAFkcQB+AAFMAAFlcQB+AAFMAAFmcQB+AAFMAAFncQB+AAFMAAFodAA9THph
+│                        L2NvL3N5bnRoZXNpcy9oYWxvL2hhbG9Db21tb25JbnRlcmZhY2UvSGFsb0NyeXB0b2dyYW1UeXBl
+│                        O0wAAWlxAH4AAUwAAWpxAH4AAUwAAWtxAH4AAUwAAWxxAH4AAUwAAW1xAH4AAUwAAW5xAH4AAUwA
+│                        AW9xAH4AAUwAAXBxAH4AAUwAAXFxAH4AAUwAAXJxAH4AAUwAAXNxAH4AAUwAAXRxAH4AAUwAAXVx
+│                        AH4AAUwAAXZxAH4AAUwAAXdxAH4AAUwAAXh0ABZMamF2YS9tYXRoL0JpZ0ludGVnZXI7TAABeXEA
+│                        fgADTAABenEAfgADeHB0AAYyNTA5MDF0AAYxNDI3NDZ0AA5BMDAwMDAwMDA0MTAxMHQAEE1BU1RF
+│                        UkNBUkQgICAgICB0AAB0AAowMDAwMDA4MDAxdAAKMDNBMjAwMDQwMH5yADt6YS5jby5zeW50aGVz
+│                        aXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9DcnlwdG9ncmFtVHlwZQAAAAAAAAAAEgAA
+│                        eHIADmphdmEubGFuZy5FbnVtAAAAAAAAAAASAAB4cHQABEFSUUN0ABAzMUFDMURERkM0NTI4OTQ0
+│                        dAAQNTE4MTAzKioqKioqMzQyNXQABjE1MjA4MHQAAjAwdAAAdAAAcQB+AAlxAH4ACXEAfgAJdAAG
+│                        MjM5MzY4cQB+AAlxAH4ACXQAAjAwdAAGMjQwOTAxdAAIQXBwcm92ZWRzcgAUamF2YS5tYXRoLkJp
+│                        Z0ludGVnZXKM/J8fqTv7HQMABkkACGJpdENvdW50SQAJYml0TGVuZ3RoSQATZmlyc3ROb256ZXJv
+│                        Qnl0ZU51bUkADGxvd2VzdFNldEJpdEkABnNpZ251bVsACW1hZ25pdHVkZXQAAltCeHIAEGphdmEu
+│                        bGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAAAAAAAAAAAAAAAAAAAAAAAAF1cgACW0Ks8xf4BghU
+│                        4AIAAHhwAAAAAgLGeHNxAH4AGgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeHNxAH4A
+│                        GgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeA==, 
+│     maskedPAN: 518103******3425, 
+│     ISOResponseCode: 00, cardType: , 
+│     amountOther: 369, 
+│     transactionDate: 250901, 
+│     tvr: 0000008001, 
+│     disposition: Approved, 
+│     applicationLabel: MASTERCARD, 
+│     stan: 239368, 
+│     aid: A0000000041010, 
+│     currencyCode: 710, 
+│     effectiveDate: 240901
+│   }, 
+│   errorDetails: []
+│ }
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 ## 8. SDK Async Behaviour after startTransaction Returns
 
