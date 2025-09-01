@@ -126,11 +126,11 @@ These details will need to be communicated to the Halo team so that they can be 
 
 Halo operates the Attestation & Monitoring (A&M) service as part of the Halo MPoC Software. Third-party operation of A&M is not supported. The content below is provided so integrators and assessment laboratories can understand and validate correct A&M operation for MPoC evaluation.
 
-### A&M Operations Model
+**A&M Operations Model**
 
 Halo is the sole operator of the A&M component. Integrators do not deploy, configure, or operate A&M.
 
-### A&M Operations Guidance
+**A&M Operations Guidance**
 
 **Base configuration**
 - **Endpoints.** The SDK uses the Halo backend **kernel server** for both A&M and transaction processing: `kernelserver.<client>.<prod|dev|qa>.haloplus.io`.
@@ -158,7 +158,7 @@ Halo is the sole operator of the A&M component. Integrators do not deploy, confi
 - For assessment labs, here are links to Halo’s internal policies ([logging](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/2546663444/Logging+Monitoring+and+Alerting), (rollout)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/3453288469/Halo+SDK+Release+and+Promotion+Process], (incident response)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4303880278/Incident+Response+Plan]).
 - All documents have authors and a log of changes. The logging document outlines our full logging and monitoring approach. The rollout document outlines our release and promotion process. The incident response document outlines our incident response plan.
 
-### Integrator Obligations (read-only responsibilities)
+**Integrator Obligations (read-only responsibilities)**
 
 - **No A&M API surface.** The integrating app **does not** call A&M APIs; the SDK invokes A&M during initialization, **periodically** (5-minute cadence), and **before each transaction**. Attestation **cannot be avoided**.
 - **Network egress.** Allow egress to the **kernel server** for **both** A&M and transaction processing. Because the same endpoint provides both, integrators **cannot** choose transactions without A&M.
