@@ -163,7 +163,7 @@ helm repo update
 
 ### Step 3: Create Values Configuration
 
-Create a `values.yaml` file tailored to your environment:
+Create a `values.yaml` file tailored to your environment (a full list of parameters is available [here](#helm-values)):
 
 ```yaml
 # Version provided by Halo Dot
@@ -232,6 +232,13 @@ paymentProvider:
   service:
     listeningPort: 80
     targetPort: 7000 #Provided by Halo Dot, based on your payment provider
+
+# Bin service configuration (only if required by your payment provider)
+binService:
+  enabled: false # Set to true if required by your payment provider
+  image:
+    repository: <Either your repository, or the repository provided by Halo Dot>
+    pullPolicy: Always
 
 # HSM Service configuration (required for PIN and card data encryption)
 hsmService:
@@ -598,11 +605,16 @@ The following table lists the configurable parameters and their default values.
 | `database.user` | PostgreSQL database user, required | `null` |
 | `database.password` | PostgreSQL database password, required and sensitive | `null` |
 | `database.databaseName` | PostgreSQL database name, required | `null` |
-| `redis` | Connection information for Redis | `{host: null, password: null, port: 6379, user: redis}` |
+| `redis` | Connection information for Redis | `{host: null, password: null, port: 6379, tls: {ca: null, cert: null, enabled: false,...` |
 | `redis.host` | Redis hostname, if Redis is deployed in cluster using  the Redis helm chart this should be set to redis-master.default.svc.cluster.local, required | `null` |
 | `redis.port` | Redis port | `6379` |
 | `redis.user` | Redis user | `redis` |
 | `redis.password` | Redis password, required and sensitive | `null` |
+| `redis.tls.enabled` | Whether to enable TLS for Redis, required if your Redis instance requires TLS | `false` |
+| `redis.tls.ca` | CA certificate for Redis TLS, required if your Redis instance requires TLS | `null` |
+| `redis.tls.cert` | Client certificate for Redis TLS, required if your Redis instance requires client certs | `null` |
+| `redis.tls.key` | Client key for Redis TLS, required if your Redis instance requires client certs, sensitive | `null` |
+| `redis.tls.passphrase` | Optional passphrase for encrypting the Redis client key, sensitive | `null` |
 | `attestation.host` | Remote attestation hostname, for non prod you can use  the QA endpoint set here, for production you will  be provided with a URL specifically for you, required | `https://kernelserver.qa.haloplus.io` |
 | `keys.dbIntegrity` | Secrets manager secret name for DB integrity secret | `haloDbIntegrity` |
 | `keys.dbEncryptionKey` | Secrets manager secret name for DB encryption secret | `haloDbEncryption` |
@@ -642,7 +654,16 @@ The following table lists the configurable parameters and their default values.
 | `paymentProvider.image.repository` | Image repository for the paymentprovider image | `null` |
 | `paymentProvider.image.tag` | Tag for the paymentprovider image, this overrides the version setting | `null` |
 | `paymentProvider.resources` | Resource limits and requests, these values can be tuned based on your volumes, it is recommended to set  memory limits and requests to the same value | `{limits: {cpu: 500m, memory: 256Mi}, requests: {cpu: 100m, memory: 256Mi}}` |
-| `paymentProvider.config` | Config for the paymentprovider, this is specific per payment provider and will be provided, required  Format will be `HALO_<PAYMENT_PROVIDER_NAME>_<CONFIG_KEY>: <CONFIG_VALUE>` | `null` |
+| `paymentProvider.config` | Config for the paymentprovider, this is specific per payment provider and will be provided, required  Format will be `HALO_<PAYMENT_PROVIDER_NAME>_<CONFIG_KEY>: <CONFIG_VALUE>` | `{env: null, file: [{content: null, name: CONFIG_FILE, path: /etc/paymentprovider/config.json}]}` |
+| `binService.enabled` | Whether to enable the BIN service, this may be required by your payment provider | `false` |
+| `binService.name` | Name of the BIN service deployment and service | `binservice` |
+| `binService.image.repository` | Image repository for the BIN service image, required | `null` |
+| `binService.image.tag` | Tag for the BIN service image, this overrides the version setting | `null` |
+| `binService.service.targetPort` | The port the BIN service listens on, this will be provided along with the config for the BIN service | `7011` |
+| `binService.service.listeningPort` | The port the BIN service exposes, if TLS is enabled this should be set to 443 | `80` |
+| `binService.readinessProbe.enabled` | Enables the readiness probe for the BIN service | `true` |
+| `binService.readinessProbe.periodSeconds` | The frequency of readiness probes | `30` |
+| `binService.resources` | Resource limits and requests, these values can be tuned based on your volumes, it is recommended to set  memory limits and requests to the same value | `{limits: {cpu: 500m, memory: 256Mi}, requests: {cpu: 100m, memory: 256Mi}}` |
 | `hsmService.enabled` | Whether to enable the HSM service, this is required for PIN and card data encryption | `true` |
 | `hsmService.name` | Name of the HSM service deployment and service | `hsmservice` |
 | `hsmService.image.repository` | Image repository for the HSM service image, required | `null` |
