@@ -155,7 +155,7 @@ Halo is the sole operator of the A&M component. Integrators do not deploy, confi
 - **Mandatory checks performed by the SDK/A&M (not configurable):** OS version; device model; installation source; attestation nonce; device key hash; application ID; **OS rollback** status; **hardware-backed** signal checks; **profile** checks; **application recognition**; **Google Play license** checks.
 
 **Operations procedures**
-- For assessment labs, here are links to Halo’s internal policies ([logging](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/2546663444/Logging+Monitoring+and+Alerting), (rollout)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/3453288469/Halo+SDK+Release+and+Promotion+Process], (incident response)[https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4303880278/Incident+Response+Plan]).
+- For assessment labs, here are links to Halo’s internal policies ([logging](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/2546663444/Logging+Monitoring+and+Alerting), [rollout](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/3453288469/Halo+SDK+Release+and+Promotion+Process), [incident response](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4303880278/Incident+Response+Plan)).
 - All documents have authors and a log of changes. The logging document outlines our full logging and monitoring approach. The rollout document outlines our release and promotion process. The incident response document outlines our incident response plan.
 
 **Integrator Obligations (read-only responsibilities)**
