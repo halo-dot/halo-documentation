@@ -4,12 +4,11 @@ This document provides technical guidance for the integration of the Halo.SDK in
 
 | The Halo Dot SDK is an Isolating MPoC SDK payment processing software with Attestation & Monitoring Capabilities. |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The architecture of this isolating MPoC Payment Software is described in the diagram below. The diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary. 
-  Inside: Halo.SDK code + SDK-managed cryptographic material; SDK-managed secure channels (to A&M and external devices where applicable); SDK-managed TUI for PIN.
-  Outside: Host MPoC Application code, UI, and business logic; device NFC interface and touchscreen (as interfaces, not part of SDK); third-party payment host(s).
-  Account-data input paths: COTS-native NFC → SDK; PIN via SDK TUI → SDK.
-  Control/attestation signals: SDK ⇄ A&M back end; SDK → host app (callbacks) without exposing sensitive assets.
-|
+| The architecture of this isolating MPoC Payment Software is described in the diagram below. The diagram also showcases the SDK boundary and the interaction between the SDK, its integrating channels, and the party payment gateways. It includes details of how data is sent in-between the boundary. |
+|  Inside: Halo.SDK code + SDK-managed cryptographic material; SDK-managed secure channels (to A&M and external devices where applicable); SDK-managed TUI for PIN. |
+|  Outside: Host MPoC Application code, UI, and business logic; device NFC interface and touchscreen (as interfaces, not part of SDK); third-party payment host(s). |
+|  Account-data input paths: COTS-native NFC → SDK; PIN via SDK TUI → SDK. |
+|  Control/attestation signals: SDK ⇄ A&M back end; SDK → host app (callbacks) without exposing sensitive assets. |
 
 <figure><img src="/img/SDKBoundary.png" alt="" /><figcaption><p>SDK Boundary</p></figcaption></figure>
 
