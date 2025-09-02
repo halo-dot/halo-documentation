@@ -47,19 +47,21 @@ If you encounter any issues, please refer to the [FAQ](#frequently-asked-questio
 
 ### Configure The Test App
 
-Open [app/build/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt](https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt) and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/>
+Open [app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt](https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt) and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/>
 You will need the private key you used to generate your public key, your issuer name, and your username.
 
 ```kotlin
-// app/build/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt
+package za.co.synthesis.halo.halotestapp
+
 object Config {
-  const val PRIVATE_KEY_PEM = "{{PRIVATE_KEY_PEM}}"
-  const val ISSUER = "{{ISSUER}}"
-  const val USERNAME = "{{USERNAME}}"
-  const val MERCHANT_ID = "{{MERCHANT_ID}}"
-  const val HOST = "{{HOST}}"
-  const val AUD = "{{AUD}}"
-  const val KSK = "{{KSK}}"
+   const val PRIVATE_KEY_PEM = "{{PRIVATE_KEY_PEM}}"
+   const val HOST = "{{HOST}}"
+   const val AUD = "{{AUD}}"
+   const val KSK = "{{KSK}}"
+   const val ISSUER = "{{ISSUER}}"
+   const val USERNAME = "{{USERNAME}}"
+   const val MERCHANT_ID = "{{MERCHANT_ID}}"
+
 }
 ```
 ### Configure local.properties
@@ -75,7 +77,16 @@ aws_secret_key={{AWS_SECRET_KEY}}
 
 ### Build
 
-You should be able to build the test app using Android Studio.
+You should be able to build and run the test app using Android Studio.
+
+![alt text](image.png)
+
+### Test Cards
+
+- Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet&hl=en_ZA" target="_blank">Visa CDET card</a> for testing.<br/>
+  - Use test card number 1 in the Visa CDET application.
+- Use a test card provided by the bank
+- **DO NOT** use actual card numbers for testing.
 
 ### Issues
 
@@ -85,19 +96,15 @@ Verify the logcat for any errors, such as
 * __Attestation error__ - Meaning the device is not trusted and does not pass the security checks.
 * __Required field missing: 'keys'__ - Usually related to a new device accessing old setting. Uninstall and re-install the app.
 
-### Test Cards
-
-Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet&hl=en_ZA" target="_blank">Visa CDET card</a> for testing.<br/>
-**DO NOT** use actual card numbers for testing.
-
 <hr/>
 
 ## More about the SDK
 
-- Details on how to access the <a href="http://docs.haloplus.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
-- How to programatically initialize the SDK <a href="http://docs.haloplus.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
-- <a href="http://docs.haloplus.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
-- <a href="http://docs.haloplus.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
+- Details on how to access the <a href="http://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
+- How to programmatically initialize the SDK <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
+- <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
+- <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
+- <a href="http://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
 
 ## Frequently Asked Questions
 
@@ -109,7 +116,7 @@ Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet
   - Error message: `A build operation failed. Could not resolve all dependencies for configuration ':app:androidApis'.`
   - Add your AWS access key and secret key to the `local.properties` file in the test app repository.
   - The `local.properties` file should be in the root of the test app repository.
-- Am I getting with the my keys
+- Am I getting an error with my keys
   - Ensure the correct format of the private key is used in the `Config.kt` file.
 ```kotlin
    const val PRIVATE_KEY_PEM = "-----BEGIN PRIVATE KEY-----\n" +
