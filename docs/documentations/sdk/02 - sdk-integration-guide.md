@@ -81,22 +81,9 @@ This section provides mandatory security guidance for integrators of the **Halo.
 - Halo publishes signed AAR builds of the SDK on a monthly basis.
 - Integrators **must not modify** SDK binaries.
 - Each new SDK release contains security patches; integrators are required to upgrade within **30 days of release** to remain compliant.
-- The integrity of the SDK must be verified via SHA-256 hash validation (provided in release notes).
 - Updating the SDK requires full regression testing of app flows to ensure lifecycle and attestation processes remain intact.
 
-### Secure Updates & Verification (Mandatory)
-
-**Manual verification**
-
-- Verify checksums:
-  ```bash
-  shasum -a 256 halo-sdk-<version>.aar
-  ```
-- Verify signature:
-  ```bash
-  gpg --verify halo-sdk-<version>.aar.asc halo-sdk-<version>.aar
-  ```
-- Compare against the hashes and signer fingerprint published in the Halo release notes.
+### Secure Updates & Verification
 
 **Maven Repository Access**
 
@@ -717,8 +704,6 @@ And the parameters of `HaloTransactionResult`:
 │     authorisedAmount: 369, 
 │     displayText: Successful Transaction, 
 │     receiptText: Card PAN , 
-│     Successful Transaction, 
-│     maskedPAN: , 
 │     stan: 239368, 
 │     base24Time: 162804, 
 │     base24Date: 0901, 
@@ -726,19 +711,13 @@ And the parameters of `HaloTransactionResult`:
 │     base24RespCode: 000, 
 │     additionalReceiptBodyText: , 
 │     SignedTransaction: eyJhbGciOiJQUzUxMiJ9.eyJpc1NpbmdsZVRhcEFuZFBpbiI6ZmFsc2UsInR5cGUiOiJBcHByb3ZlZCIsImF1dGhvcml6YXRpb25Db2RlIjoiMTUyMDgwIiwidGFncyI6W10sImhhbG9SZWZlcmVuY2UiOiJhNTVkYzk3ZS01ZDdhLTQ4YWUtYjNkOS0zZTdhMTRiOGJlMmUiLCJlcnJvck1lc3NhZ2UiOiIiLCJpc29SZXNwb25zZUNvZGUiOiIwMCIsImFzc29jaWF0aW9uIjoiIiwiZXhwaXJ5RGF0ZSI6IiIsInBheW1lbnRQcm92aWRlclJlZmVyZW5jZSI6IjAwMDAwMDIzOTM2OCIsImN1c3RvbVZhbHVlcyI6eyJyZXN1bHRDb2RlVGV4dCI6IkFwcHJvdmVkIiwib3JpZ2luYWxJc29SZXNgdI6DRKkrzAuqxZsVcYM,
-│     association: , 
-│     mid: , 
 │     transactionTime: 142746, 
 │     applicationPreferredName: , 
-│     tid: , 
-│     merchantName: , 
-│     expiryDate: , 
 │     cryptogramType: ARQC, 
 │     panSequenceNumber: 00, 
 │     cvr: 03A2000400, 
 │     amountAuthorised: 369, 
 │     cryptogram: 31AC1DDFC4528944, 
-│     panEntry: , 
 │     serialisedReceipt: rO0ABXNyAD96YS5jby5zeW50aGVzaXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9UcmFu
 │                        c2FjdGlvblJlY2VpcHRadWGnlac5lgIAGkwAAWF0ABJMamF2YS9sYW5nL1N0cmluZztMAAFicQB+
 │                        AAFMAAFjcQB+AAFMAAFkcQB+AAFMAAFlcQB+AAFMAAFmcQB+AAFMAAFncQB+AAFMAAFodAA9THph
