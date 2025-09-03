@@ -75,6 +75,7 @@ This section provides mandatory security guidance for integrators of the **Halo.
   - `BLUETOOTH_SCAN`
   - `BLUETOOTH_CONNECT`
   - `ACCESS_FINE_LOCATION` or `ACCESS_COARSE_LOCATION` (if using Android 11 and below)
+- Integrators must allow network egress to `kernelserver.<client>.<prod|dev|qa>.haloplus.io` for both A&M and transaction processing.
 
 ## Secure Update Process
 
@@ -151,13 +152,17 @@ This section provides mandatory security guidance for integrators of the **Halo.
 - The Halo.SDK is certified for **COTS-native NFC Android devices** that support Google Play Integrity API.
 - The SDK is not supported on rooted, emulated, or debugged environments.
 - The SDK is only supported on devices running **Android 10 (API level 29)** and above.
+- The SDK will only work on devices with **Google Play Services** installed and an accurate system clock.
+- The SDK currently supports the following SCRP device:
+  - **WiseEasy R1 FC** [(Bluetooth)](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4635197449/Device+Attestation+of+the+WiseEasy+R1)
 
 ## Key Management Responsibilities
 
 - JWT signing keys must be securely generated and managed by the integrator’s backend.
 - Public keys must be provisioned to Halo in advance, and certificate rotation must follow Halo’s published schedule.
 - Integrators must not generate or manage cryptographic keys within the mobile app.
-
+- Halo manages all SDK-embedded keys and secrets, including white-box cryptography, within the SDK binary.
+- Here is a more detailed outline of all the cryptographic assets and how they are managed: [Cryptographic Assets](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4450189313/Cryptographic+Assets), [Key Management Policy](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4304142392/Key+Management+Policy)
 ---
 
 # 1. Remote Attestation of the App by the Halo Backend
