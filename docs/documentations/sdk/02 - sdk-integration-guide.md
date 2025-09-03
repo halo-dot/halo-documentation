@@ -78,19 +78,65 @@ This section provides mandatory security guidance for integrators of the **Halo.
 
 ## Secure Update Process
 
-- Halo publishes signed AAR builds of the SDK on a monthly basis.
+- Halo publishes AAR builds of the SDK on a monthly basis.
 - Integrators **must not modify** SDK binaries.
 - Each new SDK release contains security patches; integrators are required to upgrade within **30 days of release** to remain compliant.
 - Updating the SDK requires full regression testing of app flows to ensure lifecycle and attestation processes remain intact.
 
-### Secure Updates & Verification
+**SDK Distribution and Access Control**
 
-**Maven Repository Access**
+- The Halo SDK AAR is published in a **private Maven repository backed by Amazon S3**.
+- Halo issues **per‑customer, long‑lived read‑only IAM credentials** scoped to the specific SDK bucket/prefix. Credentials must not be shared between customers.
+- Repository hygiene: **S3 Versioning** is enabled; pulls/reads are **audit‑logged** so access can be traced by Halo operations.
+- **Integrator obligations**:
+    - Retrieve the SDK **only** using the customer‑specific credentials issued by Halo.
+    - Do **not** mirror/redistribute Halo artifacts publicly.
+    - Track Halo release notifications and plan regular updates; Halo may enforce **minimum SDK versions** (see *Rollout & gating*).
+- **Authenticity is enforced at the application layer**: all MPoC Applications are signed; authenticity and integrity are further validated by **remote attestation** using embedded certificates signed by Halo’s **HSM‑backed CA** (protected via obfuscation).
 
-- Pull only from the authenticated Maven endpoint provided by Halo.
-- Do **not** mirror artifacts to public repositories.
-- Update to new SDK releases within **30 days** unless otherwise specified by Halo.
-- **Refuse to build** if verification fails (checksums/signatures must match).
+**EMV kernel data & configuration**
+
+- **Authoritative storage**: maintained in Halo’s **backend database**; host apps **cannot** alter these values.
+- **Change requests**: initiated by integrator or payment processor but executed only by **Halo administrators** via a **restricted administrative API**. Every admin uses an individual account; **all actions are audit‑logged**.
+- **Promotion flow**: each change is **tested in UAT** and, once approved, promoted to **production**.
+- **Delivery to devices**: after successful attestation, the SDK retrieves and atomically applies the current kernel/config. Partial/failed updates are not applied; errors are surfaced via the intialization result response and the SDK remains in a safe state.
+
+**A&M policy/configuration**
+
+- Operated **solely by Halo**; integrators do not configure or operate A&M.
+- **Attestation configuration resides only on the backend**. The SDK does **not** receive attestation policy/config before attestation. Attestation is performed against backend policy over SDK‑managed **secure channels**.
+- If attestation/policy is not satisfied, the SDK **transactions are not permitted**.
+
+**Certificate pin sets used in JWTs (base64 SHA-256)
+
+- JWTs include a **base64 SHA‑256 fingerprint list** pinning to the TLS key used by the Halo kernel server.
+- **Automatic rotation**: Production (and other environment) certificates/keys are rotated automatically by Halo DevOps on AWS. Halo **notifies customers** of upcoming changes and provides **overlapping fingerprints** to support migration. Integrators must update their JWT pin sets by the communicated effective‑by date.
+
+**Device prerequisites for config updates**
+- Accurate **device time** (significant drift will cause attestation failure).
+- **Network egress** to `kernelserver.<client>.<prod|dev|qa>.haloplus.io`.
+- Healthy initialization/attestation state.
+
+**Rollout & gating**
+- Halo **may enforce a minimum SDK version** (via versioned SDK↔kernel endpoints). Devices below the minimum may be **refused by attestation/policy** until updated.
+- Debug builds of the Halo SDK are **not usable in production**.
+
+## Software-Protected Cryptography Update Cadence
+
+**Public (Integrator‑facing)**
+- Halo employs **software‑protected cryptography to protect embedded secrets.
+- **Recommended cadence**: Halo **strongly recommends** updating to new SDK releases as they carry a refreshed white‑box **approximately every 30 days**. Halo publishes availability dates in the release notes and notifies customers of updates.
+- **Operational behavior**: The SDK continues to attest and transact when policy permits; however, older releases may expose increased risk. Integrators choosing to delay updates **accept the risk** to their merchant UX and security posture.
+- **No epoch enforcement**: Halo does **not** currently enforce a hard **Epoch ID** cutoff. Minimum SDK version enforcement may still apply (see *Rollout & gating* in 1G‑1.5).
+
+**Private Appendix (Labs‑only)** — *Secure Implementation Guide for Security Labs* (Confluence)
+- Contains the **threat model and rationale** for the 30‑day recommendation, including the lab’s **secure‑costing estimate** and internal analysis.
+- Documents how each replacement produces a **diversified binary** and **rotates embedded assets**, plus the internal controls, release packaging, and audit evidence.
+- Records the **release cadence**, notification process, and any compensating controls when customers defer updates.
+
+**Evidence & audit**
+- Release notes record availability dates for each updated white‑box build.
+- Backend policy decisions and attestation outcomes are **audit‑logged** per Halo policy.
 
 ## Tamper & Security Event Handling
 
