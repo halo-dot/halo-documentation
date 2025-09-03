@@ -130,11 +130,6 @@ This section provides mandatory security guidance for integrators of the **Halo.
 - **Operational behavior**: The SDK continues to attest and transact when policy permits; however, older releases may expose increased risk. Integrators choosing to delay updates **accept the risk** to their merchant UX and security posture.
 - **No epoch enforcement**: Halo does **not** currently enforce a hard **Epoch ID** cutoff. Minimum SDK version enforcement may still apply (see *Rollout & gating* in 1G‑1.5).
 
-**Private Appendix (Labs‑only)** — *Secure Implementation Guide for Security Labs* (Confluence)
-- Contains the **threat model and rationale** for the 30‑day recommendation, including the lab’s **secure‑costing estimate** and internal analysis.
-- Documents how each replacement produces a **diversified binary** and **rotates embedded assets**, plus the internal controls, release packaging, and audit evidence.
-- Records the **release cadence**, notification process, and any compensating controls when customers defer updates.
-
 **Evidence & audit**
 - Release notes record availability dates for each updated white‑box build.
 - Backend policy decisions and attestation outcomes are **audit‑logged** per Halo policy.
