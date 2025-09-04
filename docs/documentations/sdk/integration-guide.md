@@ -79,7 +79,7 @@ aws_secret_key={{AWS_SECRET_KEY}}
 
 You should be able to build and run the test app using Android Studio.
 
-![alt text](image.png)
+![alt text](/img/test-app.png)
 
 ### Test Cards
 
@@ -90,11 +90,8 @@ You should be able to build and run the test app using Android Studio.
 
 ### Issues
 
-Verify the logcat for any errors, such as
-
-* __Invalid JWT__ - Meaning the JWT is not valid with the public key provided or the private key used to generate the JWT is not the same as the public key provided.
-* __Attestation error__ - Meaning the device is not trusted and does not pass the security checks.
-* __Required field missing: 'keys'__ - Usually related to a new device accessing old setting. Uninstall and re-install the app.
+- See [Setup Issues](/docs/documentations/faq/integration-issues#setup-issues)
+- See [Running Issues](/docs/documentations/faq/integration-issues#running-issues)
 
 <hr/>
 
@@ -105,23 +102,3 @@ Verify the logcat for any errors, such as
 - <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
 - <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
 - <a href="http://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
-
-## Frequently Asked Questions
-
-- Why am I getting a Java version mismatch
-  - Upgrade your gradle version in the test app repository to match your Java version.
-  - This has been tested with Java 11 and Java 17.
-  - You can select which version in Android Studio Settings -> Build, Execution, Deployment -> Build Tools -> Gradle -> Gradle JVM.
-- Why am I getting `Access key cannot be null` or `Secret key cannot be null`
-  - Error message: `A build operation failed. Could not resolve all dependencies for configuration ':app:androidApis'.`
-  - Add your AWS access key and secret key to the `local.properties` file in the test app repository.
-  - The `local.properties` file should be in the root of the test app repository.
-- Am I getting an error with my keys
-  - Ensure the correct format of the private key is used in the `Config.kt` file.
-```kotlin
-   const val PRIVATE_KEY_PEM = "-----BEGIN PRIVATE KEY-----\n" +
-           "...\n" +
-           "...\n" +
-           "...\n" +
-           "-----END PRIVATE KEY-----\n"
-```
