@@ -103,3 +103,7 @@ table {
 mark {
   background: white;
 }
+
+.menu__link--hidden, .hidden {
+  display: none !important;
+}
