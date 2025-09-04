@@ -43,7 +43,7 @@ cd studio .
 ```
 
 Android Studio will automatically run Gradle Sync.<br/>
-If you encounter any issues, please refer to the [FAQ](#frequently-asked-questions) section.
+If you encounter any issues, please refer to the [FAQ](/docs/documentations/faq/integration-issues) section.
 
 ### Configure The Test App
 

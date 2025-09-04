@@ -11,7 +11,7 @@ title: Customer FAQ
 
 1. <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
 2. [Then access the SDK](/docs/documentations/sdk/getting-started-with-sdk)
-3. [Programmatically initialize the SDK](/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk)
+3. [Programmatically initialize the SDK](/docs/documentations/sdk/sdk-integration-guide#6-initialization-of-the-sdk)
 4. [Start a transaction](/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow)
    1. `val result = HaloSDK.startTransaction(amount, reference)`
 5. [See the life cycle of the SDK](/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods)
