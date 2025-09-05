@@ -88,6 +88,7 @@ You should be able to build and run the test app using Android Studio.
 * **DO NOT** use actual card numbers for testing.
 
 <hr/>
+
 ## Issues
 
 * See [Setup Issues](/docs/documentations/faq/integration-issues#setup-issues)
