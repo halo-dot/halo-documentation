@@ -654,7 +654,11 @@ The following table lists the configurable parameters and their default values.
 | `paymentProvider.image.repository` | Image repository for the paymentprovider image | `null` |
 | `paymentProvider.image.tag` | Tag for the paymentprovider image, this overrides the version setting | `null` |
 | `paymentProvider.resources` | Resource limits and requests, these values can be tuned based on your volumes, it is recommended to set  memory limits and requests to the same value | `{limits: {cpu: 500m, memory: 256Mi}, requests: {cpu: 100m, memory: 256Mi}}` |
-| `paymentProvider.config` | Config for the paymentprovider, this is specific per payment provider and will be provided, required  Format will be `HALO_<PAYMENT_PROVIDER_NAME>_<CONFIG_KEY>: <CONFIG_VALUE>` | `{env: null, file: [{content: null, name: CONFIG_FILE, path: /etc/paymentprovider/config.json}]}` |
+| `paymentProvider.config` | Config for the paymentprovider, this is specific per payment provider and will be provided, required | `{env: null, file: null}` |
+| `paymentProvider.config.env` | Format is be `HALO_<PAYMENT_PROVIDER_NAME>_<CONFIG_KEY>: <CONFIG_VALUE>` | `null` |
+| `paymentProvider.config.file` | Format is be `{ fileName: { "directory": "/path/to/dir", "content": "<content>"  }, filename2: { ... } }` | `null` |
+| `paymentProvider.secrets.env` | Format is be `HALO_<PAYMENT_PROVIDER_NAME>_<CONFIG_KEY>: <CONFIG_VALUE>` | `null` |
+| `paymentProvider.secrets.file` | Format is be `{ fileName: { "directory": "/path/to/dir", "content": "<content>"  }, filename2: { ... } }` | `null` |
 | `binService.enabled` | Whether to enable the BIN service, this may be required by your payment provider | `false` |
 | `binService.name` | Name of the BIN service deployment and service | `binservice` |
 | `binService.image.repository` | Image repository for the BIN service image, required | `null` |
