@@ -17,9 +17,6 @@ Both debug and release versions of the SDK are available. <br/>
 The release version is suitable for production use. <br/>
 The debug version is intended for development and testing purposes; it has full logging enabled and allows a debugger to be attached to the app.
 
-The Halo.SDK is hosted in a Maven repository, and stored in an S3 bucket in a Halo AWS account.
-
-
 ## Requirements
 
 Before you begin, ensure you have the following:
@@ -30,7 +27,7 @@ Before you begin, ensure you have the following:
   * Current <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/gradle/wrapper/gradle-wrapper.properties" target="_blank">gradle version is 7.5.1</a>.
 * **<a href="https://git-scm.com/" target="_blank">Git</a>** installed on your system.
 * Access the Android **<a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">test app repository on GitHub</a>**.
-* Generate your own **<a href="https://go.developerportal.qa.haloplus.io/docs/jwt" target="_blank">public key and private key pair</a>**, this will be used to create a jwt token.
+* Generate your own **<a href="http://docs.halodot.io/docs/documentations/sdk/jwt" target="_blank">public key and private key pair</a>**, this will be used to create a jwt token.
 
 ## Setup
 
@@ -66,13 +63,15 @@ object Config {
 ```
 ### Configure local.properties
 
+The Halo.SDK is hosted in a Maven repository, and stored in an S3 bucket in a Halo AWS account.<br/>
+We have generated a `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` for you to access the repo.
 Open [local.properties](https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/local.properties) and and add the values of `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` with your own values.
 
 ```bash
 aws_access_key={{AWS_ACCESS_KEY}}
 aws_secret_key={{AWS_SECRET_KEY}}
 ```
-
+<hr/>
 ## Build and Run
 
 ### Build
