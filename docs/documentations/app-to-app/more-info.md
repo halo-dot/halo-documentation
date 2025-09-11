@@ -5,4 +5,4 @@ With Halo Dot the exact same technology can be used for different use cases. How
 1. Android Intents Mechanism
 2. Deeplinking Mechanism
 
-![Android vs Deeplinking](http://static.dev.haloplus.io/static/documentation/images/android_vs_deeplinking.png)
+![Android vs Deeplinking](https://static.dev.haloplus.io/static/documentation/images/android_vs_deeplinking.png)
