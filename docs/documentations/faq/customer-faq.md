@@ -57,3 +57,11 @@ A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" targe
   - Number of buyer complaints per question type
   - Number of declines caused by exceeding the Contactless Payment Devices limit (a maximum of three (3) Contactless Payment Devices are allowed to be tapped to a same consumer’s mobile device using the Solution within a thirty (30) calendar day period). Synthesis and please clear with Visa
   - Visa reserves the right to modify and/or request further information, as needed.
+
+#### Q: What PIN should I use for testing?
+A: You can use PIN 12345 which should work for testing purposes.
+#### Q: Can a single issuer claim support multiple currencies?
+A: Currently, the process for setting up terminal configuration with currency and country codes for specific issuer claims is manual. Contact support for multi-currency setup assistance.
+#### Q: Why do smaller GBP amounts work but larger amounts (e.g., £1000) decline after a long wait?
+A: This may be due to switch processing limits or timeouts. The system may return "Unable to process transaction" for amounts above certain thresholds, though some transactions may still go through eventually.
+Attestation Issues

@@ -48,3 +48,41 @@ A: We have developed an ISO 8583 processor (Postbridge) that allows us to establ
 #### Q: How do create a JWT?
 A: You will need to generate your own public key and private key pair. You can use the guid located in the [JWT guide](/docs/documentations/sdk/jwt) to generate a JWT.<br/>
 You will need to submit the public key to the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">developer portal</a> which will be used to validate your JWT.
+#### Q: My transactions are failing with declines. What should I check?
+A: This could be due to backend PIN key rotation issues. Please provide a transaction reference ID for investigation. The support team can disable PIN key rotation if needed to resolve the issue.
+Currency Support
+#### Q: Do you provide a NEXO interface?
+A: We don't have our own standalone "NEXO Interface," but we support several integration methods:
+Postbridge interface (ISO8583): Direct connection via secure tunnel (e.g., IPsec) into Postilion systems
+Custom API integration: We can provide templates for processors to create endpoints
+Direct processor integration: Based on processor-specific APIs or specifications
+NEXO-based integration: Available through CCS via the Toro gateway
+SDK Usage & Lifecycle
+
+#### Q: How should I handle SDK lifecycle when moving between Android activities?
+A: Follow these best practices:
+Do NOT implement HaloSDK.onDestroy() - remove it if you have it
+When returning to an activity where the SDK was previously initialized, you don't need to call HaloSDK.initialize() again
+Always ensure HaloSDK.onCreate() is called when returning to the transaction activity
+Multiple successive transactions can be performed from the same activity instance without re-initialization
+#### Q: Can I perform transactions in currencies other than ZAR?
+A: Yes, the system supports multiple currencies. The terminal currency code should match the transaction currency code you pass in. Currency and country codes are configured per issuer claim in the JWT as part of the terminal configuration.
+#### Q: How do I set up GBP transactions instead of ZAR?
+A: Pass "GBP" as the transaction currency code. For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500. If the switch rejects the transaction, you can be switched to the auto-approve processor.
+#### Q: How can I get help debugging specific transaction issues?
+A: When reporting issues, please provide:
+Transaction reference ID
+Detailed error messages or logs
+Steps to reproduce the issue
+Information about your integration setup
+#### Q: I get "System is not in state to start a new transaction" when trying to perform a second transaction shortly after the first. What's wrong?
+A: This typically occurs when calling HaloSDK.startTransaction() too quickly after a previous transaction approval. Ensure proper implementation of the SDK lifecycle methods as described in the integration guide.
+#### Q: Why does the SDK fail with camera exceptions when switching between activities?
+A: This is usually caused by improper lifecycle management. Make sure you're not calling HaloSDK.onDestroy() and properly implementing the lifecycle methods as outlined in the integration guide at http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods
+Troubleshooting
+#### Q: My integration works for one transaction but fails on subsequent transactions. What should I check?
+A: Verify your SDK lifecycle implementation, particularly:
+Proper use of onCreate() methods
+Avoiding onDestroy() calls
+Correct activity state management
+Following the integration guide specifications

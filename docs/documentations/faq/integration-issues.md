@@ -43,3 +43,7 @@ A: Meaning the device is not trusted and does not pass the security checks.
 
 #### Q: Required field missing: 'keys'
 A: Usually related to a new device accessing old setting. Uninstall and re-install the app.
+
+#### Q: I'm getting attestation failure errors. What does this mean?
+A: If you see errors like "Key attestation signature digest doesn't match safetynet signature digest" or "E203: Device has not been attested," this typically means device attestation was accidentally enabled. Contact support to have attestation disabled for your testing environment.
+Integration & Connectivity
