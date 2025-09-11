@@ -10,13 +10,13 @@ const config: Config = {
   favicon: '/img/favicon-32x32.png',
 
   // Set the production url of your site here
-  url: 'http://docs.halodot.io/',
+  url: 'https://docs.halodot.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
-  organizationName: 'halo-dot', 
+  organizationName: 'halo-dot',
   projectName: 'halo-documentation',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
@@ -55,7 +55,7 @@ const config: Config = {
           }
         },
         blog: {
-          showReadingTime: true,  
+          showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
             xslt: true,

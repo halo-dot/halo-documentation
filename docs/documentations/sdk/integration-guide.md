@@ -27,7 +27,7 @@ Before you begin, ensure you have the following:
   * Current <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/gradle/wrapper/gradle-wrapper.properties" target="_blank">gradle version is 7.5.1</a>.
 * **<a href="https://git-scm.com/" target="_blank">Git</a>** installed on your system.
 * Access the Android **<a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">test app repository on GitHub</a>**.
-* Generate your own **<a href="http://docs.halodot.io/docs/documentations/sdk/jwt" target="_blank">public key and private key pair</a>**, this will be used to create a jwt token.
+* Generate your own **<a href="https://docs.halodot.io/docs/documentations/sdk/jwt" target="_blank">public key and private key pair</a>**, this will be used to create a jwt token.
 
 ## Setup
 
@@ -40,11 +40,11 @@ cd studio .
 ```
 
 Android Studio will automatically run Gradle Sync.<br/>
-If you encounter any issues, please refer to the [FAQ](/docs/documentations/faq/integration-issues) section.
+If you encounter any issues, please refer to the <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues" target="_blank">FAQ</a> section.
 
 ### Configure The Test App
 
-Open [app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt](https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt) and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/>
+Open <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt" target="_blank">Config.kt</a> and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/>
 You will need the private key you used to generate your public key, your issuer name, and your username.
 
 ```kotlin
@@ -65,7 +65,7 @@ object Config {
 
 The Halo.SDK is hosted in a Maven repository, and stored in an S3 bucket in a Halo AWS account.<br/>
 We have generated a `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` for you to access the repo.
-Open [local.properties](https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/local.properties) and and add the values of `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` with your own values.
+Open <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/local.properties" target="_blank">local.properties</a> and and add the values of `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` with your own values.
 
 ```bash
 aws_access_key={{AWS_ACCESS_KEY}}
@@ -78,7 +78,7 @@ aws_secret_key={{AWS_SECRET_KEY}}
 
 You should be able to build and run the test app using Android Studio.
 
-![alt text](http://docs.halodot.io/assets/images/test-app-f5854065b979828a83a96aae3c4ddfb2.png)
+![alt text](https://static.dev.haloplus.io/static/documentation/images/test-app.png)
 
 ### Test Cards
 
@@ -91,13 +91,13 @@ You should be able to build and run the test app using Android Studio.
 
 ## Issues
 
-* See [Setup Issues](/docs/documentations/faq/integration-issues#setup-issues)
-* See [Running Issues](/docs/documentations/faq/integration-issues#running-issues)
+* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#setup-issues" target="_blank">Setup Issues</a>
+* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#running-issues" target="_blank">Running Issues</a>
 
 ## More about the SDK
 
-* Details on how to access the <a href="http://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
-* How to programmatically initialize the SDK <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
-* <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
-* <a href="http://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
-* <a href="http://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
+* Details on how to access the <a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
+* How to programmatically initialize the SDK <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
+* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
+* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
+* <a href="https://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>

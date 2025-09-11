@@ -1,0 +1,9 @@
+{
+  "label": "App to App",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "App to App Integration"
+  },
+  "className": "hidden"
+}
