@@ -11,7 +11,7 @@ We provide a sample code to help you with the intent request function call. The 
 
 ### Initiate an Intent Transaction
 
-Retrieve a ```Transaction ID``` and payment ```JWT``` by hitting the endpoing below. You will need the API Key and ```Merchant
+Retrieve a ```Transaction ID``` and payment ```JWT``` by hitting the endpoint below. You will need the API Key and ```Merchant
 ID``` from the previous step for this API call.
 
 <br/>
