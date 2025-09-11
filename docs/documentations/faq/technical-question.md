@@ -15,12 +15,6 @@ A: No
 #### Q: Can you obtain transactions based on some date / time range as opposed to just using a txn ID?
 A: This is possible and accessible via the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">developer portal</a>
 
-#### Q: Is PIN capture supported on all Android 11+ devices which have NFC hardware or only a subset of these devices?
-A: If the device is 11+, GMS, yes
-
-#### Q: Is the PIN capture screen the only screen controlled by the SDK, and if so can we style it at all?
-A: Yes and you can style, currently, the logo at the top, font for the buttons, the cancel and "enter" button. What would you be looking to style?
-
 #### Q: What PSPs are you working with and in what regions?
 * **Do they offer additional txn reporting APIs in addition to what halo.dot offers?**<br/>
 A: The PSP we are integrated with would offer more features around recons and mark off files etc. MPGS as an example but would need a bit more context on the ask here ? Are you asking which acquirers we have integrations with?
@@ -51,13 +45,6 @@ You will need to submit the public key to the <a href="https://go.developerporta
 #### Q: My transactions are failing with declines. What should I check?
 A: This could be due to backend PIN key rotation issues. Please provide a transaction reference ID for investigation. The support team can disable PIN key rotation if needed to resolve the issue.
 Currency Support
-#### Q: Do you provide a NEXO interface?
-A: We don't have our own standalone "NEXO Interface," but we support several integration methods:
-Postbridge interface (ISO8583): Direct connection via secure tunnel (e.g., IPsec) into Postilion systems
-Custom API integration: We can provide templates for processors to create endpoints
-Direct processor integration: Based on processor-specific APIs or specifications
-NEXO-based integration: Available through CCS via the Toro gateway
-SDK Usage & Lifecycle
 
 #### Q: How should I handle SDK lifecycle when moving between Android activities?
 A: Follow these best practices:
@@ -65,8 +52,6 @@ Do NOT implement HaloSDK.onDestroy() - remove it if you have it
 When returning to an activity where the SDK was previously initialized, you don't need to call HaloSDK.initialize() again
 Always ensure HaloSDK.onCreate() is called when returning to the transaction activity
 Multiple successive transactions can be performed from the same activity instance without re-initialization
-#### Q: Can I perform transactions in currencies other than ZAR?
-A: Yes, the system supports multiple currencies. The terminal currency code should match the transaction currency code you pass in. Currency and country codes are configured per issuer claim in the JWT as part of the terminal configuration.
 #### Q: How do I set up GBP transactions instead of ZAR?
 A: Pass "GBP" as the transaction currency code. For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500. If the switch rejects the transaction, you can be switched to the auto-approve processor.
 #### Q: How can I get help debugging specific transaction issues?

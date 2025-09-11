@@ -60,8 +60,22 @@ A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" targe
 
 #### Q: What PIN should I use for testing?
 A: You can use PIN 12345 which should work for testing purposes.
+#### Q: Is PIN capture supported on all Android 11+ devices which have NFC hardware or only a subset of these devices?
+A: If the device is 11+, GMS, yes
+
+#### Q: Is the PIN capture screen the only screen controlled by the SDK, and if so can we style it at all?
+A: Yes and you can style, currently, the logo at the top, font for the buttons, the cancel and "enter" button. What would you be looking to style?
 #### Q: Can a single issuer claim support multiple currencies?
 A: Currently, the process for setting up terminal configuration with currency and country codes for specific issuer claims is manual. Contact support for multi-currency setup assistance.
 #### Q: Why do smaller GBP amounts work but larger amounts (e.g., £1000) decline after a long wait?
 A: This may be due to switch processing limits or timeouts. The system may return "Unable to process transaction" for amounts above certain thresholds, though some transactions may still go through eventually.
 Attestation Issues
+#### Q: Do you provide a NEXO interface?
+A: We don't have our own standalone "NEXO Interface," but we support several integration methods:
+Postbridge interface (ISO8583): Direct connection via secure tunnel (e.g., IPsec) into Postilion systems
+Custom API integration: We can provide templates for processors to create endpoints
+Direct processor integration: Based on processor-specific APIs or specifications
+NEXO-based integration: Available through CCS via the Toro gateway
+SDK Usage & Lifecycle
+#### Q: Can I perform transactions in currencies other than ZAR?
+A: Yes, the system supports multiple currencies. The terminal currency code should match the transaction currency code you pass in. Currency and country codes are configured per issuer claim in the JWT as part of the terminal configuration.
