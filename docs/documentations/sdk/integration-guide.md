@@ -94,7 +94,7 @@ You should be able to build and run the test app using Android Studio.
 * See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#setup-issues" target="_blank">Setup Issues</a>
 * See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#running-issues" target="_blank">Running Issues</a>
 
-## More about the SDK]
+## More about the SDK
 
 * Details on how to access the <a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
 * How to programmatically initialize the SDK <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
