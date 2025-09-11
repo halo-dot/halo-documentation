@@ -52,8 +52,6 @@ Do NOT implement HaloSDK.onDestroy() - remove it if you have it
 When returning to an activity where the SDK was previously initialized, you don't need to call HaloSDK.initialize() again
 Always ensure HaloSDK.onCreate() is called when returning to the transaction activity
 Multiple successive transactions can be performed from the same activity instance without re-initialization
-#### Q: How do I set up GBP transactions instead of ZAR?
-A: Pass "GBP" as the transaction currency code. For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500. If the switch rejects the transaction, you can be switched to the auto-approve processor.
 #### Q: How can I get help debugging specific transaction issues?
 A: When reporting issues, please provide:
 Transaction reference ID

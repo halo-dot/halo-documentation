@@ -79,3 +79,4 @@ NEXO-based integration: Available through CCS via the Toro gateway
 SDK Usage & Lifecycle
 #### Q: Can I perform transactions in currencies other than ZAR?
 A: Yes, the system supports multiple currencies. The terminal currency code should match the transaction currency code you pass in. Currency and country codes are configured per issuer claim in the JWT as part of the terminal configuration.
+For example for British Pound, pass "GBP" as the transaction currency code. For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500. If the switch rejects the transaction, you can be switched to the auto-approve processor.
