@@ -36,7 +36,7 @@ Halo Dot offers a variety of pricing plans to fit your business needs.
 
 For more information about Halo Dot, please visit the Halo Dot website.
 
-### Trusted by 
+### Trusted by
 
 Visa, Mastercard, Amex, Discover and others - our solution is built for security and designed for growth.
 

@@ -40,10 +40,10 @@ bootstrap:
   # Terminal configuration
   terminalCurrencyCode: "0840"  # USD (ISO 4217)
   encryptTags: "57,5A"  # Standard EMV tags for encryption
-  
+
   paymentProvider:
     url: "http://paymentprovider.halo.svc.cluster.local"
-  
+
   # JWT configuration for SDK authentication
   jwt:
     issuerName: "softpos-api.yourdomain.com"
@@ -51,7 +51,7 @@ bootstrap:
       -----BEGIN PUBLIC KEY-----
       <your-jwt-public-key>
       -----END PUBLIC KEY-----
-  
+
   image:
     repository: <provided-repository>
     tag: <provided-version>
@@ -138,16 +138,16 @@ helm uninstall bootstrapper -n halo
 
 ### Currency Codes
 
-Common ISO 4217 currency codes for `terminalCurrencyCode`. 
-A full list can be found [here](https://en.wikipedia.org/wiki/ISO_4217):
+Common ISO 4217 currency codes for `terminalCurrencyCode`.
+A full list can be found <a href="https://en.wikipedia.org/wiki/ISO_4217" target="_blank">here</a>:
 
-| Currency | Code | Numeric | 
-|----------|------|---------| 
-| US Dollar | USD | 0840 | 
-| Euro | EUR | 0978 | 
-| British Pound | GBP | 0826 | 
-| South African Rand | ZAR | 0710 | 
-| Australian Dollar | AUD | 0036 | 
+| Currency | Code | Numeric |
+|----------|------|---------|
+| US Dollar | USD | 0840 |
+| Euro | EUR | 0978 |
+| British Pound | GBP | 0826 |
+| South African Rand | ZAR | 0710 |
+| Australian Dollar | AUD | 0036 |
 | Canadian Dollar | CAD | 0124 |
 
 ### EMV Tags for Encryption
@@ -285,7 +285,7 @@ For additional support, contact Halo Dot with:
 - Configuration files (sanitized)
 - Your issuer name
 
-## Helm values 
+## Helm values
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -369,4 +369,3 @@ For additional support, contact Halo Dot with:
    hexModulus: AF4B8D230FDFCB1538E975795A1DB40C396A5359FAA31AE095CB522A5C82E7FFFB252860EC2833EC3D4A665F133DD934EE1148D81E2B7E03F92995DDF7EB7C90A75AB98E69C92EC91A533B21E1C4918B43AFED5780DE13A32BBD37EBC384FA3DD1A453E327C56024DACAEA74AA052C4D
    hexHashSha1: 33F5B0344943048237EC89B275A95569718AEE20
 ```
-
