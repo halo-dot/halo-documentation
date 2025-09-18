@@ -1,4 +1,5 @@
 ### Getting Started with App to App Integration
+------
 
 #### What is App to App Integration?
 
