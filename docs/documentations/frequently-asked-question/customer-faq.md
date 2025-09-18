@@ -3,80 +3,85 @@ id: customer-faq
 title: Customer FAQ
 ---
 
-# Frequently asked questions
+# Frequently Asked Questions
 
-## Customer Question  (FAQ)
+Provides answers to common questions about using our platform, SDK, and APIs.
 
-#### Q: How do we get a transaction working with the SDK?
+## General Questions
 
-1. <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
-2. [Then access the SDK](/docs/documentations/sdk/getting-started-with-sdk)
-3. [Programmatically initialize the SDK](/docs/documentations/sdk/sdk-integration-guide#6-initialization-of-the-sdk)
-4. [Start a transaction](/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow)
-   1. `val result = HaloSDK.startTransaction(amount, reference)`
-5. [See the life cycle of the SDK](/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods)
+### What is the difference between Scan to Tap, Tap on Own, and Push to Pay?
 
-#### Q: How do refund work?
-A: The refund transaction is a transaction that is refunded after it is settled. The funds are sent back to the cardholder’s account. [see](/docs/documentations/api-docs/refunds#refund)
+  * **Scan to Tap:** This feature is available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> and uses deep links to generate a QR code. A customer can scan this QR code to open the Halo app and complete a payment.
+  * **Tap on Own:** This feature, also available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a>, allows you to integrate a checkout system directly into your e-commerce store.
+  * **Push to Pay:** This feature lets you link your device to the Halo app to facilitate payments. It is available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a>.
 
-#### Q: How do reversal work?
-A: The reversal transaction is a transaction that is reversed before it is settled. No money is moved. Typically used within the same day or session. [see](/docs/documentations/api-docs/refunds#reversal)
+### What is the difference between Deep Link and Intent-based integration?
 
-#### Q: How do void transaction work?
-A: The void transaction is a transaction that is voided before it is settled. No money is moved. Typically used within the same day or session. [see](/docs/documentations/api-docs/refunds#void)
+  * **Intent-based Integration:** This is an app-to-app transaction. A third-party app uses an "intent" to connect with the Halo app, which then handles the transaction with a payment provider.
+  * **Deep Link Integration:** This involves generating a QR code that, when scanned, opens the Halo app directly to a specific payment flow.
 
-#### Q: What is the difference between Deep Link and Intent based integration?
-A: An intent transaction is an app-to-app transaction between us and a third party app transacting through us to a payment provider.<br/>
-Deep link transaction involves the generation of a QrCode that can be scanned to open the Halo app for payment.
+### What are the reporting requirements for Master Card and VISA?
 
-#### Q: What is Scan to Tap?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> it uses deep links to generate a QrCode that can be scanned to open the Halo app for payment.
+Reporting requirements vary by card network.
 
-#### Q: What is Tap on own?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> allows you to integrate a checkout system in your eCommerce store.
+  * **Mastercard:** Reports must mention both the Acquirer (Nedbank) and the Solution Developer (Synthesis). Required data includes the number of new and total devices enabled, active merchants, total applications deployed, and monthly transaction volume, count, and declined transactions. Some data is provided by Synthesis, and some by the acquirer.
+  * **VISA:** This data is typically for troubleshooting and analysis. It includes cart abandonment rates, troubleshooting call volume, buyer complaints, and the number of declines caused by exceeding contactless device limits.
 
-#### Q: What is Push to Pay?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> allows you to link your device to the Halo app for payment.
+## Transaction & Refund Questions
 
-#### Q: What are the reporting requirements?
-- Master Card:
-  - Reports must mention Acquirer and Solution Developer Name – Nedbank & Synthesis
-  - Number of total devices enabled (cumulative across all months of Pilot activity). Synthesis
-  - The number of new devices enabled each month. The number of active merchants each month (processing at least one transaction per month). Synthesis
-  - The number of total devices enabled (cumulative across all months of pilot activity) Synthesis
-  - The total number of applications deployed (i.e. How many potential apps with the ability to use the Tap to More use case functionality). Synthesis
-  - Total Transaction Volume (in USD) each month. Nedbank
-  - Total Transaction Count each month. Nedbank
-  - Number of Declined Transactions each month. Nedbank
-  - Devices Active per country/territory (if applicable) Synthesis
-  - If the Acquirer is in compliance with the Transaction Identifiers disclosed above, with written confirmation from Mastercard, the Acquirer is no long required to send Manual Reporting in this Section 4.
-- VISA data requirements:
-  - Cart abandonment rate (benchmark)
-  - Cart abandonment rate (if using TTOD option)
-  - Number of troubleshooting calls per question type
-  - Number of buyer complaints per question type
-  - Number of declines caused by exceeding the Contactless Payment Devices limit (a maximum of three (3) Contactless Payment Devices are allowed to be tapped to a same consumer’s mobile device using the Solution within a thirty (30) calendar day period). Synthesis and please clear with Visa
-  - Visa reserves the right to modify and/or request further information, as needed.
+### How do I get a transaction working with the SDK?
 
-#### Q: What PIN should I use for testing?
-A: You can use PIN 12345 which should work for testing purposes.
-#### Q: Is PIN capture supported on all Android 11+ devices which have NFC hardware or only a subset of these devices?
-A: If the device is 11+, GMS, yes
+Follow these steps to set up and process a transaction with the SDK:
 
-#### Q: Is the PIN capture screen the only screen controlled by the SDK, and if so can we style it at all?
-A: Yes and you can style, currently, the logo at the top, font for the buttons, the cancel and "enter" button. What would you be looking to style?
-#### Q: Can a single issuer claim support multiple currencies?
-A: Currently, the process for setting up terminal configuration with currency and country codes for specific issuer claims is manual. Contact support for multi-currency setup assistance.
-#### Q: Why do smaller GBP amounts work but larger amounts (e.g., £1000) decline after a long wait?
-A: This may be due to switch processing limits or timeouts. The system may return "Unable to process transaction" for amounts above certain thresholds, though some transactions may still go through eventually.
-Attestation Issues
-#### Q: Do you provide a NEXO interface?
-A: We don't have our own standalone "NEXO Interface," but we support several integration methods:
-Postbridge interface (ISO8583): Direct connection via secure tunnel (e.g., IPsec) into Postilion systems
-Custom API integration: We can provide templates for processors to create endpoints
-Direct processor integration: Based on processor-specific APIs or specifications
-NEXO-based integration: Available through CCS via the Toro gateway
-SDK Usage & Lifecycle
-#### Q: Can I perform transactions in currencies other than ZAR?
-A: Yes, the system supports multiple currencies. The terminal currency code should match the transaction currency code you pass in. Currency and country codes are configured per issuer claim in the JWT as part of the terminal configuration.
-For example for British Pound, pass "GBP" as the transaction currency code. For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500. If the switch rejects the transaction, you can be switched to the auto-approve processor.
+1.  **Register a Developer Account:** First, <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">register a developer account</a> on the Halo portal to get the necessary AWS credentials for accessing the Maven repository.
+2.  **Access the SDK:** <a href="https://www.google.com/search?q=/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Learn how to access the SDK here.</a>
+3.  **Initialize the SDK:** <a href="https://www.google.com/search?q=/docs/documentations/sdk/sdk-integration-guide%236-initialization-of-the-sdk" target="_blank">Programmatically initialize the SDK</a> within your application.
+4.  **Start a Transaction:** <a href="https://www.google.com/search?q=/docs/documentations/sdk/sdk-integration-guide%237-transaction-flow" target="_blank">Follow the transaction flow guide</a>. You can start a transaction with a simple command, such as:
+    `val result = HaloSDK.startTransaction(amount, reference)`
+5.  **Understand the SDK Lifecycle:** For a deeper understanding, <a href="https://www.google.com/search?q=/docs/documentations/sdk/sdk-integration-guide%235-life-cycle-methods" target="_blank">review the SDK's life cycle methods</a>.
+
+### What is the difference between a refund, a reversal, and a void?
+
+These terms are often used interchangeably but have distinct meanings in the payment world:
+
+  * **Refund:** A refund is processed *after* a transaction has been settled (money has been moved). The funds are sent back to the cardholder's account. <a href="https://www.google.com/search?q=/docs/documentations/api-docs/refunds%23refund" target="_blank">See documentation for more details.</a>
+  * **Reversal:** A reversal occurs *before* a transaction has been settled. No money is moved. This is typically used to cancel a transaction within the same day or session. <a href="https://www.google.com/search?q=/docs/documentations/api-docs/refunds%23reversal" target="_blank">See documentation for more details.</a>
+  * **Void:** Similar to a reversal, a void transaction is canceled *before* it is settled. No money is moved. This is also typically used within the same day or session. <a href="https://www.google.com/search?q=/docs/documentations/api-docs/refunds%23void" target="_blank">See documentation for more details.</a>
+
+## Integration Questions
+
+### Is PIN capture supported on all Android 11+ devices with NFC hardware?
+
+Yes, if the device is running Android 11 or higher and has Google Mobile Services (GMS), PIN capture is supported.
+
+### What PIN should I use for testing?
+
+For testing purposes, you can use the PIN **12345**.
+
+### Can I perform transactions in currencies other than ZAR?
+
+Yes, the system supports multiple currencies. The currency and country codes are configured per issuer claim within the terminal configuration. When passing a transaction, the terminal currency code must match the transaction currency code.
+
+  * **Example:** For a transaction in British Pounds, pass `"GBP"` as the transaction currency code.
+  * **Note:** For GBP transactions, the CVM (Cardholder Verification Method) limits are set to £500.
+
+### Why do some large GBP transactions (e.g., £1000) fail?
+
+Larger amounts may be declined due to switch processing limits or timeouts. If a transaction amount exceeds certain thresholds, the system may return an "Unable to process transaction" error, even if some large transactions occasionally go through.
+
+### Can a single issuer claim support multiple currencies?
+
+Currently, the process for setting up terminal configurations with multiple currency and country codes is manual. Please contact support for assistance with multi-currency setup.
+
+### Is the PIN capture screen the only one controlled by the SDK? Can I style it?
+
+Yes, the PIN capture screen is the only one controlled by the SDK. You have limited styling options, including the ability to customize the top logo and the font for the buttons (including "cancel" and "enter"). If you require further customization, please let us know what you'd like to change.
+
+### Do you provide a NEXO interface?
+
+We do not offer a standalone "NEXO Interface," but we support several integration methods:
+
+  * **Postbridge Interface (ISO8583):** Direct connection via a secure tunnel (e.g., IPsec) into Postilion systems.
+  * **Custom API Integration:** We can provide templates to help processors create custom endpoints.
+  * **Direct Processor Integration:** Integration based on a processor's specific APIs or specifications.
+  * **NEXO-based Integration:** Available through CCS via the Toro gateway.

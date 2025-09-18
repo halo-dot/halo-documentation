@@ -2,27 +2,35 @@
 id: integration-issues
 title: Integration Issues
 ---
-# Integration Issues
 
-These stem from the SDK integration. <br/>
+## SDK Integration & Connectivity Issues
 
-### Setup Issues
+This section addresses common problems encountered during SDK integration and connectivity.
 
-#### Q: Why am I getting a Java version mismatch
+-----
 
-  - Upgrade your gradle version in the test app repository to match your Java version.
-  - This has been tested with Java 11 and Java 17.
-  - You can select which version in Android Studio Settings -> Build, Execution, Deployment -> Build Tools -> Gradle -> Gradle JVM.
+## Setup Issues 🛠️
 
-#### Q: Why am I getting `Access key cannot be null` or `Secret key cannot be null`
+These issues typically arise during the initial setup of the SDK.
 
-  - Error message: `A build operation failed. Could not resolve all dependencies for configuration ':app:androidApis'.`
-  - Add your AWS access key and secret key to the `local.properties` file in the test app repository.
-  - The `local.properties` file should be in the root of the test app repository.
+### Java Version Mismatch
 
-#### Q: Am I getting an error with my keys
+**Problem:** You are getting an error related to a Java version mismatch.
 
-  - Ensure the correct format of the private key is used in the `Config.kt` file.
+**Solution:** Update your Gradle version to match your Java version. The SDK has been tested with **Java 11** and **Java 17**. You can select your Java version in Android Studio by going to **Settings \> Build, Execution, Deployment \> Build Tools \> Gradle \> Gradle JVM**.
+
+### Missing AWS Keys
+
+**Problem:** The error message `A build operation failed. Could not resolve all dependencies for configuration ':app:androidApis'` appears, accompanied by `Access key cannot be null` or `Secret key cannot be null`.
+
+**Solution:** You need to add your **AWS access key** and **secret key** to the `local.properties` file. This file should be located in the **root directory** of your test app repository.
+
+### Incorrect Private Key Format
+
+**Problem:** You are getting an error with your private key.
+
+**Solution:** Ensure the private key in your `Config.kt` file is in the correct PEM format, including the header and footer, as shown below:
+
 ```kotlin
    const val PRIVATE_KEY_PEM = "-----BEGIN PRIVATE KEY-----\n" +
            "...\n" +
@@ -31,19 +39,26 @@ These stem from the SDK integration. <br/>
            "-----END PRIVATE KEY-----\n"
 ```
 
-### Running Issues
+-----
 
-After embedding the SDK and running the app verify the logCat for any errors, such as
+## Runtime Issues 🐛
 
-#### Q: Invalid JWT
-A: Meaning the JWT is not valid with the public key provided or the private key used to generate the JWT is not the same as the public key provided.
+These issues occur after the SDK is embedded and the app is running. Check the **Logcat** for any of these errors.
 
-#### Q: Attestation error
-A: Meaning the device is not trusted and does not pass the security checks.
+### Invalid JWT
 
-#### Q: Required field missing: 'keys'
-A: Usually related to a new device accessing old setting. Uninstall and re-install the app.
+**Problem:** The SDK reports an **"Invalid JWT"** error.
 
-#### Q: I'm getting attestation failure errors. What does this mean?
-A: If you see errors like "Key attestation signature digest doesn't match safetynet signature digest" or "E203: Device has not been attested," this typically means device attestation was accidentally enabled. Contact support to have attestation disabled for your testing environment.
-Integration & Connectivity
+**Solution:** This means the JSON Web Token (JWT) is not valid. Verify that the public key provided matches the private key used to generate the JWT. The private key used for generation and the public key provided to the system must be a matching pair.
+
+### Attestation Errors
+
+**Problem:** You receive errors like **"E203: Device has not been attested"** or **"Key attestation signature digest doesn't match safetynet signature digest."**
+
+**Solution:** These errors indicate that **device attestation** was accidentally enabled for your testing environment. This feature performs security checks to ensure the device is trusted. For development and testing, you should contact support to have attestation **disabled**.
+
+### Required Field Missing: 'keys'
+
+**Problem:** The error **"Required field missing: 'keys'"** appears.
+
+**Solution:** This error often occurs when a new device tries to access old settings. The simplest solution is to **uninstall and then reinstall the app**.
