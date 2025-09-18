@@ -15,7 +15,7 @@ This section provides answers to common technical questions and guides you throu
 
 #### Question: Can I set the terminal country code, currency, and CVM limits per transaction?
 
-**Aanswer:** You can set the **currency** for each transaction. For example: `HaloSdk.startTransaction(1.00, 'Some merchant reference', 'ZAR');`.
+**Answer:** You can set the **currency** for each transaction. For example: `HaloSdk.startTransaction(1.00, 'Some merchant reference', 'ZAR');`.
 
 However, the **country code** and **CVM (Cardholder Verification Method) limits** are configured at the application level on the backend. While these can be updated, the changes will not take effect until the application is restarted.
 
@@ -27,13 +27,13 @@ However, the **country code** and **CVM (Cardholder Verification Method) limits*
 
 **Answer:** To create a JWT, you first need to generate your own **public and private key pair**. You can then follow the instructions in the <a href="https://www.google.com/search?q=/docs/documentations/sdk/jwt" target="_blank">JWT guide</a> to generate the token.
 
-Once you have your key pair, you must submit the **public key** to the <a href="https://halo.developerportal.qa.haloplus.io" target="_blank">developer portal</a>. This key will be used by our system to validate the JWTs you generate.
+Once you have your key pair, you must submit the **public key** to the <a href="https://halo.developerportal.dev.haloplus.io" target="_blank">developer portal</a>. This key will be used by our system to validate the JWTs you generate.
 
 ### Transaction & Data
 
 #### Question: Can I obtain transactions based on a date or time range, not just by transaction ID?
 
-**Answer:** Yes, this functionality is available and accessible via the **<a href="https://halo.developerportal.qa.haloplus.io" target="_blank">developer portal</a>**.
+**Answer:** Yes, this functionality is available and accessible via the **<a href="https://halo.developerportal.dev.haloplus.io" target="_blank">developer portal</a>**.
 
 #### Question: Why are my transactions failing with `DeclinedOffline`?
 
