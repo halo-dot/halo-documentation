@@ -16,7 +16,7 @@ The use of branding for Tap on Phone and other SoftPOS solutions must be applied
 Branding within Tap on Phone or SoftPOS solution prior to payment acceptance on merchant’s device screen:
 
 * Must display Contactless symbol
-* Must display Mastercard and and other network acceptance marks, in accordance with the applicable network requirements. For Mastercard display and parity requirements in the digital environment, see **Signaling digital payment acceptance** in [Use in digital payments](https://www.mastercard.com/brandcenter/en-ca/brand-requirements/mastercard/digital-payments).
+* Must display Mastercard and and other network acceptance marks, in accordance with the applicable network requirements. For Mastercard display and parity requirements in the digital environment, see **Signaling digital payment acceptance** in <a href="https://www.mastercard.com/brandcenter/en-ca/brand-requirements/mastercard/digital-payments" target="_blank">Use in digital payments</a>.
 
 COMPLIANT AND NON-COMPLIANT TAP ON PHONE PRE-PAYMENT ACCEPTANCE EXAMPLES
 <div style={{textAlign: 'center'}}>
