@@ -1,6 +1,6 @@
 # SDK Error Codes
 
-Possible SDK error codes you may encounter during integration
+Possible SDK error codes you may encounter during integration.
 
 | Error Code | Description                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------- |
