@@ -1,141 +1,148 @@
 # SDK Error Codes
 
-|Error Code| Description|
-|-----|-----------------|
-|0|OK|
-|1|Declined|
-|2|Declined Offline|
-|65|Single Tap And Pin|
-|100|Unauthorised|
-|101|Forbidden|
-|102|Invalid Api Key|
-|103|Invalid JSON|
-|104|Invalid Request|
-|105|Blocked User|
-|106|Request Signature Invalid|
-|107|Request Signature Missing|
-|108|Device Key Missing|
-|109|Device Key Invalid|
-|110|Replayed Message|
-|111|Request Signing Key Missing|
-|112|Request Signing Key Invalid|
-|113|Request Encryption Key Missing|
-|114|Request Encryption Key Invalid|
-|115|Device Not Attested|
-|116|Device Failed Attestation|
-|117|JWT Invalid|
-|118|JWT Expired|
-|119|Id Already Exists|
-|120|Phone Number Not Verified|
-|121|Email Not Verified|
-|122|Data Not Found|
-|123|Transaction Does Not Belong To Merchant|
-|124|Duplicate Merchant Reference|
-|125|Receipt Signature Invalid|
-|126|Invalid Algorithm|
-|127|Site Identifier Invalid|
-|128|Site Identifier Missing|
-|129|Error With External Request|
-|130|Email Already Exists|
-|131|Phone Already Exists|
-|132|Max Login Retries Exceeded|
-|133|Integrator Not Approved|
-|134|Data Error|
-|135|User Invalid|
-|136|Unknown Device Installation Id|
-|137|Request Encryption Unsupported Curve|
-|138|Secure Card Reader Not Supported|
-|139|Blocked Device|
-### 200
-|Error Code| Description|
-|-----|-----------------|
-|200|Database Integrity Failed|
-|201|Database Error|
-|202|Decrypt Request Error|
-|203|Unknown Error|
-|204|Crypto Error|
-|205|Dukpt Transaction Counter Overflow|
-|208|Invalid Payment Provider|
-|209|Declined By Payment Provider|
-|210|Failed To Submit To All Payment Providers|
-|211|Invalid Pin Data|
-|212|Refund Too Late|
-|213|Refund Already Processed|
-|214|Missing Pfs Server Key|
+Possible SDK error codes you may encounter during integration
 
-### 300 Device Error Codes
-|Error Code| Description|
-|-----|-----------------|
-|300|NFC Disabled|
-|301|Invalid System State|
-|302|Invalid Currency|
-|303|Invalid Android Version|
-|304|Error Parsing JWT|
-|305|Network Error|
-|306|Response Signature Missing|
-|307|Response Signature Invalid|
-|308|Server Requested Config Clear|
-|309|Error Deserialising|
-|310|Safety Net Attestation Error|
-|311|Google Play Unavailable|
-|312|Time Drift Too Great|
-|313|Attestation In Progress|
-|314|Rooted Device|
-|315|Instrumented Device|
-|316|Debugged Device|
-|317|Cancelled Transaction|
-|318|Card Tap Timeout Expired|
-|319|Transaction Error|
-|320|TEE Attestation Error|
-|321|Error Validating Pin Key|
-|322|Integrity Check Failed|
-|323|Use Of Nfc State Before Connect|
-|324|Failed To Import Server Signing Cert|
-|325|Failed To Import Server Encryption Key|
-|326|Not Implemented|
-|327|Missing Sensors|
-|328|Microphone Was Unmuted|
-|329|Null Attestation Handle|
-|330|Cryptography Error|
-|399|System Not Initialised|
+| Error Code | Description                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| 0          | **OK** – The request completed successfully with no errors.                                       |
+| 1          | **Declined** – The request was rejected by the system or provider.                                |
+| 2          | **Declined Offline** – The transaction was declined while the device was offline.                 |
+| 65         | **Single Tap and PIN** – User is required to tap once and provide a PIN for authentication.       |
+| 100        | **Unauthorized** – Access denied due to missing or invalid credentials.                           |
+| 101        | **Forbidden** – Operation not allowed; permissions are insufficient.                              |
+| 102        | **Invalid API Key** – The provided API key is not valid.                                          |
+| 103        | **Invalid JSON** – Request payload contains malformed JSON.                                       |
+| 104        | **Invalid Request** – The request is not properly structured or is missing fields.                |
+| 105        | **Blocked User** – The user account has been blocked from making requests.                        |
+| 106        | **Invalid Request Signature** – Signature does not match the expected value.                      |
+| 107        | **Missing Request Signature** – Required signature was not included in the request.               |
+| 108        | **Missing Device Key** – No device key was provided.                                              |
+| 109        | **Invalid Device Key** – The provided device key is invalid.                                      |
+| 110        | **Replayed Message** – Duplicate/replayed request detected (possible attack).                     |
+| 111        | **Missing Request Signing Key** – Request is missing the signing key.                             |
+| 112        | **Invalid Request Signing Key** – Signing key is not valid.                                       |
+| 113        | **Missing Request Encryption Key** – No encryption key was provided.                              |
+| 114        | **Invalid Request Encryption Key** – Encryption key provided is invalid.                          |
+| 115        | **Device Not Attested** – Device has not been verified for integrity/security.                    |
+| 116        | **Device Failed Attestation** – Device integrity check failed.                                    |
+| 117        | **Invalid JWT** – Provided JWT token is invalid.                                                  |
+| 118        | **Expired JWT** – JWT token is expired and no longer valid.                                       |
+| 119        | **ID Already Exists** – Duplicate identifier found; cannot create a new entry.                    |
+| 120        | **Phone Number Not Verified** – Phone verification step is incomplete.                            |
+| 121        | **Email Not Verified** – Email verification step is incomplete.                                   |
+| 122        | **Data Not Found** – Requested data could not be located.                                         |
+| 123        | **Transaction Does Not Belong to Merchant** – Transaction does not match the requesting merchant. |
+| 124        | **Duplicate Merchant Reference** – The merchant reference already exists.                         |
+| 125        | **Invalid Receipt Signature** – The receipt signature could not be validated.                     |
+| 126        | **Invalid Algorithm** – Unsupported or incorrect algorithm specified.                             |
+| 127        | **Invalid Site Identifier** – Site ID is invalid.                                                 |
+| 128        | **Missing Site Identifier** – Site ID is missing.                                                 |
+| 129        | **External Request Error** – An error occurred while calling an external service.                 |
+| 130        | **Email Already Exists** – Duplicate email detected in the system.                                |
+| 131        | **Phone Already Exists** – Duplicate phone number detected in the system.                         |
+| 132        | **Max Login Retries Exceeded** – Too many failed login attempts.                                  |
+| 133        | **Integrator Not Approved** – The integrator is not approved to use the system.                   |
+| 134        | **Data Error** – General error with input or retrieved data.                                      |
+| 135        | **Invalid User** – User details are invalid.                                                      |
+| 136        | **Unknown Device Installation ID** – The given installation ID is not recognized.                 |
+| 137        | **Unsupported Encryption Curve** – The encryption curve is not supported.                         |
+| 138        | **Unsupported Secure Card Reader** – Secure card reader is not supported on this device.          |
+| 139        | **Blocked Device** – Device is blocked from performing requests.                                  |
 
-### 400
-|Error Code| Description|
-|-----|-----------------|
-|401|Camera Permission Not Granted|
-|402|Accessibility Service Blocks Pin|
-|403|Developer Options Enabled|
-|404|Missing Attestation Nonce|
-|405|Config Fetch Error|
-|406|Missing Entropy|
-|410|Invalid Transaction Reference|
-|411|Missing Secure Card Reader Implementation|
-|412|Failed To Get Random Bytes|
-|413|Missing Data Kek|
-|414|Pin Error|
+### 200 – Database & Transaction Errors
 
-### 500 Secure Card Reader Errors
-|Error Code| Description|
-|-----|-----------------|
-|500|Bluetooth Connect Permissions Not Granted|
-|501|Bluetooth Scan Permission Not Granted|
-|502|Bluetooth Unavailable|
-|503|Bluetooth Scan In Progress|
-|504|Bluetooth Pair Failed|
-|505|Secure Card Reader Command Failed|
-|506|Bluetooth Device Unavailable|
-|507|Secure Card Reader Timeout|
-|508|Secure Card Reader Config Invalid|
-|509|Bluetooth Not Enabled|
-|510|Secure Card Reader Pin Error|
-|511|Secure Card Reader Plugin Not Available For Device|
-|512|Secure Card Reader Transaction In Progress|
-|513|Bluetooth Fine Location Permissions Not Granted|
-|514|Bluetooth Pair Timeout|
-|515|Secure Card Reader Key Load Error|
-|516|Secure Card Reader Low Battery|
-|517|Secure Card Reader Disconnected|
-|518|Secure Card Reader Firmware Update Required|
-|519|Secure Card Reader Firmware Update In Progress|
-|520|Secure Card Reader Security Mechanism Disabled|
-|521|Secure Card Reader Tamper Flag Set|
+| Error Code | Description                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------------- |
+| 200        | **Database Integrity Failed** – Data integrity constraints were violated.                       |
+| 201        | **Database Error** – A general error occurred in the database.                                  |
+| 202        | **Decrypt Request Error** – The system could not decrypt the request.                           |
+| 203        | **Unknown Error** – An unspecified error occurred.                                              |
+| 204        | **Crypto Error** – A cryptographic operation failed.                                            |
+| 205        | **DUKPT Counter Overflow** – The transaction counter for DUKPT keys has overflowed.             |
+| 208        | **Invalid Payment Provider** – Payment provider details are invalid.                            |
+| 209        | **Declined by Payment Provider** – Payment was explicitly rejected by the provider.             |
+| 210        | **Failed to Submit to All Providers** – Request could not be submitted to any payment provider. |
+| 211        | **Invalid PIN Data** – PIN information is missing or invalid.                                   |
+| 212        | **Refund Too Late** – Refund request exceeds allowed time limit.                                |
+| 213        | **Refund Already Processed** – The refund has already been completed.                           |
+| 214        | **Missing PFS Server Key** – Required key from the PFS server is missing.                       |
+
+### 300– Device Error Codes
+
+| Error Code | Description                                                                           |
+| ---------- | ------------------------------------------------------------------------------------- |
+| 300        | **NFC Disabled** – NFC is disabled on the device.                                     |
+| 301        | **Invalid System State** – The device is in an unsupported state.                     |
+| 302        | **Invalid Currency** – Currency code is invalid.                                      |
+| 303        | **Unsupported Android Version** – Device OS version is not supported.                 |
+| 304        | **JWT Parsing Error** – JWT token could not be parsed.                                |
+| 305        | **Network Error** – Network connectivity failure.                                     |
+| 306        | **Missing Response Signature** – Expected response signature is not present.          |
+| 307        | **Invalid Response Signature** – Response signature validation failed.                |
+| 308        | **Server Requested Config Clear** – Server instructed device to clear configuration.  |
+| 309        | **Deserialization Error** – Response could not be deserialized.                       |
+| 310        | **SafetyNet Attestation Error** – Google SafetyNet attestation failed.                |
+| 311        | **Google Play Unavailable** – Required Google Play services unavailable.              |
+| 312        | **Excessive Time Drift** – Device clock drift exceeds allowed threshold.              |
+| 313        | **Attestation in Progress** – Device attestation is ongoing; request cannot complete. |
+| 314        | **Rooted Device** – Device is rooted and not allowed.                                 |
+| 315        | **Instrumented Device** – Device shows signs of tampering/instrumentation.            |
+| 316        | **Debugging Enabled** – Device is in debug mode, which is disallowed.                 |
+| 317        | **Transaction Cancelled** – Transaction was cancelled by user or system.              |
+| 318        | **Card Tap Timeout** – Card was not tapped within the allowed time.                   |
+| 319        | **Transaction Error** – General transaction error occurred.                           |
+| 320        | **TEE Attestation Error** – Trusted Execution Environment attestation failed.         |
+| 321        | **Invalid PIN Key** – Validation of the PIN key failed.                               |
+| 322        | **Integrity Check Failed** – Security integrity validation failed.                    |
+| 323        | **Invalid NFC State** – NFC used before establishing connection.                      |
+| 324        | **Failed to Import Signing Cert** – Server signing certificate import failed.         |
+| 325        | **Failed to Import Encryption Key** – Server encryption key import failed.            |
+| 326        | **Not Implemented** – Feature not implemented.                                        |
+| 327        | **Missing Sensors** – Required hardware sensors are missing.                          |
+| 328        | **Microphone Was Unmuted** – Microphone unmuted unexpectedly during operation.        |
+| 329        | **Null Attestation Handle** – Attestation returned a null handle.                     |
+| 330        | **Cryptography Error** – Cryptographic function failed.                               |
+| 399        | **System Not Initialised** – SDK/system has not been initialized.                     |
+
+### 400 – Configuration & Security Errors
+
+| Error Code | Description                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| 401        | **Camera Permission Not Granted** – Camera access permission denied.                           |
+| 402        | **Accessibility Service Blocks PIN** – Accessibility settings interfere with PIN entry.        |
+| 403        | **Developer Options Enabled** – Device has developer options enabled, which is disallowed.     |
+| 404        | **Missing Attestation Nonce** – Attestation nonce value not provided.                          |
+| 405        | **Configuration Fetch Error** – Failed to retrieve configuration from server.                  |
+| 406        | **Missing Entropy** – Random entropy source unavailable.                                       |
+| 410        | **Invalid Transaction Reference** – Transaction reference does not match format.               |
+| 411        | **Missing Secure Card Reader Implementation** – Required card reader component is not present. |
+| 412        | **Failed to Get Random Bytes** – Secure random byte generation failed.                         |
+| 413        | **Missing Data KEK** – Key encryption key (KEK) for data is missing.                           |
+| 414        | **PIN Error** – General error occurred with PIN input/processing.                              |
+
+### 500 – Secure Card Reader Errors
+
+| Error Code | Description                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| 500        | **Bluetooth Connect Permission Not Granted** – Required Bluetooth connect permission missing.  |
+| 501        | **Bluetooth Scan Permission Not Granted** – Required Bluetooth scan permission missing.        |
+| 502        | **Bluetooth Unavailable** – Bluetooth is unavailable on the device.                            |
+| 503        | **Bluetooth Scan in Progress** – A Bluetooth scan is already running.                          |
+| 504        | **Bluetooth Pair Failed** – Secure card reader pairing attempt failed.                         |
+| 505        | **Secure Card Reader Command Failed** – A command sent to the card reader failed.              |
+| 506        | **Bluetooth Device Unavailable** – Required Bluetooth device not available.                    |
+| 507        | **Secure Card Reader Timeout** – Secure card reader did not respond in time.                   |
+| 508        | **Invalid Card Reader Config** – Card reader configuration is invalid.                         |
+| 509        | **Bluetooth Not Enabled** – Bluetooth is turned off on the device.                             |
+| 510        | **Secure Card Reader PIN Error** – Error occurred while handling PIN via reader.               |
+| 511        | **Plugin Not Available for Device** – Card reader plugin not supported on this device.         |
+| 512        | **Transaction Already in Progress** – A secure card reader transaction is ongoing.             |
+| 513        | **Location Permission Not Granted** – Fine location permission missing for Bluetooth scanning. |
+| 514        | **Bluetooth Pair Timeout** – Pairing attempt with card reader timed out.                       |
+| 515        | **Key Load Error** – Failed to load encryption keys into card reader.                          |
+| 516        | **Low Battery** – Secure card reader battery is too low.                                       |
+| 517        | **Disconnected** – Secure card reader unexpectedly disconnected.                               |
+| 518        | **Firmware Update Required** – Card reader firmware is outdated.                               |
+| 519        | **Firmware Update in Progress** – Card reader firmware update is ongoing.                      |
+| 520        | **Security Mechanism Disabled** – Required card reader security features are disabled.         |
+| 521        | **Tamper Flag Set** – Card reader indicates physical tampering.                                |
