@@ -46,7 +46,7 @@ The **Halo Dot SDK** is an **isolating MPoC SDK** for payment processing with at
 
 You’ll need the following to integrate the Halo Dot SDK:
 
-- A developer account — register on the **[Developer Portal](https://go.developerportal.qa.haloplus.io/)**
+- A developer account — register on the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>**
 - Executed **Non‑Disclosure Agreement (NDA)** (available on the portal)
 - **Public/Private key pair** to generate JWTs (upload the **public** key on the portal)
 - **Kotlin** `2.0.21` *(newer version work-in-progress)*
@@ -55,8 +55,8 @@ You’ll need the following to integrate the Halo Dot SDK:
 - **Java** `21`
 - IDE — **Android Studio** recommended
 - **Recommended Flutter packages**
-  - [`permission_handler`](https://pub.dev/packages/permission_handler) `^11.3.1`
-  - [`dart_jsonwebtoken`](https://pub.dev/packages/dart_jsonwebtoken) `^2.16.2`
+  - <a href="https://pub.dev/packages/permission_handler" target="_blank">permission_handler ^11.3.1</a>
+  - <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken ^2.16.2</a>
 
 > **Android SDK levels**
 >
@@ -70,14 +70,15 @@ You’ll need the following to integrate the Halo Dot SDK:
 
 You must register on the **QA/UAT** environment before testing in production. The developer portal allows you to:
 
-1. Accept the NDA
+1. Accept the Non Disclosure Agreement(NDA)
 2. Access the SDK
 3. Submit your public key (for JWT verification)
 4. Obtain JWT configuration details (issuer, audience/host, etc.)
+5. Obtain AWS access key and secret key (use to download the SDK)
 
 ### Registration Steps
 
-1. Access the **[Developer Portal](https://go.developerportal.qa.haloplus.io/)** and register
+1. Access the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and register
 2. Verify your account via OTP
 3. Click **Access to the SDK**
    
@@ -165,7 +166,7 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
 
 ### JWT
 
-All calls to the Halo SDK require a **valid JWT**. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using [`dart_jsonwebtoken`](https://pub.dev/packages/dart_jsonwebtoken) to generate JWTs.
+All calls to the Halo SDK require a **valid JWT**. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
 
 Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation).
 
@@ -429,14 +430,14 @@ From this point, UI messages and results will arrive via your callbacks. Use the
 
 ## Documentation
 
-- **Halo Dot SDK Docs**: https://halo-dot-developer-docs.gitbook.io/halo-dot/sdk
+- **<a href="https://halo-dot-developer-docs.gitbook.io/halo-dot/sdk" target="_blank">Halo Dot SDK Docs</a>**
 
 ---
 
 ## Testing
 
 - All transactions are **null and void** until the **NDA** is executed.
-- You can test with a virtual card, e.g., **[Visa Mobile CDET](https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet)**.
+- You can test with a virtual card, e.g., **<a href="https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet" target="_blank">Visa Mobile CDET</a>**.
 
 ---
 
