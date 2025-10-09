@@ -2,7 +2,8 @@
 
 Use this guide to run the **Halo SDK Flutter plugin test app** and verify integration end-to-end.
 
-> For the full step by step Flutter plugin integration guide for your app, see the plugin’s [documentation](https://pub.dev/packages/halo_sdk_flutter_plugin).
+> For the full step by step Flutter plugin integration guide for your app, see the plugin’s 
+<a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">documentation</a>.
 
 ---
 
@@ -123,4 +124,4 @@ Select a connected Android device or emulator when prompted.
 ## Notes
 
 * This test app is intended as a reference implementation to demonstrate how to integrate the Halo SDK Flutter plugin into a Flutter app.
-* For deeper API usage, configuration options, and platform specifics, consult the SDK README at [halo sdk flutter plugin](https://pub.dev/packages/halo_sdk_flutter_plugin).
+* For deeper API usage, configuration options, and platform specifics, consult the SDK README at <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">halo sdk flutter plugin</a>.
