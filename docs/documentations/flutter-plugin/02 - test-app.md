@@ -2,7 +2,7 @@
 
 Use this guide to run the **Halo SDK Flutter plugin test app** and verify integration end-to-end.
 
-> For the full step by step Flutter plugin integration guide for you app, see the plugin’s [documentation](https://pub.dev/packages/halo_sdk_flutter_plugin).
+> For the full step by step Flutter plugin integration guide for your app, see the plugin’s [documentation](https://pub.dev/packages/halo_sdk_flutter_plugin).
 
 ---
 
