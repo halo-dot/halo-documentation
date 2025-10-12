@@ -1,8 +1,12 @@
+---
+sidebar_class_name: hidden
+---
+
 # Test App Setup
 
 Use this guide to run the **Halo SDK Flutter plugin test app** and verify integration end-to-end.
 
-> For the full step by step Flutter plugin integration guide for your app, see the plugin’s 
+> For the full step by step Flutter plugin integration guide for your app, see the plugin’s
 <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">documentation</a>.
 
 ---
