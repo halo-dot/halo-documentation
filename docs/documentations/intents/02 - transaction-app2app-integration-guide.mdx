@@ -339,7 +339,7 @@ The call to the Halo backend to retrieve a deep link.
 {
     "qrCode": "data:image/png;base64,..."
     "url": "https://halompos.page.link/DYfL4EZEzvAzBfBAS",
-    "reference": "c9e1were-8156-444c-894d-e065d71366a6"   
+    "reference": "c9e1were-8156-444c-894d-e065d71366a6"
 }
 ```
     </TabItem>
@@ -353,6 +353,76 @@ The generated link returned by the API call can then be used to invoke the Halo.
 
 Should you pass in the `image` param in the body, you will then be able to retrieve the base64 encoded QrCode image. This can be used to scan the image and open the payment application with the payment details specified in the request.
 
-## 4. Conclusion
+## 4. Applinking
+
+**1. Retrieve a Transaction Applink from the Halo Backend**
+
+> **Note:** This endpoint replaces the deprecated `/consumer/qrCode` endpoint.
+
+You will need an `API Key` and a `Merchant ID` from the [Merchant Portal](https://go.merchantportal.prod.haloplus.io/) for this API call. The response will contain a deep link that can be used to invoke the Halo.Go/Halo.Link app.
+
+_**Let’s take a closer look at the API request.**_
+
+<mark style={{color:'green'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/applink`
+
+The call to the Halo backend to retrieve an Applink.
+
+**Path Parameters**
+
+| Name                                  | Type   | Description                              |
+| ------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+
+**Headers**
+
+| Name                                            | Type   | Description                                                              |
+| ----------------------------------------------- | ------ | ------------------------------------------------------------------------ |
+| Content-Type<mark style={{color:'red'}}>\*</mark>  | String | Content Type of the Request: application/json                            |
+| x-api-key<mark style={{color:'red'}}>\*</mark>     | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead)         |
+
+**Request Body**
+
+| Name                                               | Type    | Description                                                 |
+| -------------------------------------------------- | ------- |-------------------------------------------------------------|
+| merchantId<mark style={{color:'red'}}>\*</mark>       | Integer | Merchant ID from Merchant Portal                            |
+| paymentReference<mark style={{color:'red'}}>\*</mark> | String  | Reference of the transaction                                |
+| amount<mark style={{color:'red'}}>\*</mark>           | String  | Amount of the transaction (100.01)                          |
+| timestamp<mark style={{color:'red'}}>\*</mark>        | String  | ISO Standard Timestamp                                      |
+| currencyCode<mark style={{color:'red'}}>\*</mark>     | String  | ISO Standard Currency Codes                                 |
+| isConsumerApp<mark style={{color:'red'}}>\*</mark>    | Boolean | Indicate if the call is for a Consumer App                  |
+| image<mark style={{color:'red'}}>\*</mark>            | JSON    | Set to true to generate a QR code - \{ "required": false \} |
+
+
+<Tabs>
+    <TabItem value="OkApp" label="200: Ok Applink to invoke Halo.Go/Halo.Link">
+```json
+{
+    "url": "https://go.merchantportal.dev.haloplus.io/c9e1were-8156-444c-894d-e065d71366a6?env=kernelserver.{env}.haloplus.io",
+    "reference": "c9e1were-8156-444c-894d-e065d71366a6"
+}
+```
+    </TabItem>
+    <TabItem value="okLink" label="200: OK Applink to invoke Halo.Go/Halo.Link with base64">
+
+```json
+{
+    "qrCode": "data:image/png;base64,..."
+    "url": "https://go.merchantportal.dev.haloplus.io/c9e1were-8156-444c-894d-e065d71366a6?env=kernelserver.{env}.haloplus.io",
+    "reference": "c9e1were-8156-444c-894d-e065d71366a6"
+}
+```
+    </TabItem>
+</Tabs>
+
+
+
+**2. Use the Generated URL to call the Halo Dot Go application**
+
+The generated link returned by the API call can then be used to invoke the Halo.Go/Halo.Link application and start processing transactions.
+
+Should you pass in the `image` param in the body, you will then be able to retrieve the base64 encoded QrCode image. This can be used to scan the image and open the payment application with the payment details specified in the request.
+
+## 5. Conclusion
 
 That concludes the guide on integrating the Halo.Go/Halo.Link app into your payment flow. For any questions, please do not hesitate to reach out to the Halo Dot Team.
