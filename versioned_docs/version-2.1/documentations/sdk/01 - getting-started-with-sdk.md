@@ -14,7 +14,7 @@ A debug version of the SDK is made available to support development efforts, but
 
 ## Accessing Maven Repo
 
-1. You can access your AWS access key and secret key by registering on the developer portal [here](https://go.developerportal.qa.haloplus.io/).\
+1. You can access your AWS access key and secret key by registering on the <a href="https://halo.developerportal.dev.haloplus.io" target="_blank">developer portal</a>.\
    These are **sensitive** and should not be committed to source control. \
    Add the credentials to your `local.properties` located in your android development folder.
 

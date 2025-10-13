@@ -7,8 +7,8 @@ The application is a stand-alone project that does not require any backend to pe
 
 ### Technologies used <a href="#technologies-used" id="technologies-used"></a>
 
-* [Kotlinopens in a new tab](https://kotlinlang.org/docs/reference/android-overview.html) version 1.8.20 to build
-* [Gradleopens in a new tab](https://services.gradle.org/distributions/) version 8.2.1 to build
+* <a href="https://kotlinlang.org/docs/reference/android-overview.html" target="_blank">Kotlinopens in a new tab</a> version 1.8.20 to build
+* <a href="https://services.gradle.org/distributions/" target="_blank">Gradleopens in a new tab</a> version 8.2.1 to build
 
 ## Get the source code <a href="#get-the-source-code" id="get-the-source-code"></a>
 
@@ -20,7 +20,7 @@ Reference Application for Android SDK can be downloaded below:
 
 ## What you will need <a href="#what-you-will-need" id="what-you-will-need"></a>
 
-* A development environment set up with your IDE of choice, preferred is [Android Studio | Flamingo 2022.2.1opens in a new tab](https://developer.android.com/studio/install)
+* A development environment set up with your IDE of choice, preferred is <a href="https://developer.android.com/studio/install" target="_blank">Android Studio | Flamingo 2022.2.1opens in a new tab</a>
 * Android SDK version Lollipop and above
 
 ## What you will build <a href="#what-you-will-build" id="what-you-will-build"></a>
@@ -40,7 +40,7 @@ Reference Application for Android SDK can be downloaded below:
 
     ```kotlin
         private val sonicController = SonicController()
-        
+
     ```
 * **What changes are required to play different features of Mastercard Sonic Branding**
 
@@ -75,7 +75,7 @@ After the integration of Android SDK is completed, prepare the `SonicController`
                 }
             })
     }
-     
+
 ```
 
 *   **When to play Mastercard Checkout Sound and Animation**
