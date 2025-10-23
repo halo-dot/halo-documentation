@@ -30,7 +30,7 @@ The Halo.SDK is an isolated system development kit with A&M functionality. It op
 - Third-party payment providers which transactions are routed to.
 
 *Account-data input paths:*
-- COTS-native NFC → SDK: Contactles PAN/EMV data enters via the device NFC interface and is processed within the SDK.
+- COTS-native NFC → SDK: Contactless PAN/EMV data enters via the device NFC interface and is processed within the SDK.
 - PIN via SDK TUI → SDK: PIN entry is handled by the SDK's TUI, ensuring that the host app cannot access the PIN.
 
 *A&M and attestation signals:*
