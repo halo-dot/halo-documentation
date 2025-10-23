@@ -23,7 +23,7 @@ The following attestation payload field must be configured in the Halo server wi
 | field                      | description                                                                  |
 | -------------------------- | ---------------------------------------------------------------------------- |
 | apkPackageName             | fully qualified APK name, e.g. za.co.synthesis.halo.halo\_mpos\_new          |
-| apkCertificateDigestSha256 | base64 encoded, SHA-256 hash of the certifi cate used to sign requesting app |
+| apkCertificateDigestSha256 | base64 encoded, SHA-256 hash of the certificate used to sign requesting app |
 | applicationVersion         | version number of application of host application                            |
 
 
