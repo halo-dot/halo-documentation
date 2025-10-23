@@ -14,7 +14,7 @@ This document provides technical guidance for the integration of the Halo.SDK in
 
 <figure><img src="/img/halodot-backend.png" alt="" /><figcaption>Halo Backend</figcaption></figure>
 
-The Halo.SDK is an isolated system development kit with A&M functionality. It operates in an isolated memory space, which provides sufficient separation of data processing between the SDK and other software (including the integrating app). The MPoC Application cannot access the SDK's memory or sensitive assets (including cryptographic keys and plaintext account/PIN data). This aligns with the MPoC definition of an Isolating SDK; any access would indicate non-compliant itegration.
+The Halo.SDK is an isolated system development kit with A&M functionality. It operates in an isolated memory space, which provides sufficient separation of data processing between the SDK and other software (including the integrating app). The MPoC Application cannot access the SDK's memory or sensitive assets (including cryptographic keys and plaintext account/PIN data). This aligns with the MPoC definition of an Isolating SDK; any access would indicate non-compliant integration.
 
 **Detailed SDK Boundary Description**
 
