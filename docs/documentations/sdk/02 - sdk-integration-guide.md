@@ -125,7 +125,7 @@ This section provides mandatory security guidance for integrators of the **Halo.
 ## Software-Protected Cryptography Update Cadence
 
 **Public (Integrator‑facing)**
-- Halo employs **software‑protected cryptography to protect embedded secrets.
+- Halo employs **software‑protected cryptography** to protect embedded secrets.
 - **Recommended cadence**: Halo **strongly recommends** updating to new SDK releases as they carry a refreshed white‑box **approximately every 30 days**. Halo publishes availability dates in the release notes and notifies customers of updates.
 - **Operational behavior**: The SDK continues to attest and transact when policy permits; however, older releases may expose increased risk. Integrators choosing to delay updates **accept the risk** to their merchant UX and security posture.
 - **No epoch enforcement**: Halo does **not** currently enforce a hard **Epoch ID** cutoff. Minimum SDK version enforcement may still apply (see *Rollout & gating* in 1G‑1.5).
