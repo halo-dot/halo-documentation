@@ -27,9 +27,9 @@ Halo.Plus is a pre-certified white label app that allows businesses to accept pa
 * Flexible: Halo.Plus is a flexible solution that can be customized to meet the needs of any business.
 
 ## Halo.Link
-Halo.Link is a secure companion app that allows you to accept payments through Intents and Deeplinking. 
-It handles all sensitive card details and returns the outcome to your existing app. 
-Halo.Link can be branded according to your own corporate identity. 
+Halo.Link is a secure companion app that allows you to accept payments through Intents and Deeplinking.
+It handles all sensitive card details and returns the outcome to your existing app.
+Halo.Link can be branded according to your own corporate identity.
 It is the simplest way to start accepting payments if you have an existing app.
 
 ### Features
