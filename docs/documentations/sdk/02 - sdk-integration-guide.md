@@ -440,7 +440,7 @@ public interface IHaloCallbacks {
     void onHaloUIMessage(HaloUIMessage message);
     void onHaloTransactionResult(HaloTransactionResult result);
     void onRequestJWT(Function1<? super String, Unit> function1);
-    void onAttestationError(HaloAttestionHealthResult result);
+    void onAttestationError(HaloAttestationHealthResult result);
     void onSecurityError(HaloErrorCode code);
     void onCameraControlLost();
 }
