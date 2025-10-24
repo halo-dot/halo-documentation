@@ -46,7 +46,7 @@ The **Halo Dot SDK** is an **isolating MPoC SDK** for payment processing with at
 
 You’ll need the following to integrate the Halo Dot SDK:
 
-- A developer account — register on the **<a href="https://halo.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>**
+- A developer account — register on the **<a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">Developer Portal</a>**
 - Executed **Non‑Disclosure Agreement (NDA)** (available on the portal)
 - **Public/Private key pair** to generate JWTs (upload the **public** key on the portal)
 - **Kotlin** `2.0.21` *(newer version work-in-progress)*
@@ -78,7 +78,7 @@ You must register on the **QA/UAT** environment before testing in production. Th
 
 ### Registration Steps
 
-1. Access the **<a href="https://halo.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and register
+1. Access the **<a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">Developer Portal</a>** and register
 2. Verify your account via OTP
 3. Click **Access to the SDK**
    
