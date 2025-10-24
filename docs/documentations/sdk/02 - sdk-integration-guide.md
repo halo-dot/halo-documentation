@@ -160,7 +160,7 @@ This section provides mandatory security guidance for integrators of the **Halo.
 - Here is a more detailed outline of all the cryptographic assets and how they are managed: [Cryptographic Assets](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4450189313/Cryptographic+Assets), [Key Management Policy](https://synthesis-software.atlassian.net/wiki/spaces/HALO/pages/4304142392/Key+Management+Policy)
 ---
 
-# 1. Remote Attestation of the App by the Halo Backend
+## 1. Remote Attestation of the App by the Halo Backend
 
 In accordance with prescribed security requirements, the Halo backend performs remote attestation of the integrating app using Google’s Play Integrity attestation framework.
 
@@ -223,7 +223,7 @@ Halo is the sole operator of the A&M component. Integrators do not deploy, confi
 
 ---
 
-# 2. Requirements of the Integrating App’s Backend
+## 2. Requirements of the Integrating App’s Backend
 
 **JWT**
 
@@ -283,7 +283,7 @@ All these values can be validated by making a POST request to `https://kernelser
 
 ---
 
-# 3. SDK Binary
+## 3. SDK Binary
 
 The Halo.SDK is written in Kotlin and packaged as an AAR (Android Archive Library). For security reasons, the compiled binary has been obfuscated.
 
@@ -291,7 +291,7 @@ See the [Getting Started Guide](/docs/documentations/sdk/getting-started-with-sd
 
 ---
 
-# 4. Application Manifest
+## 4. Application Manifest
 
 The `AndroidManifest.xml` application manifest file of the mobile app must include the following user permissions:
 
@@ -305,7 +305,7 @@ In addition, to indicate to the Google Play store that this is an NFC-enabled ap
 
 ---
 
-# 5. Life-Cycle Methods
+## 5. Life-Cycle Methods
 
 In order for the SDK to properly handle the Android application life cycle the host app needs to add hooks into the following Android lifecycle methods on the `MainActivity` or relevant activity classes.
 
