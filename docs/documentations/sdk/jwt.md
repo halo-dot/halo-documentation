@@ -13,7 +13,7 @@ This document outlines a technical guide for generating a private key, using JWT
 
 ### PEM Key Pair
 
-Before generating a private key, ensure that [OpenSSL](https://www.openssl.org) is installed on your system.
+Before generating a private key, ensure that <a href="https://www.openssl.org" target="_blank">OpenSSL</a> is installed on your system.
 
 To generate a 2048-bit PEM key pair, follow these steps:
 

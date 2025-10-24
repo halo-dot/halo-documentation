@@ -309,7 +309,7 @@ In addition, to indicate to the Google Play store that this is an NFC-enabled ap
 
 In order for the SDK to properly handle the Android application life cycle the host app needs to add hooks into the following Android lifecycle methods on the `MainActivity` or relevant activity classes.
 
-⚠️ **Do not hook up to a sub-activity or a fragment** as this will cause problems. If you do so, please use our multi-activity test app as a reference. [Test App Source](https://github.com/halo-dot/test_app-android_sdk)
+⚠️ **Do not hook up to a sub-activity or a fragment** as this will cause problems. If you do so, please use our multi-activity test app as a reference. <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">Test App Source</a>
 
 List of Android lifecycle methods:
 

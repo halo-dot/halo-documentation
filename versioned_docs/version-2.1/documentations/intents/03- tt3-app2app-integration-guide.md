@@ -67,7 +67,7 @@ The call to the Halo Dot Backend to initiate a TT3 Intent Transaction.
 **2. Send an Intent Request to the Halo Dot Go**
 
 We provide a sample code to help you with the intent request function call. \
-The code is available on the [merchant portal](https://go.merchantportal.qa.haloplus.io/deeplinking) ⇒ Help Center => App to App menu item.
+The code is available on the <a href="https://go.merchantportal.qa.haloplus.io/deeplinking" target="_blank">merchant portal</a> ⇒ Help Center => App to App menu item.
 
 ## 2. Deeplinking Mechanism
 
