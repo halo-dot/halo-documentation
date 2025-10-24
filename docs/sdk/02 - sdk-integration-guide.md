@@ -411,7 +411,7 @@ In the case of failure, the `errorCode` field may hold more information, whereas
 
 **HaloInitializationParameters**
 
-```
+```js
 import za.co.synthesis.halo.sdk.model.HaloInitializationParameters
 
 public class HaloInitializationParameters {
@@ -737,66 +737,68 @@ And the parameters of `HaloTransactionResult`:
 
 4. Example HaloTransactionResult
 
-┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-│ onHaloTransactionResult: {
-│   resultType: Approved, 
-│   merchantTransactionReference: 2d3c88e3-a100-4288-a902-87cb43031c37, 
-│   haloTransactionReference: a55dc97e-5d7a-48ae-b3d9-3e7a14b8be2e, 
-│   paymentProviderReference: 000000239368, 
-│   errorCode: 0, 
-│   customTags: {
-│     resultCodeText: Approved, 
-│     originalIsoResponseCode: 00, 
-│     authorisedAmount: 369, 
-│     displayText: Successful Transaction, 
-│     receiptText: Card PAN , 
-│     stan: 239368, 
-│     base24Time: 162804, 
-│     base24Date: 0901, 
-│     ICCData: 910ADB924439BA6E9C680012, 
-│     base24RespCode: 000, 
-│     additionalReceiptBodyText: , 
-│     SignedTransaction: eyJhbGciOiJQUzUxMiJ9.eyJpc1NpbmdsZVRhcEFuZFBpbiI6ZmFsc2UsInR5cGUiOiJBcHByb3ZlZCIsImF1dGhvcml6YXRpb25Db2RlIjoiMTUyMDgwIiwidGFncyI6W10sImhhbG9SZWZlcmVuY2UiOiJhNTVkYzk3ZS01ZDdhLTQ4YWUtYjNkOS0zZTdhMTRiOGJlMmUiLCJlcnJvck1lc3NhZ2UiOiIiLCJpc29SZXNwb25zZUNvZGUiOiIwMCIsImFzc29jaWF0aW9uIjoiIiwiZXhwaXJ5RGF0ZSI6IiIsInBheW1lbnRQcm92aWRlclJlZmVyZW5jZSI6IjAwMDAwMDIzOTM2OCIsImN1c3RvbVZhbHVlcyI6eyJyZXN1bHRDb2RlVGV4dCI6IkFwcHJvdmVkIiwib3JpZ2luYWxJc29SZXNgdI6DRKkrzAuqxZsVcYM,
-│     transactionTime: 142746, 
-│     applicationPreferredName: , 
-│     cryptogramType: ARQC, 
-│     panSequenceNumber: 00, 
-│     cvr: 03A2000400, 
-│     amountAuthorised: 369, 
-│     cryptogram: 31AC1DDFC4528944, 
-│     serialisedReceipt: rO0ABXNyAD96YS5jby5zeW50aGVzaXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9UcmFu
-│                        c2FjdGlvblJlY2VpcHRadWGnlac5lgIAGkwAAWF0ABJMamF2YS9sYW5nL1N0cmluZztMAAFicQB+
-│                        AAFMAAFjcQB+AAFMAAFkcQB+AAFMAAFlcQB+AAFMAAFmcQB+AAFMAAFncQB+AAFMAAFodAA9THph
-│                        L2NvL3N5bnRoZXNpcy9oYWxvL2hhbG9Db21tb25JbnRlcmZhY2UvSGFsb0NyeXB0b2dyYW1UeXBl
-│                        O0wAAWlxAH4AAUwAAWpxAH4AAUwAAWtxAH4AAUwAAWxxAH4AAUwAAW1xAH4AAUwAAW5xAH4AAUwA
-│                        AW9xAH4AAUwAAXBxAH4AAUwAAXFxAH4AAUwAAXJxAH4AAUwAAXNxAH4AAUwAAXRxAH4AAUwAAXVx
-│                        AH4AAUwAAXZxAH4AAUwAAXdxAH4AAUwAAXh0ABZMamF2YS9tYXRoL0JpZ0ludGVnZXI7TAABeXEA
-│                        fgADTAABenEAfgADeHB0AAYyNTA5MDF0AAYxNDI3NDZ0AA5BMDAwMDAwMDA0MTAxMHQAEE1BU1RF
-│                        UkNBUkQgICAgICB0AAB0AAowMDAwMDA4MDAxdAAKMDNBMjAwMDQwMH5yADt6YS5jby5zeW50aGVz
-│                        aXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9DcnlwdG9ncmFtVHlwZQAAAAAAAAAAEgAA
-│                        eHIADmphdmEubGFuZy5FbnVtAAAAAAAAAAASAAB4cHQABEFSUUN0ABAzMUFDMURERkM0NTI4OTQ0
-│                        dAAQNTE4MTAzKioqKioqMzQyNXQABjE1MjA4MHQAAjAwdAAAdAAAcQB+AAlxAH4ACXEAfgAJdAAG
-│                        MjM5MzY4cQB+AAlxAH4ACXQAAjAwdAAGMjQwOTAxdAAIQXBwcm92ZWRzcgAUamF2YS5tYXRoLkJp
-│                        Z0ludGVnZXKM/J8fqTv7HQMABkkACGJpdENvdW50SQAJYml0TGVuZ3RoSQATZmlyc3ROb256ZXJv
-│                        Qnl0ZU51bUkADGxvd2VzdFNldEJpdEkABnNpZ251bVsACW1hZ25pdHVkZXQAAltCeHIAEGphdmEu
-│                        bGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAAAAAAAAAAAAAAAAAAAAAAAAF1cgACW0Ks8xf4BghU
-│                        4AIAAHhwAAAAAgLGeHNxAH4AGgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeHNxAH4A
-│                        GgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeA==, 
-│     maskedPAN: 518103******3425, 
-│     ISOResponseCode: 00, cardType: , 
-│     amountOther: 369, 
-│     transactionDate: 250901, 
-│     tvr: 0000008001, 
-│     disposition: Approved, 
-│     applicationLabel: MASTERCARD, 
-│     stan: 239368, 
-│     aid: A0000000041010, 
-│     currencyCode: 710, 
-│     effectiveDate: 240901
-│   }, 
-│   errorDetails: []
-│ }
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+```js
+
+ onHaloTransactionResult: {
+   resultType: Approved,
+   merchantTransactionReference: 2d3c88e3-a100-4288-a902-87cb43031c37,
+   haloTransactionReference: a55dc97e-5d7a-48ae-b3d9-3e7a14b8be2e,
+   paymentProviderReference: 000000239368,
+   errorCode: 0,
+   customTags: {
+     resultCodeText: Approved,
+     originalIsoResponseCode: 00,
+     authorisedAmount: 369,
+     displayText: Successful Transaction,
+     receiptText: Card PAN ,
+     stan: 239368,
+     base24Time: 162804,
+     base24Date: 0901,
+     ICCData: 910ADB924439BA6E9C680012,
+     base24RespCode: 000,
+     additionalReceiptBodyText: ,
+     SignedTransaction: eyJhbGciOiJQUzUxMiJ9.eyJpc1NpbmdsZVRhcEFuZFBpbiI6ZmFsc2UsInR5cGUiOiJBcHByb3ZlZCIsImF1dGhvcml6YXRpb25Db2RlIjoiMTUyMDgwIiwidGFncyI6W10sImhhbG9SZWZlcmVuY2UiOiJhNTVkYzk3ZS01ZDdhLTQ4YWUtYjNkOS0zZTdhMTRiOGJlMmUiLCJlcnJvck1lc3NhZ2UiOiIiLCJpc29SZXNwb25zZUNvZGUiOiIwMCIsImFzc29jaWF0aW9uIjoiIiwiZXhwaXJ5RGF0ZSI6IiIsInBheW1lbnRQcm92aWRlclJlZmVyZW5jZSI6IjAwMDAwMDIzOTM2OCIsImN1c3RvbVZhbHVlcyI6eyJyZXN1bHRDb2RlVGV4dCI6IkFwcHJvdmVkIiwib3JpZ2luYWxJc29SZXNgdI6DRKkrzAuqxZsVcYM,
+     transactionTime: 142746,
+     applicationPreferredName: ,
+     cryptogramType: ARQC,
+     panSequenceNumber: 00,
+     cvr: 03A2000400,
+     amountAuthorised: 369,
+     cryptogram: 31AC1DDFC4528944,
+     serialisedReceipt: rO0ABXNyAD96YS5jby5zeW50aGVzaXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9UcmFu
+                        c2FjdGlvblJlY2VpcHRadWGnlac5lgIAGkwAAWF0ABJMamF2YS9sYW5nL1N0cmluZztMAAFicQB+
+                        AAFMAAFjcQB+AAFMAAFkcQB+AAFMAAFlcQB+AAFMAAFmcQB+AAFMAAFncQB+AAFMAAFodAA9THph
+                        L2NvL3N5bnRoZXNpcy9oYWxvL2hhbG9Db21tb25JbnRlcmZhY2UvSGFsb0NyeXB0b2dyYW1UeXBl
+                        O0wAAWlxAH4AAUwAAWpxAH4AAUwAAWtxAH4AAUwAAWxxAH4AAUwAAW1xAH4AAUwAAW5xAH4AAUwA
+                        AW9xAH4AAUwAAXBxAH4AAUwAAXFxAH4AAUwAAXJxAH4AAUwAAXNxAH4AAUwAAXRxAH4AAUwAAXVx
+                        AH4AAUwAAXZxAH4AAUwAAXdxAH4AAUwAAXh0ABZMamF2YS9tYXRoL0JpZ0ludGVnZXI7TAABeXEA
+                        fgADTAABenEAfgADeHB0AAYyNTA5MDF0AAYxNDI3NDZ0AA5BMDAwMDAwMDA0MTAxMHQAEE1BU1RF
+                        UkNBUkQgICAgICB0AAB0AAowMDAwMDA4MDAxdAAKMDNBMjAwMDQwMH5yADt6YS5jby5zeW50aGVz
+                        aXMuaGFsby5oYWxvQ29tbW9uSW50ZXJmYWNlLkhhbG9DcnlwdG9ncmFtVHlwZQAAAAAAAAAAEgAA
+                        eHIADmphdmEubGFuZy5FbnVtAAAAAAAAAAASAAB4cHQABEFSUUN0ABAzMUFDMURERkM0NTI4OTQ0
+                        dAAQNTE4MTAzKioqKioqMzQyNXQABjE1MjA4MHQAAjAwdAAAdAAAcQB+AAlxAH4ACXEAfgAJdAAG
+                        MjM5MzY4cQB+AAlxAH4ACXQAAjAwdAAGMjQwOTAxdAAIQXBwcm92ZWRzcgAUamF2YS5tYXRoLkJp
+                        Z0ludGVnZXKM/J8fqTv7HQMABkkACGJpdENvdW50SQAJYml0TGVuZ3RoSQATZmlyc3ROb256ZXJv
+                        Qnl0ZU51bUkADGxvd2VzdFNldEJpdEkABnNpZ251bVsACW1hZ25pdHVkZXQAAltCeHIAEGphdmEu
+                        bGFuZy5OdW1iZXKGrJUdC5TgiwIAAHhwAAAAAAAAAAAAAAAAAAAAAAAAAAF1cgACW0Ks8xf4BghU
+                        4AIAAHhwAAAAAgLGeHNxAH4AGgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeHNxAH4A
+                        GgAAAAAAAAAAAAAAAAAAAAAAAAABdXEAfgAeAAAAAgFxeA==,
+     maskedPAN: 518103******3425,
+     ISOResponseCode: 00, cardType: ,
+     amountOther: 369,
+     transactionDate: 250901,
+     tvr: 0000008001,
+     disposition: Approved,
+     applicationLabel: MASTERCARD,
+     stan: 239368,
+     aid: A0000000041010,
+     currencyCode: 710,
+     effectiveDate: 240901
+   },
+   errorDetails: []
+ }
+
+```
 
 ## 8. SDK Async Behaviour after startTransaction Returns
 
@@ -914,7 +916,7 @@ class MyApplication: Application() {
 }
 ```
 An Application class is used so that the initialization state and callbacks can be shared across all activities. The SDK is initialized in a separate thread to avoid blocking the UI thread.
-This function, initializeHaloSdk(), should be called in your parent activity - where the payment methods are shown i.e. 
+This function, initializeHaloSdk(), should be called in your parent activity - where the payment methods are shown i.e.
 
 ```
 // Initialize Halo SDK
