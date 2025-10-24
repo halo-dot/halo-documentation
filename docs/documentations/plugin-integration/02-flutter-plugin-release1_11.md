@@ -1,4 +1,4 @@
-# Integration Guide for Flutter Plugin Release 2.0
+# Integration Guide for Flutter Plugin Release 1.11
 
 A production-focused guide to integrating the **Halo Dot SDK** via the **halo_sdk_flutter_plugin** in a Flutter Android application.
 
@@ -46,17 +46,17 @@ The **Halo Dot SDK** is an **isolating MPoC SDK** for payment processing with at
 
 You’ll need the following to integrate the Halo Dot SDK:
 
-- A developer account — register on the **<a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">Developer Portal</a>**
-- Executed **Non‑Disclosure Agreement (NDA)** (available on the portal)
-- **Public/Private key pair** to generate JWTs (upload the **public** key on the portal)
-- **Kotlin** `2.0.21` *(newer version work-in-progress)*
-- **Flutter** `3.27.3` *(newer version work-in-progress)*
-- **Dart** `3.6.1` *(bundled with Flutter)*
-- **Java** `21`
+- A developer account — register on the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>**
+- Signed **Non‑Disclosure Agreement (NDA)** (available on the portal)
+- **Public/Private key pair** to generate JWTs
+- **Kotlin** `1.3.72` *(>= `1.4.x` introduces breaking changes for this setup)*
+- **Flutter** `2.10.5` *(pin with [FVM](https://fvm.app/) if your global Flutter differs)*
+- **Dart** `2.9.2` *(see notes below; testing references `2.16.2` DevTools `2.9.2`)*
+- **Java** `11`
 - IDE — **Android Studio** recommended
-- **Recommended Flutter packages**
-  - <a href="https://pub.dev/packages/permission_handler" target="_blank">permission_handler ^11.3.1</a>
-  - <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken ^2.16.2</a>
+- **Recommended packages**
+  - <a href="https://pub.dev/packages/permission_handler" target="_blank">permission_handler ^11.0.0</a>
+  - <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken ^2.4.2</a>
 
 > **Android SDK levels**
 >
@@ -78,7 +78,7 @@ You must register on the **QA/UAT** environment before testing in production. Th
 
 ### Registration Steps
 
-1. Access the **<a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">Developer Portal</a>** and register
+1. Access the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and register
 2. Verify your account via OTP
 3. Click **Access to the SDK**
    
@@ -105,15 +105,30 @@ Create a new Flutter app or integrate into an existing one. **Android** must be 
 # Using Flutter
 flutter create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo.test.plugin
 
-# Using FVM (recommended for pinning Flutter versions)
-fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo.test.plugin
+# Using FVM (to pin Flutter 2.10.5)
+fvm spawn 2.10.5 create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo.test.plugin
 ```
 
 ### Environment
 
-1. **Java**: Tested with **Java 21** (later versions not yet confirmed).
-2. **Flutter/Dart**: Tested with **Flutter 3.27.3** and **Dart 3.6.1** (DevTools `2.40.2`).
-3. **Android minSdk**: Ensure `minSdkVersion` is **29** or higher in `android/app/build.gradle`:
+1. **Kotlin**: The Android SDK was built with **Kotlin 1.3.72**. Stay on this line; `>= 1.4.x` introduces breaking changes for this configuration. In `android/build.gradle` ensure:
+
+   ```gradle
+   ext {
+     kotlin_version = '1.3.72' // <-- version defined here
+   }
+   buildscript {
+     dependencies {
+       classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // <-- used here
+     }
+   }
+   ```
+
+2. **Java**: Tested with **Java 11**.
+
+3. **Flutter / Dart**: Tested with **Flutter 2.10.5** and **Dart 2.16.2** (DevTools `2.9.2`).
+
+4. **Android minSdk**: Ensure `minSdkVersion` is **29** or higher in `android/app/build.gradle`:
 
    ```gradle
    defaultConfig {
@@ -123,7 +138,7 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    }
    ```
 
-4. If you encounter issues setting `minSdkVersion`, see the [FAQ](#faq--troubleshooting).
+5. If you encounter `minSdkVersion` or version catalog issues, see the [FAQ](#faq--troubleshooting).
 
 ### Plugin Installation
 
@@ -139,23 +154,43 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    flutter pub add permission_handler
    ```
 
-3. **Configure Halo Maven access** (SDK binaries are hosted on AWS S3). Retrieve your `accesskey` and `secretkey` from the **Developer Portal** and add them to `android/local.properties` (create the file if it doesn’t exist):
+3. Configure access to Halo’s S3‑hosted Maven artifacts. From the **Developer Portal**, copy `accesskey` and `secretkey` and add to `android/local.properties`:
 
    ```properties
    aws.accesskey=<accesskey>
    aws.secretkey=<secretkey>
    ```
 
-   > **Note**: Keys are case‑sensitive. Keep them out of source control.
+   > **Note**: Values are case‑sensitive. Do not commit this file.
 
-4. Ensure your Gradle script loads `local.properties` (typically in `android/app/build.gradle`):
+4. Ensure your app module Gradle loads `local.properties` (usually present):
 
    ```gradle
    def localProperties = new Properties()
    def localPropertiesFile = rootProject.file('local.properties')
    if (localPropertiesFile.exists()) {
-     localPropertiesFile.withReader('UTF-8') { reader ->
-       localProperties.load(reader)
+     localPropertiesFile.withReader('UTF-8') { reader -> localProperties.load(reader) }
+   }
+   ```
+
+5. Configure repositories and dependency substitutions compatible with Kotlin `1.3.72` in `android/build.gradle`:
+
+   ```gradle
+   allprojects {
+     repositories {
+       google()
+       mavenCentral() // <-- for Kotlin 1.3.72
+       maven { url 'https://jitpack.io' }
+     }
+     configurations.all {
+       resolutionStrategy.cacheChangingModulesFor 1, 'days'
+       resolutionStrategy.dependencySubstitution {
+         substitute(module("androidx.core:core-ktx")).with(module("androidx.core:core-ktx:(*, 1.3.2]"))
+         substitute(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7")).with(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7:(*, 1.3.72]"))
+         substitute(module("org.jetbrains.kotlin:kotlin-stdlib-jdk8")).with(module("org.jetbrains.kotlin:kotlin-stdlib-jdk7:(*, 1.3.72]"))
+         substitute(module("androidx.window:window-java")).with(module("androidx.core:core-ktx:(*, 1.3.2]"))
+         substitute(module("com.google.firebase:firebase-analytics-ktx")).with(module("com.google.firebase:firebase-analytics-ktx:19.0.0"))
+       }
      }
    }
    ```
@@ -166,7 +201,7 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
 
 ### JWT
 
-All calls to the Halo SDK require a **valid JWT**. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
+All calls to the Halo SDK require a **valid JWT**. The values required to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
 
 Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation).
 
@@ -175,12 +210,12 @@ Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation
 ```dart
 class Config {
   static const String privateKeyPem = String.fromEnvironment('PRIVATE_KEY', defaultValue: '');
-  static const String issuer = '{get from the Developer Portal}';
-  static const String username = '{get from the Developer Portal}';
-  static const String merchantId = '{get from the Developer Portal}';
-  static const String host = '{get from the Developer Portal}';
-  static const String aud = '{get from the Developer Portal}';
-  static const String ksk = '{get from the Developer Portal}';
+  static const String issuer = "{get from the Developer portal}";
+  static const String username = "{get from the Developer portal}";
+  static const String merchantId = "{get from the Developer portal}";
+  static const String host = "{get from the Developer portal}";
+  static const String aud = "{get from the Developer portal}";
+  static const String ksk = "{get from the Developer portal}";
 }
 ```
 
@@ -204,43 +239,38 @@ class JwtToken {
     );
 
     final key = RSAPrivateKey(Config.privateKeyPem);
-    // IMPORTANT: Use the algorithm configured for your tenant in the Developer Portal.
-    // Example shows RS512; some environments may require RS256.
     final token = jwt.sign(key, algorithm: JWTAlgorithm.RS512);
     return token;
   }
 }
 ```
 
-> **Security**
->
-> - Do **not** commit the private key to your repo. Use secure configuration (env vars, secret managers).
-> - Provide the JWT via the SDK callback `onRequestJWT`.
+> **Security**: Do **not** store the private key in your repository. Use environment variables or a secure secret manager. Provide the JWT when the SDK invokes `onRequestJWT`.
 
 ### JWT Lifetime
 
-Keep JWT lifetimes **short** to minimize risk. A lifetime of **15 minutes** is recommended.
+Keep JWT lifetimes **short**. A lifetime of **15 minutes** is recommended to limit exposure.
 
 ### JWT Signing Public Key Format
 
-Publish the JWT public key as a **certificate** in a text‑friendly format (e.g., **Base64‑encoded PEM** `.crt`/`.pem`).
+Publish the JWT public key as a certificate in a text‑friendly format, e.g., **Base64‑encoded PEM** (`.crt`, `.pem`).
 
 ### JWT Claims
 
-The JWT must include the following (standard unless noted):
+Include the following claims (standard unless noted):
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `alg` | String | RSA algorithm used for signing (e.g., **RS256** or **RS512**). Follow the value configured for your environment to maintain non‑repudiation. |
-| `sub` | String | Payment Processor Merchant‑User ID or Application ID. |
-| `iss` | String | Unique identifier for the JWT issuer (as configured by Synthesis/Halo). Retrieve from the **Developer Portal**. |
-| `aud` | String | URL of the Halo server TLS endpoint (environment‑specific, e.g. `kernelserver.qa.haloplus.io`). |
+| `alg` | String | RSA‑signed SHA‑256 (alias **RS256**) or the algorithm required by your tenant. Asymmetric signing preserves non‑repudiation. |
+| `sub` | String | Payment Processor Merchant‑User ID, or Application ID. |
+| `iss` | String | Unique identifier for the JWT issuer (configured by Synthesis/Halo). Obtain from the **Developer Portal**. |
+| `aud` | String | URL of the Halo server TLS endpoint (e.g., `kernelserver.qa.haloplus.io`; environment‑specific). |
 | `usr` | String | Username of the user performing the transaction. |
-| `iat` | NumericDate | UTC issuance timestamp. |
-| `exp` | NumericDate | UTC expiration timestamp. |
+| `iat` | NumericDate | UTC time when the JWT was issued. |
+| `exp` | NumericDate | UTC expiration time. |
 | `aud_fingerprints` | String | CSV of expected SHA‑256 fingerprints for the Kernel Server TLS endpoint (supports rotation). |
 
-To validate values, POST to:
+Validate by POSTing to:
 
 ```
 https://kernelserver.qa.haloplus.io/<sdk-version>/tokens/checkjwt
@@ -259,32 +289,17 @@ Declare required permissions in `AndroidManifest.xml`:
 ```xml
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="za.co.synthesis.halo.sdkflutterplugin_example">
-
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.NFC"/>
     <uses-permission android:name="android.permission.CAMERA"/>
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
-
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation" />
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
 </manifest>
 ```
 
-Ensure `compileSdkVersion` and `targetSdkVersion` are **34** or higher.
+> If you also use `permission_handler`, ensure your `compileSdkVersion` and `targetSdkVersion` are **34** or higher.
 
 ### Requesting Runtime Permissions
 
@@ -292,52 +307,56 @@ Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  permission_handler: ^11.3.1
+  permission_handler: ^11.0.0
 ```
 
-Run `flutter pub get` after editing `pubspec.yaml`.
-
-Create `permission.dart` to request permissions before SDK initialization:
+Run `flutter pub get`, then create `permission.dart` to request permissions before SDK initialization:
 
 ```dart
 import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> checkPermissions() async {
-  final permissions = <Permission>{
+  final permissions = <Permission>[
     Permission.camera,
-    Permission.bluetoothConnect,
-    Permission.bluetoothScan,
+    Permission.phone,
+    Permission.storage,
+    Permission.notification,
     Permission.location,
-  };
+  ];
 
   for (final p in permissions) {
-    await _requestPermission(p);
+    await requestPermission(p);
   }
 }
 
-Future<void> _requestPermission(Permission permission) async {
+Future<void> requestPermission(Permission permission) async {
   final status = await permission.status;
   if (status.isGranted) {
-    debugPrint('$permission already granted');
+    debugPrint('$permission permission is granted, not requesting');
+    return;
+  }
+
+  if (status.isPermanentlyDenied) {
+    debugPrint('$permission permission is permanently denied, enable in settings');
     return;
   }
 
   final result = await permission.request();
   if (result.isPermanentlyDenied) {
-    debugPrint('$permission permanently denied — prompt user to enable in Settings');
+    debugPrint('$permission permission is permanently denied, enable in settings');
   }
 }
 ```
 
 ### Extend `HaloActivity` on Android
 
-Your `MainActivity` (e.g., `app/src/main/kotlin/<appId>/MainActivity.kt`) must extend `HaloActivity` (which itself extends `FlutterFragmentActivity`) to hook into SDK lifecycle methods:
+Your Android `MainActivity` **Kotlin** class (e.g., `app/src/main/kotlin/<appId>/MainActivity.kt`) must extend `HaloActivity` (which extends `FlutterFragmentActivity`) to hook into SDK lifecycle methods:
 
 ```kotlin
 import za.co.synthesis.halo.sdkflutterplugin.HaloActivity
 
-class MainActivity : HaloActivity()
+class MainActivity : HaloActivity() { }
 ```
 
 ### Implement Halo Callbacks
@@ -346,48 +365,39 @@ Implement `IHaloCallbacks` to receive SDK events:
 
 ```dart
 // halo_sdk.dart
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-
-// import your JwtToken helper
 import './jwt_token.dart';
 
 class HaloCallbacks implements IHaloCallbacks {
   @override
   void onAttestationError(HaloAttestationHealthResult details) {
-    debugPrint('attestation error: $details');
+    debugPrint('example app: attestation error: $details');
   }
 
   @override
   void onHaloTransactionResult(HaloTransactionResult result) {
-    debugPrint('transaction result: $result');
+    debugPrint('example app: transaction result: $result');
   }
 
   @override
   void onHaloUIMessage(HaloUIMessage message) {
-    debugPrint('UI message: $message');
+    debugPrint('example app: UI message: $message');
   }
 
   @override
   void onInitializationResult(HaloInitializationResult result) {
-    debugPrint('initialization: $result');
+    debugPrint('example app: initialization message: $result');
   }
 
   @override
   void onRequestJWT(void Function(String jwt) callback) {
-    debugPrint('onRequestJWT');
+    debugPrint('example app: onRequestJWT');
     final jwt = JwtToken.getJwt();
     callback(jwt);
   }
 
   @override
   void onSecurityError(errorCode) {
-    debugPrint('security error: $errorCode');
-  }
-
-  @override
-  void onCameraControlLost() {
-    debugPrint('camera control lost');
+    debugPrint('example app: security error: $errorCode');
   }
 }
 ```
@@ -399,20 +409,19 @@ Call initialization when the widget/screen that handles payments is displayed:
 ```dart
 void onInitializeSdk(BuildContext context) {
   final haloCallbacks = HaloCallbacks();
-  const packageName = 'za.co.synthesis.halo.sdkflutterplugin_example';
+  const package = 'za.co.synthesis.halo.sdkflutterplugin_example';
   const appVersion = '0.0.2';
-  const startTxnTimeoutMs = 300000; // 5 minutes
-
+  const onStartTransactionTimeOut = 300000; // ms
   try {
     Sdkflutterplugin.initializeHaloSDK(
       haloCallbacks,
-      packageName,
+      package,
       appVersion,
-      startTxnTimeoutMs,
+      onStartTransactionTimeOut,
     );
   } on PlatformException catch (e) {
     final message = 'SDK initialisation error: ${e.code} ${e.message}';
-    // Replace with your app’s UI messaging
+    // e.g. setUiMessage(UiMessage(message, Colors.red));
     debugPrint(message);
   }
 }
@@ -430,7 +439,7 @@ From this point, UI messages and results will arrive via your callbacks. Use the
 
 ## Documentation
 
-- **<a href="/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
+- **<a href="https://halo-dot-developer-docs.gitbook.io/halo-dot/sdk" target="_blank">Halo Dot SDK Docs</a>**
 
 ---
 
@@ -443,13 +452,17 @@ From this point, UI messages and results will arrive via your callbacks. Use the
 
 ## FAQ / Troubleshooting
 
-**Q: How do I set `compileSdkVersion` when it’s defined as `flutter.compileSdkVersion`?**
+**My `android/build.gradle` looks different**
+
+> Newer Android Studio templates may define Kotlin as `ext.kotlin_version = '1.3.72'`. Ensure it matches the version required above.
+
+**How do I set `compileSdkVersion` when it’s defined as `flutter.compileSdkVersion`?**
 
 Add values to `android/local.properties`:
 
 ```properties
 sdk.dir=/home/{me}/android-sdk/
-flutter.sdk=/home/{me}/fvm/versions/3.27.3
+flutter.sdk=/home/{me}/fvm/versions/2.10.5
 flutter.buildMode=debug
 flutter.versionName=1.0.0
 flutter.versionCode=1
@@ -468,19 +481,17 @@ android {
 }
 ```
 
-**Q: How do I set my `minSdkVersion` if it’s currently set as `flutter.minSdkVersion`?**
+**How do I set my `minSdkVersion` if it’s currently `flutter.minSdkVersion`?**
 
 See the configuration above — define it in `local.properties` and read it from Gradle.
 
-**Q: I’m not able to import the Halo SDK.**
+**I am not able to import the Halo SDK.**
 
 - Open the Android folder in **Android Studio** and run **Gradle Sync**
 - Ensure the plugin is installed: `flutter pub add halo_sdk_flutter_plugin`
-- Verify versions: **Java 21**, **Kotlin 2.0.21**, **Flutter 3.27.3**
+- Verify versions: **Java 11**, **Kotlin 1.3.72**, **Flutter 2.10.5**
 - Set `minSdkVersion` **≥ 29**
 - Set `compileSdkVersion` and `targetSdkVersion` **≥ 34**
 - Ensure `aws.accesskey` and `aws.secretkey` are correctly set in `local.properties`
-
-> **Algorithm note**: Some snippets show `RS512` while claim tables reference `RS256`. **Always use the algorithm specified for your tenant in the Developer Portal**. If mismatched, signature validation will fail.
 
 ---
