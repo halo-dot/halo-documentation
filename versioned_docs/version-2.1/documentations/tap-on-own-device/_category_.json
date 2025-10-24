@@ -1,8 +1,0 @@
-{
-  "label": "Tap on own device",
-  "position": 4,
-  "link": {
-    "type": "generated-index",
-    "description": "Halo Dot SDK is a software development kit that allows integrators to embed a contactless payments into their own mobile apps."
-  }
-}

@@ -38,7 +38,7 @@ Android version 10
 
 Google-certified device
 
-All devices that are currently compatible for the Halo Dot Solution are defined and managed in the [Google Play Console Device Catalogue](https://play.google.com/console/u/0/developers/7094180247634818303/app/4974352686746815262/devices).
+All devices that are currently compatible for the Halo Dot Solution are defined and managed in the <a href="https://play.google.com/console/u/0/developers/7094180247634818303/app/4974352686746815262/devices" target="_blank">Google Play Console Device Catalogue</a>.
 
 In addition to being compatible with our solution, we will need your device to grant the below permissions:
 
@@ -54,4 +54,4 @@ In addition to being compatible with our solution, we will need your device to g
 | - | ---------------- | --------- | -------------------------------------------- | -------------- |
 | 1 | Wiseasy          | R1        | Mastercard, Visa, American Express, Discover |                |
 
-The [Acceptance Process to Update COTS platform to Baseline](https://synthesis-software.atlassian.net/wiki/x/J4A0\_/) page identifies and process for making updates to the COTS. This also describes the frequency of Changes to the system baseline and how they are implemented on an ad hoc basis. The depreciation of operating systems and devices are communicated according to the [non-functional](https://synthesis-software.atlassian.net/wiki/spaces/H/pages/2411921411/Communication+Schedule#Manual-Communication-Channels) communication in the Halo communication schedule.
+The <a href="https://synthesis-software.atlassian.net/wiki/x/J4A0\_/" target="_blank">Acceptance Process to Update COTS platform to Baseline</a> page identifies and process for making updates to the COTS. This also describes the frequency of Changes to the system baseline and how they are implemented on an ad hoc basis. The depreciation of operating systems and devices are communicated according to the [non-functional](https://synthesis-software.atlassian.net/wiki/spaces/H/pages/2411921411/Communication+Schedule#Manual-Communication-Channels) communication in the Halo communication schedule.
