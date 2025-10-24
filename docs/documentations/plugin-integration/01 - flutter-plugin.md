@@ -430,7 +430,7 @@ From this point, UI messages and results will arrive via your callbacks. Use the
 
 ## Documentation
 
-- **<a href="https://halo-dot-developer-docs.gitbook.io/halo-dot/sdk" target="_blank">Halo Dot SDK Docs</a>**
+- **<a href="/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
 
 ---
 

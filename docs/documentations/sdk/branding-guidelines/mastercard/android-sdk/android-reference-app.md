@@ -28,7 +28,8 @@ Reference Application for Android SDK can be downloaded below:
 * A simple Android application that shows how Mastercard Checkout Sound and Animation is integrated into the merchant application.
 * A merchant application that shows how Mastercard Checkout Sound and Animation is played on a transaction approval.
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt="" /><figcaption></figcaption></figure>
+
+![alt text](/img/master-card.png)
 
 ## What you will learn <a href="#what-you-will-learn" id="what-you-will-learn"></a>
 
