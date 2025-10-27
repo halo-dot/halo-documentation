@@ -207,4 +207,4 @@ The generated link returned by the API call can then be used to invoke the Halo 
 
 That concludes the guide to integrating the Halo Dot Go into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
-Not what you were looking for? If you are looking for the Transaction Integration guide, it is over [here](/docs/versioned_docs/version-2.1/documentations/intents/transaction-app2app-integration-guide)
+Not what you were looking for? If you are looking for the Transaction Integration guide, it is over [here](/docs/documentations/intents/transaction-app2app-integration-guide)
