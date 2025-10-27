@@ -1,4 +1,4 @@
-# SDK Mobile Integration Guide
+# SDK Mobile Integration Guide.
 
 This README provides technical guidance on the integration of the Halo.SDK with a host Android application.&#x20;
 
