@@ -1,8 +1,0 @@
-{
-  "label": "Intents",
-  "position": 1,
-  "link": {
-    "type": "generated-index",
-    "description": "Enables you to accept contactless payments with your existing solution using App-to-App integration."
-  }
-}
