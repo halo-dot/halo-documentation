@@ -98,7 +98,7 @@ You should be able to build and run the test app using Android Studio.
 
 * Details on how to access the <a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
 * How to programmatically initialize the SDK <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
-* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
+* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow" target="_blank">How to start a transaction</a>
 * <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
 * <a href="https://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
 
