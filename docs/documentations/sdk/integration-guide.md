@@ -104,5 +104,5 @@ You should be able to build and run the test app using Android Studio.
 
 ## Halo SDK Plugin
 
-* Integrate the SDK with the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/01 - flutter-plugin" target="_blank">here</a>
-* How to access the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/02 - flutter-test-app" target="_blank">here</a>
+* Integrate the SDK with the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/flutter-plugin" target="_blank">here</a>
+* How to access the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/flutter-test-app" target="_blank">here</a>
