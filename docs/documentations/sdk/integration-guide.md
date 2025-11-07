@@ -82,25 +82,30 @@ You should be able to build and run the test app using Android Studio.
 
 ### Test Cards
 
+For testing transactions within the staging environment, you must use a test card. Never use a live/actual card in this setting.
+
 * Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet&hl=en_ZA" target="_blank">Visa CDET card</a> for testing.<br/>
-  * Use test card number 1 in the Visa CDET application.
+  * Use test card first card or second card in the Visa CDET application.
 * Use a test card provided by the bank
 * **DO NOT** use actual card numbers for testing.
 
-<hr/>
+## Integrate the SDK Manually (Android)
 
-## Issues
-
-* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#setup-issues" target="_blank">Setup Issues</a>
-* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#running-issues" target="_blank">Running Issues</a>
-
-## More about the SDK
+If your setup requires direct embedding, these instructions delow details how to manually integrate the SDK into your Android application.
 
 * Details on how to access the <a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
 * How to programmatically initialize the SDK <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
 * <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide/#7-transaction-flow" target="_blank">How to start a transaction</a>
 * <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
 * <a href="https://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
+
+<hr/>
+
+## Issues you may face
+
+* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#setup-issues" target="_blank">Setup Issues</a>
+* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#running-issues" target="_blank">Running Issues</a>
+
 
 ## Halo SDK Plugin
 
