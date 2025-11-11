@@ -13,7 +13,7 @@ A: The currency can be set per transaction
 A: No
 
 #### Q: Can you obtain transactions based on some date / time range as opposed to just using a txn ID?
-A: This is possible and accessible via the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">developer portal</a>
+A: This is possible and accessible via the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">developer portal</a>
 
 #### Q: What PSPs are you working with and in what regions?
 * **Do they offer additional txn reporting APIs in addition to what halo.dot offers?**<br/>
@@ -41,7 +41,7 @@ A: We have developed an ISO 8583 processor (Postbridge) that allows us to establ
 
 #### Q: How do create a JWT?
 A: You will need to generate your own public key and private key pair. You can use the guid located in the [JWT guide](/docs/documentations/sdk/jwt) to generate a JWT.<br/>
-You will need to submit the public key to the <a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">developer portal</a> which will be used to validate your JWT.
+You will need to submit the public key to the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">developer portal</a> which will be used to validate your JWT.
 #### Q: My transactions are failing with declines. What should I check?
 A: This could be due to backend PIN key rotation issues. Please provide a transaction reference ID for investigation. The support team can disable PIN key rotation if needed to resolve the issue.
 Currency Support

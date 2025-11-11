@@ -12,7 +12,7 @@ A debug version of the SDK is made available to support development efforts, but
 
 ## Accessing Maven Repo
 
-1. In order to access the SDK, we generate an AWS access key and secret key when you register on the developer portal <a href="https://halo.developerportal.dev.haloplus.io/" target="_blank">here</a>.\
+1. In order to access the SDK, we generate an AWS access key and secret key when you register on the developer portal <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">here</a>.\
    These are **sensitive** and should not be committed to source control. \
    Add the credentials to the `local.properties` file located in your android app source.
 

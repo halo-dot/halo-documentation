@@ -9,7 +9,7 @@ title: Customer FAQ
 
 #### Q: How do we get a transaction working with the SDK?
 
-1. <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
+1. <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
 2. [Then access the SDK](/docs/documentations/sdk/getting-started-with-sdk)
 3. [Programmatically initialize the SDK](/docs/documentations/sdk/sdk-integration-guide#6-initialization-of-the-sdk)
 4. [Start a transaction](/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow)
@@ -30,13 +30,13 @@ A: An intent transaction is an app-to-app transaction between us and a third par
 Deep link transaction involves the generation of a QrCode that can be scanned to open the Halo app for payment.
 
 #### Q: What is Scan to Tap?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> it uses deep links to generate a QrCode that can be scanned to open the Halo app for payment.
+A: Available on the <a href="https://go.merchantportal.qa.haloplus.io/" target="_blank">merchant portal</a> it uses deep links to generate a QrCode that can be scanned to open the Halo app for payment.
 
 #### Q: What is Tap on own?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> allows you to integrate a checkout system in your eCommerce store.
+A: Available on the <a href="https://go.merchantportal.qa.haloplus.io/" target="_blank">merchant portal</a> allows you to integrate a checkout system in your eCommerce store.
 
 #### Q: What is Push to Pay?
-A: Available on the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">merchant portal</a> allows you to link your device to the Halo app for payment.
+A: Available on the <a href="https://go.merchantportal.qa.haloplus.io/" target="_blank">merchant portal</a> allows you to link your device to the Halo app for payment.
 
 #### Q: What are the reporting requirements?
 - Master Card:
