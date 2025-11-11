@@ -9,7 +9,7 @@ title: Customer FAQ
 
 #### Q: How do we get a transaction working with the SDK?
 
-1. <a href="https://go.developerportal.qa.haloplus.ioo/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
+1. <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Register a developer</a> account with Halo, this will give you AWS credentials to access the maven repository
 2. [Then access the SDK](/docs/documentations/sdk/getting-started-with-sdk)
 3. [Programmatically initialize the SDK](/docs/documentations/sdk/sdk-integration-guide#6-initialization-of-the-sdk)
 4. [Start a transaction](/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow)

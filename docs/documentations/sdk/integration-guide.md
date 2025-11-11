@@ -85,7 +85,7 @@ You should be able to build and run the test app using Android Studio.
 For testing transactions within the staging environment, you must use a test card. Never use a live/actual card in this setting.
 
 * Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet&hl=en_ZA" target="_blank">Visa CDET card</a> for testing.<br/>
-  * Use test card first card or second card in the Visa CDET application.
+  * Use the first or the second card in the Viase CDET.
 * Use a test card provided by the bank
 * **DO NOT** use actual card numbers for testing.
 
