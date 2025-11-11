@@ -13,7 +13,7 @@ A: The currency can be set per transaction
 A: No
 
 #### Q: Can you obtain transactions based on some date / time range as opposed to just using a txn ID?
-A: This is possible and accessible via the <a href="https://halo.merchantportal.dev.haloplus.io/" target="_blank">developer portal</a>
+A: This is possible and accessible via the <a href="https://go.developerportal.qa.haloplus.ioo/" target="_blank">developer portal</a>
 
 #### Q: What PSPs are you working with and in what regions?
 * **Do they offer additional txn reporting APIs in addition to what halo.dot offers?**<br/>
