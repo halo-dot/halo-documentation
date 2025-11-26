@@ -4,5 +4,7 @@
   "compilerOptions": {
     "baseUrl": "."
   },
-  "exclude": [".docusaurus", "build"]
+  "exclude": [".docusaurus", "build"],
+  // Extending "@tsconfig/docusaurus/tsconfig.json".types with "docusaurus-json-schema-plugin"
+  "types": ["node", "@docusaurus/module-type-aliases", "@docusaurus/theme-classic", "docusaurus-json-schema-plugin"]
 }

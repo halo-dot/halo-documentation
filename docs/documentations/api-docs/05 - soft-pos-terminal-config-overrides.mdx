@@ -1,0 +1,86 @@
+---
+title: Terminal Config
+description: >-
+  Overriding terminal configuration for Soft POS
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import JSONSchemaViewer from '@theme/JSONSchemaViewer';
+import SoftPosConfigCreate from '@site/static/schemas/SoftPosConfigCreate.json';
+import SoftPosConfigUpdate from '@site/static/schemas/SoftPosConfigUpdate.json';
+
+# SoftPOS Terminal Configuration
+
+## Description
+
+You may provide terminal configuration profiles that you may use to override your terminal configuration
+as needed.
+
+## Activating a Terminal Configuration Profile
+
+To activate a given profile for a specific user, you merely need to add the `spCfg` claim to the user's JWT
+with the value of the claim set to the profile's name.
+
+## Creating a Profile
+
+<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/acquirers/{acquirerId}/softposconfigs`
+
+#### Path Parameters
+
+| Name                                            | Type   | Description                              |
+| ----------------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark>        | String | The backend environment \[dev, qa, prod] |
+| acquirerId<mark style={{color:'red'}}>\*</mark> | Number | Your acquirer id                         |
+
+#### Headers
+
+| Name                                           | Type   | Description                                    |
+| ---------------------------------------------- | ------ | ---------------------------------------------- |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal |
+
+#### Request Body
+
+There are two accepted formats for creating a Terminal Configuration Profile:
+
+<JSONSchemaViewer schema={ SoftPosConfigCreate } />
+
+## Updating a Profile
+
+<mark style={{color:'blue'}}>`PUT`</mark> `https://kernelserver.{env}.haloplus.io/acquirers/{acquirerId}/softposconfigs/{profile}`
+
+#### Path Parameters
+
+| Name                                            | Type   | Description                              |
+| ----------------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark>        | String | The backend environment \[dev, qa, prod] |
+| acquirerId<mark style={{color:'red'}}>\*</mark> | Number | Your acquirer id                         |
+| profile<mark style={{color:'red'}}>\*</mark>    | String | The name of the profile to update        |
+
+#### Headers
+
+| Name                                           | Type   | Description                                    |
+| ---------------------------------------------- | ------ | ---------------------------------------------- |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal |
+
+#### Request Body
+
+<JSONSchemaViewer schema={ SoftPosConfigUpdate } />
+
+## Deleting a Profile
+
+<mark style={{color:'blue'}}>`DELETE`</mark> `https://kernelserver.{env}.haloplus.io/acquirers/{acquirerId}/softposconfigs/{profile}`
+
+#### Path Parameters
+
+| Name                                            | Type   | Description                              |
+| ----------------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark>        | String | The backend environment \[dev, qa, prod] |
+| acquirerId<mark style={{color:'red'}}>\*</mark> | Number | Your acquirer id                         |
+| profile<mark style={{color:'red'}}>\*</mark>    | String | The name of the profile to delete        |
+
+#### Headers
+
+| Name                                           | Type   | Description                                    |
+| ---------------------------------------------- | ------ | ---------------------------------------------- |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal |
+
