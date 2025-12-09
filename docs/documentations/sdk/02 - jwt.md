@@ -1,7 +1,6 @@
 ---
 id: jwt
-title: Json Web Token (JWT)
-sidebar_class_name: hidden
+title: JSON Web Token (JWT)
 tags:
   - sdk
   - guides
@@ -75,12 +74,13 @@ The JWT must make a number of claims - all of them standard except for `aud_fing
 |-------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | alg   | String      | The signing algorithm is RSA signed SHA-256 hash, aliased as RS256. An asymmetric encryption (signing) scheme is required to allow the Kernel Server to be able to validate the token without being able to generate it. |
 | sub   | String      | The Payment Processor Merchant-User ID, or Application ID                                                                                                                                                             |
-| iss   | String      | This is a unique (from the perspective of Halo server) identifier for the JWT issuer, agreed upon by the JWT issuer and Synthesis, and configured in advance by Synthesis in the Halo server.                        |
+| iss   | String      | This is a unique (from the perspective of Halo server) identifier for the JWT issuer, agreed upon by the JWT issuer and Synthesis, and configured in advance by Synthesis in the Halo server.                         |
 | aud   | String      | URL of Halo server TLS endpoint, e.g. 'kernelserver.qa.haloplus.io'. This value should be obtained from Synthesis (different per environment) e.g. for QA it would be 'kernelserver.qa.haloplus.io' and for DEV 'kernelserver.za.dev.haloplus.io' |
 | usr   | String      | The details of the user performing the transaction, typically the username used to sign into the Halo.Go Developer Portal.                                                                                            |
 | iat   | NumericDate | The UTC timestamp of when the JWT was generated.                                                                                                                                                                      |
-| exp   | NumericDate | The UTC timestamp of expiration of the JWT.                                                                                                                                                                                |
+| exp   | NumericDate | The UTC timestamp of expiration of the JWT.                                                                                                                                                                           |
 | aud_fingerprints | String | A CSV list of expected SHA-256 fingerprints for the Kernel Server TLS endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writing this would be: "sha256/zc6c97JhKPZUa+rIrVqjknDE1lDcDK77G41sDo+1ay0=" |
+| spCfg | String      | Optional. The name of a [SoftPOS Terminal Configuration profile](../api-docs/terminal-config) to be used for this user. If provided, the given profile will be combined with the terminal configuration returned by the server. |
 
 ---
 

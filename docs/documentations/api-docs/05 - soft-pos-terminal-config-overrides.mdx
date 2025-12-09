@@ -1,5 +1,6 @@
 ---
 title: Terminal Config
+id: terminal-config
 description: >-
   Overriding terminal configuration for Soft POS
 ---
@@ -18,8 +19,25 @@ as needed.
 
 ## Activating a Terminal Configuration Profile
 
-To activate a given profile for a specific user, you merely need to add the `spCfg` claim to the user's JWT
+To activate a given profile for a specific user, you merely need to add the `spCfg` claim to the user's [JWT](../sdk/jwt#jwt-claims)
 with the value of the claim set to the profile's name.
+
+## Getting your Acquirer Id
+
+<mark style={{color:'blue'}}>`GET`</mark> `https://kernelserver.{env}.haloplus.io/acquirers/me`
+
+#### Path Parameters
+
+| Name                                            | Type   | Description                              |
+| ----------------------------------------------- | ------ | ---------------------------------------- |
+| env<mark style={{color:'red'}}>\*</mark>        | String | The backend environment \[dev, qa, prod] |
+
+#### Response
+
+| Field                        | Type             | Description      |
+| ---------------------------- | ---------------- | ---------------- |
+| id                           | Number           | Your acquirer id |
+
 
 ## Creating a Profile
 
