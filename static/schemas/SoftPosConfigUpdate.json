@@ -1,0 +1,159 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "terminalCurrencyCode": {
+      "description": "An ISO-3166 Numeric code",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 4,
+      "pattern": "^0?[0-9]{3}$"
+    },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "title": "Custom Value",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "aid",
+              "kernelID",
+              "transactionTypeConfigs"
+            ],
+            "properties": {
+              "aid": {
+                "description": "The AID prefix to match against",
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]+$"
+              },
+              "kernelID": {
+                "description": "The number of the kernel that will process this AID prefix",
+                "type": "number"
+              },
+              "transactionTypeConfigs": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "title": "Custom Value",
+                      "type": "object",
+                      "required": [
+                        "transactionType",
+                        "tlvDatabase"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "transactionType": {
+                          "description": "The transaction type to apply this configuration for, given by the first two digits of ISO 8583:1987 Processing Code",
+                          "type": "string",
+                          "pattern": "^[0-9][0-9]$"
+                        },
+                        "tlvDatabase": {
+                          "type": "array",
+                          "items": {
+                            "oneOf": [
+                              {
+                                "title": "Custom Value",
+                                "type": "object",
+                                "required": [
+                                  "tag",
+                                  "value"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                  "tag": {
+                                    "description": "The EMV tag in hexadecimal format",
+                                    "type": "string",
+                                    "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                                  },
+                                  "value": {
+                                    "description": "The value to set the given tag to in hexadecimal format",
+                                    "type": "string",
+                                    "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                                  }
+                                }
+                              },
+                              {
+                                "title": "Delete Default",
+                                "type": "object",
+                                "required": [
+                                  "tag",
+                                  "remove"
+                                ],
+                                "additionalProperties": false,
+                                "properties": {
+                                  "tag": {
+                                    "description": "The EMV tag in hexadecimal format",
+                                    "type": "string",
+                                    "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                                  },
+                                  "remove": {
+                                    "description": "Should be present and equal to 'true' if the default value should be deleted",
+                                    "const": true
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "title": "Delete Default",
+                      "type": "object",
+                      "required": [
+                        "transactionType",
+                        "remove"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "transactionType": {
+                          "description": "The transaction type to apply this configuration for, given by the first two digits of ISO 8583:1987 Processing Code",
+                          "type": "string",
+                          "pattern": "^[0-9][0-9]$"
+                        },
+                        "remove": {
+                          "description": "Should be present and equal to 'true' if the default value should be deleted",
+                          "const": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "title": "Delete Default",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "aid",
+              "kernelID",
+              "remove"
+            ],
+            "properties": {
+              "aid": {
+                "description": "The AID prefix to match against",
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]+$"
+              },
+              "kernelID": {
+                "description": "The number of the kernel that will process this AID prefix",
+                "type": "number"
+              },
+              "remove": {
+                "description": "Should be present and equal to 'true' if the default value should be deleted",
+                "const": true
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "minProperties": 1
+}
