@@ -2,7 +2,7 @@
   "oneOf": [
     {
       "title": "Advanced",
-      "description": "Note that while both 'overrides' and 'terminalCurrencyCode' are optional, at least of them must be present",
+      "description": "Note that while both 'overrides' and 'terminalCurrencyCode' are optional, at least one of them must be present",
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -171,7 +171,7 @@
     },
     {
       "title": "Simple",
-      "description": "Note that while both 'overrides' and 'terminalCurrencyCode' are optional, at least of them must be present",
+      "description": "Note that while both 'overrides' and 'terminalCurrencyCode' are optional, at least one of them must be present",
       "type": "object",
       "required": [
         "name"
