@@ -31,6 +31,8 @@ Android version 10
 |                                 | Version 12            |  ACTIVE              |                                           |
 |                                 | Version 13            |  ACTIVE              |                                           |
 |                                 | Version 14            |  ACTIVE              |                                           |
+|                                 | Version 15            |  ACTIVE              |                                           |
+|                                 | Version 16            |  ACTIVE              |                                           |
 |               iOS               | Not applicable        | NOT SUPPORTED        |                                           |
 |            Harmony OS           | Not supported         | In development       |                                           |
 
