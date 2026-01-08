@@ -6,108 +6,81 @@ tags:
   - guides
 ---
 
-# Halo.SDK Integration Guide
+# Accessing the SDK
 
-Welcome to the Halo.SDK integration guide! Follow these steps to quickly integrate the Halo.SDK into your Android application.
+The SDK is hosted in a maven repo, through an S3 bucket in a Halo AWS account.
 
-## Getting Started
+A debug version of the SDK is made available to support development efforts, but only the release version will be permitted to transact in production. The debug version has full logging enabled and allows a debugger to be attached to the integrating app.
 
-To start integrating the Halo.SDK into your app, you will need to add it as a dependency in your project.<br/>
-Both debug and release versions of the SDK are available. <br/>
-The release version is suitable for production use. <br/>
-The debug version is intended for development and testing purposes; it has full logging enabled and allows a debugger to be attached to the app.
+## Accessing Maven Repo
 
-## Requirements
-
-Before you begin, ensure you have the following:
-
-* **<a href="https://developer.android.com/studio" target="_blank">Android Studio</a>:** You will need Android Studio installed on your system to run the test app.
-* At least **<a href="https://www.oracle.com/java/technologies/downloads/#java17" target="_blank">Java JDK 17</a>** installed on your system.
-  * If you use a newer version you may be required to upgrade the gradle version in the test app repository.
-  * Current <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/gradle/wrapper/gradle-wrapper.properties" target="_blank">gradle version is 7.5.1</a>.
-* **<a href="https://git-scm.com/" target="_blank">Git</a>** installed on your system.
-* Access the Android **<a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">test app repository on GitHub</a>**.
-* Generate your own **<a href="https://docs.halodot.io/docs/documentations/sdk/jwt" target="_blank">public key and private key pair</a>**, this will be used to create a jwt token.
-
-## Setup
-
-### Clone the test app repository
-
-```bash
-git clone https://github.com/halo-dot/test_app-android_sdk.git
-cd test_app-android_sdk/test_app
-cd studio .
-```
-
-Android Studio will automatically run Gradle Sync.<br/>
-If you encounter any issues, please refer to the <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues" target="_blank">FAQ</a> section.
-
-### Configure The Test App
-
-Open <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt" target="_blank">Config.kt</a> and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/>
-You will need the private key you used to generate your public key, your issuer name, and your username.
+1. In order to access the SDK, we generate an AWS access key and secret key when you register on the developer portal <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">here</a>.\
+   These are **sensitive** and should not be committed to source control. \
+   Add the credentials to the `local.properties` file located in your android app source.
 
 ```kotlin
-package za.co.synthesis.halo.halotestapp
+AWS.ACCESSKEY = {{ACCESS_KEY}}
+AWS.SECRETKEY = {{SECRET_KEY}}
+```
 
-object Config {
-   const val PRIVATE_KEY_PEM = "{{PRIVATE_KEY_PEM}}"
-   const val HOST = "{{HOST}}"
-   const val AUD = "{{AUD}}"
-   const val KSK = "{{KSK}}"
-   const val ISSUER = "{{ISSUER}}"
-   const val USERNAME = "{{USERNAME}}"
-   const val MERCHANT_ID = "{{MERCHANT_ID}}"
+2. Add the following to your project-level gradle file, to read the access credentials into variables:
 
+
+```kotlin
+ext {
+    Properties properties = new Properties()
+    def propertiesFile = project.rootProject.file('local.properties')
+    if (propertiesFile.exists()) {
+        properties.load(propertiesFile.newDataInputStream())
+    }
+
+    def localAccessKey = properties.getProperty('aws.accesskey')
+    def systemEnvAccessKey = System.getenv('AWS_ACCESS_KEY_ID')
+
+    def localSecretKey = properties.getProperty('aws.secretkey')
+    def systemEnvSecretKey = System.getenv('AWS_SECRET_ACCESS_KEY')
+
+    accessKey = localAccessKey != null ? localAccessKey : systemEnvAccessKey
+    secretKey = localSecretKey != null ? localSecretKey : systemEnvSecretKey
 }
 ```
-### Configure local.properties
 
-The Halo.SDK is hosted in a Maven repository, and stored in an S3 bucket in a Halo AWS account.<br/>
-We have generated a `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` for you to access the repo.
-Open <a href="https://github.com/halo-dot/test_app-android_sdk/blob/master/test_app/local.properties" target="_blank">local.properties</a> and and add the values of `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` with your own values.
+3. Add the following to your module-level gradle file to pull the artifacts:
 
-```bash
-aws_access_key={{AWS_ACCESS_KEY}}
-aws_secret_key={{AWS_SECRET_KEY}}
+You need to add two repos:
+
+* Snapshots: Debug builds
+* Release: Release builds
+
+```kotlin
+repositories {
+    def repos = [
+            'releases',
+            'snapshots'
+    ]
+
+    repos.each { repo ->
+        maven {
+            name = repo
+            url = "s3://synthesis-halo-artifacts/$repo"
+            credentials(AwsCredentials) {
+                accessKey = rootProject.ext.accessKey
+                secretKey = rootProject.ext.secretKey
+            }
+        }
+    }
+}
+
+dependencies {
+    releaseImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.8"
+    debugImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.8-debug"
+}
 ```
-<hr/>
-## Build and Run
 
-### Build
+After a gradle sync, you should now be able to import from the za.co.synthesis.halo.sdk namespace, e.g:
 
-You should be able to build and run the test app using Android Studio.
+```kotlin
+import za.co.synthesis.halo.sdk.HaloSDK
+```
 
-![alt text](https://static.dev.haloplus.io/static/documentation/images/test-app.png)
-
-### Test Cards
-
-For testing transactions within the staging environment, you must use a test card. Never use a live/actual card in this setting.
-
-* Use the <a href="https://play.google.com/store/apps/details?id=com.visa.app.cdet&hl=en_ZA" target="_blank">Visa CDET card</a> for testing.<br/>
-  * Use the first or the second card in the Viase CDET.
-* Use a test card provided by the bank
-* **DO NOT** use actual card numbers for testing.
-
-## Integrate the SDK Manually (Android)
-
-If your setup requires direct embedding, these instructions delow details how to manually integrate the SDK into your Android application.
-
-* Details on how to access the <a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">SDK</a>
-* How to programmatically initialize the SDK <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#6-initiallization-of-the-sdk" target="_blank">here</a>
-* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#7-transaction-flow" target="_blank">How to start a transaction</a>
-* <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide#5-life-cycle-methods" target="_blank">The life cycle of the SDK </a>
-* <a href="https://docs.halodot.io/docs/documentations/sdk/branding-guidelines" target="_blank">Branding Guidelines</a>
-
-<hr/>
-
-## Issues you may face
-
-* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#setup-issues" target="_blank">Setup Issues</a>
-* See <a href="https://docs.halodot.io/docs/documentations/faq/integration-issues#running-issues" target="_blank">Running Issues</a>
-
-
-## Halo SDK Plugin
-
-* Integrate the SDK with the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/flutter-plugin" target="_blank">here</a>
-* How to access the flutter plugin <a href="https://docs.halodot.io/docs/documentations/plugin-integration/flutter-test-app" target="_blank">here</a>
+For a more technical integration guide, see the [next guide](/docs/documentations/sdk/sdk-integration-guide).
