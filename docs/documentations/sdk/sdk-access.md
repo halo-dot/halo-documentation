@@ -25,13 +25,13 @@ Before you begin, ensure you have the following:
 
 ###### Your Issuer Name and Public Key
 
-{{VIEW_ISSUER_NAME}}
+<hr/>
 
 ---
 
 ###### Your Access Credentials
 
-{{VIEW_ACCESS_KEY}}
+<hr/>
 
 ---
 
@@ -59,7 +59,7 @@ Before you begin, ensure you have the following:
         }
         ```
 
-    - Open (or create it if it does not exit) the `local.properties` file and replace the placeholder values of `aws.accessKey` and `aws.secretKey`. These credentials are sensitive and should not be committed to source control. Add the credentials into a `local.properties` file:
+    - Open (or create it if it does not exist) the `local.properties` file and replace the placeholder values of `aws.accessKey` and `aws.secretKey`. These credentials are sensitive and should not be committed to source control. Add the credentials into a `local.properties` file:
 
         ```properties
         sdk.dir=~/Library/Android/sdk
@@ -145,6 +145,6 @@ Before you begin, ensure you have the following:
    We recommend downloading the <a href="https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet" target="_blank">Visa Contactless Device Evaluation Toolkit (CDET)</a> application.<br/>
    This is an Android-based mobile application that simulates virtual cards.
 
-    {{VIEW_TRANSACTIOINS}}
+    <hr/>
     
 Now, you are ready to start using the Halo.SDK in your Android application!
