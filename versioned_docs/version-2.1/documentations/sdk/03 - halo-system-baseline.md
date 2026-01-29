@@ -14,6 +14,14 @@ The Halo Dot Solution is an Android Application that enables the process tap on 
 * Devices supported
 * SCRP devices supported
 
+## Supported SDKs <a href="#supported-sdks" id="supported-sdks"></a>
+
+| **Version**           | **Status**           |
+| :-------------------: | -------------------- |
+| 2.0.x                 | DEPRECATED           |
+| 2.1.x                 |  ACTIVE              |
+| 4.x.x                 |  ACTIVE **BASELINE** |
+
 ### Operating Systems <a href="#operating-systems" id="operating-systems"></a>
 
 **Operating System Baseline**
