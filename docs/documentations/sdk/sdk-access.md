@@ -22,6 +22,7 @@ Before you begin, ensure you have the following:
 - **<a href="https://developer.android.com/studio" target="_blank">Android Studio</a>:** You will need Android Studio installed on your system to run the test app.
 
 ---
+Need more detail? Refer to out <a href="https://docs.halodot.io/" target="_blank">docs.haloto.io</a> for the comprehensive documentation.
 
 ###### Your Issuer Name and Public Key
 
@@ -39,7 +40,7 @@ Before you begin, ensure you have the following:
 
 1. **Download the Test App**
 
-    Clone our <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">test app</a> repo from GitHub.
+    Download our <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">test app</a> from GitHub.
 
 <br/>
 
@@ -73,72 +74,13 @@ Before you begin, ensure you have the following:
 
 3. **Gradle Setup**
 
-    After a Gradle sync, you should be able to import from the `za.co.synthesis.halo.sdk` namespace:
+    Run a Gradle sync, this will download the SDK and configure Android Studio to build the test app
 
-    ```kotlin
-    import za.co.synthesis.halo.sdk.HaloSDK
-    ```
+4. **Build & Run**
 
----
-
-##### Additional Configuration
-
-1. **Read AWS Credentials from `local.properties`**
-
-    This code snippet reads AWS credentials from a `local.properties` file and sets them as project properties in the Gradle build:
-
-    ```gradle
-    ext {
-        Properties properties = new Properties()
-        def propertiesFile = project.rootProject.file('local.properties')
-        if (propertiesFile.exists()) {
-            properties.load(propertiesFile.newDataInputStream())
-        }
-
-        accessKey = properties.getProperty('aws.accessKey')
-        secretKey = properties.getProperty('aws.secretKey')
-        tokenKey = System.getenv('AWS_SESSION_TOKEN')
-    }
-    ```
-<br/>
-
-2. **Maven Repository Configuration**
-
-    This configuration sets up Maven repositories hosted in an S3 bucket in a Halo AWS account:
-
-    ```gradle
-    repositories {
-        def repos = ['releases', 'snapshots']
-        repos.each { repo ->
-            maven {
-                name = repo
-                url = "s3://synthesis-halo-artifacts/$repo"
-
-                credentials(AwsCredentials) {
-                    accessKey = rootProject.ext.accessKey
-                    secretKey = rootProject.ext.secretKey
-                    if (tokenKey != null) {
-                        sessionToken = rootProject.ext.tokenKey
-                    }
-                }
-            }
-        }
-    }
-    ```
-<br/>
-
-3. **SDK Dependencies**
-
-    This code snippet configures the Halo.SDK dependencies for the test project in the app-level `build.gradle`:
-
-    ```gradle
-    dependencies {
-        // Declare dependencies for the Halo SDK
-        debugImplementation group: 'za.co.synthesis.halo', name: 'sdk', version: '2.1.26-debug'
-        releaseImplementation group: 'za.co.synthesis.halo', name: 'sdk', version: '2.1.26'
-    }
-    ```
-4. **Testing**
+   In Android Studio, click the run button to build and run the test app on your device
+   
+5. **Testing**
 
    After running the application, wait for the application to initialize, you will be able to enter an amount and a transaction reference.<br/>
    Initially, you will be testing against a test environment and a test card is required to test the transaction.<br/>
