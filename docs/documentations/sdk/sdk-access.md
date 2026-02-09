@@ -21,9 +21,11 @@ Before you begin, ensure you have the following:
 
 - **<a href="https://developer.android.com/studio" target="_blank">Android Studio</a>:** You will need Android Studio installed on your system to run the test app.
 
----
 Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank">docs.haloto.io</a> for the comprehensive documentation.
 
+---
+
+<br/>
 ###### Your Issuer Name and Public Key
 
 <hr/>
