@@ -21,8 +21,10 @@ Before you begin, ensure you have the following:
 
 - **<a href="https://developer.android.com/studio" target="_blank">Android Studio</a>:** You will need Android Studio installed on your system to run the test app.
 
+Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank">docs.halodot.io</a> for the comprehensive documentation.
+
 ---
-Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank">docs.haloto.io</a> for the comprehensive documentation.
+
 
 ###### Your Issuer Name and Public Key
 
@@ -76,10 +78,12 @@ Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank
 
     Run a Gradle sync, this will download the SDK and configure Android Studio to build the test app
 
+
 4. **Build & Run**
 
    In Android Studio, click the run button to build and run the test app on your device
    
+
 5. **Testing**
 
    After running the application, wait for the application to initialize, you will be able to enter an amount and a transaction reference.<br/>
