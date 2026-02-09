@@ -25,7 +25,7 @@ Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank
 
 ---
 
-<br/>
+
 ###### Your Issuer Name and Public Key
 
 <hr/>
