@@ -78,10 +78,12 @@ Need more detail? Refer to our <a href="https://docs.halodot.io/" target="_blank
 
     Run a Gradle sync, this will download the SDK and configure Android Studio to build the test app
 
+
 4. **Build & Run**
 
    In Android Studio, click the run button to build and run the test app on your device
    
+
 5. **Testing**
 
    After running the application, wait for the application to initialize, you will be able to enter an amount and a transaction reference.<br/>
