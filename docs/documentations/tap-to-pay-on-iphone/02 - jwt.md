@@ -9,7 +9,7 @@ tags:
 ---
 # JWT Integration Guide
 
-This guide explains how clients can generate JWT tokens for authentication with our backend system using RSA-256 asymmetric cryptography.
+This guide explains how clients can generate JWT tokens for authentication with our backend system using the **RS256 (RSA-SHA256)** algorithm for JWT signing.
 
 ## Overview
 
@@ -73,11 +73,9 @@ You must provide your **public key** to our backend team so we can verify your J
    ```
 
 2. **Send via secure channel**:
-   - Email to: ``
    - Support ticket with subject: "JWT Public Key Submission - [Your Company Name]"
 
 3. **Include the following information**:
-
    ```
    Company Name: [Your Company Name]
    Environment:
@@ -122,7 +120,7 @@ Your JWT token must include the following claims in the payload. Use your JWT li
 
 ### Required Claims
 
-```json
+```jsonc
 {
   "iss": "your company identifier",
   "sub": "Merchant ID",
@@ -133,7 +131,7 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "x-tid": "Terminal ID",
   "mcc": "Merchant Category Code",
   "mbn": "Your Business Name",
-  "tpid": "Transacation Provider ID"
+  "tpid": "Transaction Provider ID"
 }
 ```
 
