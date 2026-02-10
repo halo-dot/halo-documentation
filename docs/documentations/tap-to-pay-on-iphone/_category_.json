@@ -1,6 +1,6 @@
 {
-  "label": "Tap on own device",
-  "position": 6,
+  "label": "Tap To Pay on IPhone SDK Integration Guide",
+  "position": 3,
   "link": {
     "type": "generated-index",
     "description": "Halo Dot SDK is a software development kit that allows integrators to embed a contactless payments into their own mobile apps."
