@@ -7,18 +7,29 @@ tags:
   - tap to pay on iphone
   - iphone
 ---
-# HaloSDK
+# Halo.Swift (iOS SDK)
 
-A Swift SDK for accepting contactless payments on iPhone using Apple's Tap to Pay technology.
+Halo.Swift enables merchants to accept contactless card payments on iPhone using Apple’s Tap to Pay on iPhone technology. The SDK handles device capability checks, the Proximity Reader lifecycle, communication with Apple services, transaction execution, and security enforcement.
+
+Halo.Swift is distributed as the `HaloSDK` Swift module. All code examples reference the `HaloSDK` namespace.
 
 ## Requirements
 
-You'll need a few things before getting started:
+You'll need the following before getting started:
 
-- **iOS 15.5 or later** on a physical device (simulator won't work for Tap to Pay)
-- **iPhone XS or newer** — older models don't have the required NFC hardware
-- The **ProximityReader entitlement** from Apple (you'll need to apply through your Apple Developer account)
-- A merchant account set up through Apple's Tap to Pay program
+- iOS 15.5 or later on a physical device (the simulator will not work for Tap to Pay)
+
+- iPhone XS or newer. Older models do not have the required NFC hardware
+
+- The ProximityReader entitlement from Apple, requested through your Apple Developer account
+
+- A merchant account enrolled in Apple’s Tap to Pay on iPhone program
+
+## Before You Start
+
+Before integrating the SDK into your app, you'll need to set up JWT authentication on your backend. This involves generating RSA keys and configuring token signing — the SDK uses these tokens for all API requests.
+
+Follow the [JWT Integration Guide](./jwt) to get that sorted first. Once your backend can generate valid JWT tokens, come back here and continue with installation.
 
 ## Installation
 
@@ -47,7 +58,7 @@ import HaloSDK
 
 ### 1. Initialize the SDK
 
-Call this once when your app starts, typically in your AppDelegate or early in your payment flow:
+Your app must call `initialize` to trigger the initial preparation and warming up of Tap to Pay on iPhone at app launch or when the app enters the foreground.
 
 ```swift
 do {
@@ -55,23 +66,26 @@ do {
         authToken: "your_auth_token_from_backend",
         environment: .sandbox  // use .production for live payments
     )
-    
+
     if capabilities.canAcceptPayments {
         print("Ready to accept payments")
     }
+
 } catch HaloError.deviceNotSupported(let reason) {
     // This device can't accept Tap to Pay
     print("Device not supported: \(reason)")
+
 } catch {
     print("Initialization failed: \(error)")
 }
+
 ```
 
 The SDK will check if the device supports Tap to Pay and throw an error if it doesn't. You'll get back a `HaloDeviceCapabilities` object that tells you what the device can do.
 
 ### 2. Start a Payment
 
-When you're ready to accept a payment:
+Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements.
 
 ```swift
 let result = await HaloSDK.startContactlessPayment(
@@ -81,16 +95,18 @@ let result = await HaloSDK.startContactlessPayment(
 )
 ```
 
-This brings up Apple's card reader UI. The customer taps their card or phone, and you get a result back.
+This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
 
 ### 3. Handle the Result
 
-The SDK returns one of two results — either the payment went through or it didn't:
+startContactlessPayment returns a HaloPaymentResult that represents the final outcome of a single checkout attempt. A payment is either approved or declined.
+
+A declined result may represent a customer cancellation, an issuer decline, a network failure, or another error condition.
 
 ```swift
 switch result {
 case .approved(let receipt):
-    // Payment went through
+    // Payment completed successfully
     print("Payment approved: \(receipt.transactionId)")
     print("Amount: \(receipt.amountMinor) \(receipt.currency)")
     print("Card: \(receipt.cardBrand ?? "Unknown") ending in \(receipt.last4 ?? "****")")
@@ -109,15 +125,15 @@ case .declined(let errorCode, let errorMessage):
 
 ### Common Error Codes
 
-When a payment is declined, `errorCode` tells you what happened:
+When a payment is declined, `errorCode` identifies the outcome for application logic and analytics. User-facing messaging should remain clear and non-technical.
 
 | Error Code | Meaning |
 |-----------|---------|
 | `USER_CANCELLED` | Customer cancelled the payment |
 | `CARD_DECLINED` | Card was declined by the issuer |
 | `NETWORK_ERROR` | Network connectivity issue |
-| `PAYMENT_IN_PROGRESS` | Another payment is already running |
-| `DEVICE_NOT_SUPPORTED` | Device can't do Tap to Pay |
+| `PAYMENT_IN_PROGRESS` | Another payment is already in progress |
+| `DEVICE_NOT_SUPPORTED` | Device does not support Tap to Pay on iPhone |
 | `SCREEN_CAPTURE_DETECTED` | Screen recording/mirroring detected |
 | `NOT_INITIALIZED` | SDK wasn't initialized |
 | `TIMEOUT` | Request timed out |
@@ -142,29 +158,60 @@ case .declined(let errorCode, let errorMessage):
         showAlert(title: "Payment Failed", message: errorMessage ?? "Please try again")
     }
 }
+
 ```
 
+Applications should always present a clear outcome after a contactless payment attempt. This includes confirming successful payments, indicating when a payment is declined, and clearly distinguishing user-initiated cancellations from errors. This behavior is required to meet Apple’s Tap to Pay on iPhone checkout experience guidelines.
+
 ## Configuration
+
+Configuration is applied during SDK initialization and affects how the SDK prepares Tap to Pay on iPhone, connects to backend services, and validates transactions. Configuration changes require reinitializing the SDK to take effect.
 
 ### Environments
 
 The SDK supports two environments:
 
 ```swift
+
 // For development and testing
+
 try HaloSDK.initialize(authToken: token, environment: .sandbox)
 
 // For real payments
+
 try HaloSDK.initialize(authToken: token, environment: .production)
+
 ```
 
-Sandbox mode connects to test servers and won't process real payments. Always use this during development.
+Sandbox mode connects to test services and does not process real payments. It should be used for development and testing only. Production mode is required for live payments and App Store distribution.
+
+### Mock Mode
+
+If you want to test the payment flow without a physical card reader setup, you can enable mock mode by using an auth token that starts with `mock_` or `test_`:
+
+```swift
+
+try HaloSDK.initialize(
+    authToken: "mock_test_token",
+    environment: .sandbox
+)
+
+```
+
+Mock mode simulates the payment result flow and can be used for UI and integration testing without submitting a real Tap to Pay transaction. It is intended for development and automated testing. Mock mode does not replace Apple entitlements or device requirements for real contactless payments.
+
+Use sandbox mode when testing real Tap to Pay on iPhone behavior on a physical device. Use mock mode when validating application logic, UI flows, or automated tests where real card interaction is not required.
 
 ## Error Handling
+
+These error codes apply to declined payment results returned from startContactlessPayment. They represent transaction-level outcomes rather than SDK initialization or configuration errors.
+
+Payment attempts return a HaloPaymentResult. Transaction-level outcomes (including declines and cancellations) are returned as .declined with an error code. HaloError is used for SDK lifecycle and operational errors (for example initialization, preparation, token issues, or reader failures).
 
 The SDK uses a single `HaloError` enum for all errors. Here's how to handle the common ones:
 
 ```swift
+
 switch error {
 case .notInitialized:
     // You forgot to call HaloSDK.initialize()
@@ -207,32 +254,35 @@ default:
 Every `HaloError` has properties that help you decide what to do:
 
 ```swift
+
 if error.isRetryable {
-    // Safe to retry immediately
+    // Retry the operation (for example refresh token, re-attempt preparation, or retry payment start)
 }
 
 if error.requiresUserAction {
-    // Show the user what they need to do
+    // Prompt the user to complete the required step (for example account linking or enabling permissions)
 }
 
 if error.isFatal {
-    // Can't recover — device doesn't support Tap to Pay
+    // Disable Tap to Pay features
 }
 ```
 
 ### Event Delegate
 
-The SDK notifies your app about errors and reader preparation progress through a delegate. Apple requires apps to display a progress indicator while Tap to Pay is being configured, and the delegate makes this easy.
+The SDK notifies your app about errors and reader preparation progress through a delegate. Applications should display clear preparation status while Tap to Pay on iPhone is being configured. The delegate provides preparation progress and readiness callbacks to support this.
+
+The example below shows one way to map SDK events to UI state. Replace the UI updates with your application’s own patterns.
 
 ```swift
 class PaymentHandler: HaloEventDelegate {
-    
     // Called during reader preparation (0.0 to 1.0)
     func haloSDK(didUpdatePreparationProgress progress: Double) {
         DispatchQueue.main.async {
             self.progressView.progress = Float(progress)
             self.statusLabel.text = "Preparing Tap to Pay..."
         }
+
     }
     
     // Called when reader is ready to accept payments
@@ -243,7 +293,7 @@ class PaymentHandler: HaloEventDelegate {
             self.statusLabel.text = "Ready to accept payments"
         }
     }
-    
+
     // Called if reader preparation fails
     func haloSDK(didFailPreparationWithError error: HaloError) {
         DispatchQueue.main.async {
@@ -251,7 +301,7 @@ class PaymentHandler: HaloEventDelegate {
             self.statusLabel.text = "Setup failed: \(error.localizedDescription)"
         }
     }
-    
+
     // Called when any error occurs
     func haloSDK(didReceiveError event: HaloErrorEvent) {
         Analytics.track("payment_error", properties: [
@@ -267,17 +317,19 @@ class PaymentHandler: HaloEventDelegate {
 HaloSDK.setEventDelegate(PaymentHandler())
 ```
 
-The preparation progress callbacks fire during SDK initialization (in the background) and again if the reader needs to be re-prepared before a payment. You don't need to implement all methods — they all have default empty implementations, so just override the ones you care about.
+Preparation progress callbacks are triggered during SDK initialization and whenever the system needs to prepare or re-prepare Tap to Pay on iPhone (for example after app foregrounding or a configuration change). Applications should be prepared to receive these callbacks more than once during the app lifecycle.
 
 ## Security
 
-The SDK handles security automatically. During payment, it continuously monitors for:
+The SDK enforces security controls during Tap to Pay on iPhone preparation and payment. If a prohibited condition is detected, the payment attempt is stopped and an appropriate error is returned.
 
-- **Screen recording or mirroring** — payment is aborted if detected
-- **Jailbreak detection** — compromised devices are blocked
-- **App backgrounding** — payment can't proceed if the app isn't in the foreground
+- **Screen recording or mirroring** — the payment attempt is aborted if detected
 
-You don't need to implement any of this yourself. If a security check fails, you'll get an appropriate error in the payment result.
+- **Compromised device checks** — devices that fail security integrity checks are blocked
+
+- **App state changes** — the payment cannot proceed if the app moves out of the foreground
+
+You don't need to implement any of this yourself. If a security check fails during a payment attempt, the payment returns a declined result with an appropriate error code. If a device fails mandatory security checks outside of a payment attempt, the SDK surfaces a HaloError and disables Tap to Pay functionality for that device.
 
 Sensitive data like tokens are stored in the iOS Keychain, not in UserDefaults or plain files.
 
@@ -286,14 +338,22 @@ Sensitive data like tokens are stored in the iOS Keychain, not in UserDefaults o
 Tap to Pay requires specific hardware. The SDK checks this during initialization and will throw `deviceNotSupported` if the device can't accept payments.
 
 **Supported devices:**
+
 - iPhone XS and later (includes XR, 11, 12, 13, 14, 15, 16 series)
+
 - Must be running iOS 15.5 or later
+
 - Must be a physical device — the simulator doesn't have NFC hardware
 
 **Not supported:**
+
 - iPhone X and earlier
-- Any iPad (no NFC for payments)
+
+- Any iPad (Tap to Pay on iPhone is not supported on iPadOS)
+
 - Simulator builds
+
+Device compatibility is evaluated during SDK initialization based on device model, iOS version, entitlements, and required system capabilities. If any requirement is not met, initialization fails with deviceNotSupported.
 
 ## Cancelling a Payment
 
@@ -303,7 +363,9 @@ If you need to cancel a payment that's in progress (maybe a timeout in your UI):
 HaloSDK.cancelPayment()
 ```
 
-This will stop the card reader. The `startContactlessPayment` call will return `.declined(errorCode: "USER_CANCELLED", errorMessage: "Payment cancelled by user")`.
+This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "USER_CANCELLED", errorMessage: "Payment cancelled by user")`.
+
+Applications should call cancelPayment() only in response to a clear user action or application-level timeout. The SDK automatically cancels the payment if required by system, security, or lifecycle conditions, and applications do not need to handle those cases explicitly.
 
 ## Cleanup
 
@@ -322,9 +384,10 @@ The SDK can include device location in transaction requests for fraud prevention
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>Location is used to help verify transactions and prevent fraud.</string>
+
 ```
 
-If location permission isn't granted (or the key is missing), transactions will still work — the SDK just won't include location data in the request headers. You don't need to request permission yourself; the SDK handles it automatically when a payment starts.
+If location permission is denied or unavailable, transactions still proceed normally, but location data is not included in the request headers. If a user has previously denied location permission, iOS will not prompt again and the user must enable it manually in system settings.
 
 **What happens with location:**
 - If granted: Location coordinates are sent in the `X-Location` header for fraud scoring
@@ -350,6 +413,7 @@ The SDK automatically includes these headers with each transaction:
 When a payment is approved, the `HaloReceipt` contains data from both the card reader and the backend:
 
 ```swift
+
 case .approved(let receipt):
     receipt.transactionId    // Backend's haloReference
     receipt.authCode         // Authorization code from processor
@@ -388,9 +452,9 @@ Make sure you're running on a physical device, not the simulator. Also check tha
 
 You need the ProximityReader entitlement from Apple. This requires approval through the Apple Developer program for Tap to Pay.
 
-**"Account not linked" error**
+**Payments work in mock mode but fail with real tokens**
 
-The merchant account needs to be set up. Go to Settings → Wallet & Apple Pay on the device and complete the merchant enrollment.
+Your backend needs to provide valid Apple-signed JWT tokens. Mock tokens (starting with `mock_` or `test_`) bypass the real Apple infrastructure.
 
 **Location not being sent with transactions**
 
@@ -399,8 +463,3 @@ Check that you've added `NSLocationWhenInUseUsageDescription` to your Info.plist
 **"PPS-4003" or "Request Expired" error**
 
 The encrypted card data must be submitted to the backend within 60 seconds of the card tap. If you're seeing this error, there may be network delays or the payment flow is taking too long. The SDK handles this automatically, but slow network conditions can cause timeouts.
-
----
-
-## License
-
