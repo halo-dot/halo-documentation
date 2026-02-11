@@ -167,7 +167,7 @@ Your JWT token must include the following claims in the payload. Use your JWT li
 
 ### Use Token when calling the SDK
 
-Include the JWT token in the initialisation message to the SDK
+Include the JWT token in the initialisation message to the SDK:
 
 ```swift
 do {
