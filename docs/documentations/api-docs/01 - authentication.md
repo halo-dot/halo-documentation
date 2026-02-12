@@ -2,7 +2,7 @@
 
 ## Users Managed by Halo Dot
 
-Follow this process if if Halo Dot manages your users: 
+Follow this process if Halo Dot manages your users: 
 
 In order to interact with any of the API endpoints, you must provide your API key as part of the request. You can find your secret key in the <a href="https://go.merchantportal.prod.haloplus.io/auth/login" target="_blank">Halo.Go Portal </a>after signing up.\
 From the  Portal, navigate to Users. \
