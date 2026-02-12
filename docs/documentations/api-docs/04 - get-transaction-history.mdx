@@ -37,9 +37,12 @@ import TabItem from '@theme/TabItem';
 
 #### Headers
 
+You need to supply one of the following authentication methods in the header of the API request:
+
 | Name                                        | Type   | Description                                    |
 | ------------------------------------------- | ------ | ---------------------------------------------- |
 | x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal |
+| Authorzation: Bearer \<token\><mark style={{color:'red'}}>\*</mark> | String | A token issued by your backend |
 
 <Tabs>
     <TabItem value="transactionHistory" label="200: OK Status">
@@ -49,7 +52,6 @@ import TabItem from '@theme/TabItem';
     "id": "1d87e52a-ed08-4b5a-96c6-3f6942a1dc17",
     "passthroughUserId": null,
     "merchantTransactionReference": "17a42d8a-2717-45b6-95f7-7f4957e36c16",
-    "dataRecord": "nwIGAAAAAQAAnwMGAAAAAAAAnyYIvmPeBfQYE4mCAhmAUApDT00wMiB2MSAwXzQBAZ82AgACnwcC/8CfCQIAAp8nAYCfNAMfAwKEB6AAAAAEMGCfHggwMkE0NjQ4M58QEgEQoAAPBAAAAAAAAAAAAAAA/58zAwAICJ8aAgcQnzUBIZUFAAAAgAFfKgIHEJoDIwYGnAEAnzcEAczRLA==",
     "details": [
         {
             "tags": [
@@ -140,10 +142,6 @@ import TabItem from '@theme/TabItem';
                 {
                     "tag": "9F39",
                     "value": "07"
-                },
-                {
-                    "tag": "DF9E09",
-                    "value": "57126799998900000074324D49122010123456785A0A6799998900000074324F5F24034912315F25031601015F280208405F3401018C279F02069F03069F1A0295055F2A029A039C019F37049F35019F45029F4C089F34039F21039F7C148D0C910A8A0295059F37049F4C088E0C000000000000000042031F039F0702FFC09F080200029F0D0500000000009F0E0500000000009F0F0500000000009F420208409F4A01821980"
                 },
                 {
                     "tag": "9F36",
@@ -423,11 +421,6 @@ import TabItem from '@theme/TabItem';
                 }
             ],
             "maskedPAN": "679999*********4324",
-            "encryptedV2": {
-                "keyVersion": "ERqqMJM4mCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-                "fingerprint": "",
-                "encryptedCardData": "OVq8nqoXs4MQ+A+dSTzlnyxwDMc7t7mEs8tMJwspHZqCORQAOB3Gx9+RfM33tZqKiJQezpFC4+CvyC7TWF0UvQtEdN9IpPAFXfuETCQUyJcC/L8nY2oeCN/015Yqw6su2mpgW1JWfklcFiqx1vbYoF1R39BG2CrAV9XFozmm4fKzQ1M+FD7xsuwXgRO/4qaSFTkWg8Dg8DsqeRawfyaGRnR5mUOa4JWjbeBhZ9Bid5BNptLlwfXEilsnM0Qn1VYy/LwbvewJ4bZuQeJSbmaB52C8INnrswK65anS7fIZqkNQoCZ7CIjJ1FsF4ob30p8XippufuvI6ZmyvnsNsS5suA=="
-            },
             "paymentProviderId": 100
         }
     ],

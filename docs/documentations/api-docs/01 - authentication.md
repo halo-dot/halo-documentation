@@ -11,7 +11,7 @@ In the user table click generate to create  your `API Key`&#x20;
 The API key should be included in the header of the API request. You can provide the secret key by using <a href="https://swagger.io/docs/specification/authentication/api-keys/" target="_blank">API Keys</a> and the `Headers`. To do this, prepend X-API-Key to the secret key and insert it into the `Headers.`
 
 ```
-Headers: X-API-Key <abcdef12345>
+Headers: x-api-key: <abcdef12345>
 ```
 
 :::warning
@@ -23,7 +23,6 @@ Your API keys are used to identify you and enable payments, so be sure to keep t
 If you issue the tokens used to initialise the Halo Dot SDK, you can use the same tokens to authenticate API requests. To do this, include the token in the `Authorization` header of the API request. Prepend `Bearer` to the token and insert it into the `Headers.`
 
 ```
-Headers: Authorization Bearer <abcdef12345>
+Headers: Authorization: Bearer <abcdef12345>
 ```
 
-```
