@@ -44,7 +44,7 @@ Add it directly to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(id: "synthesis.halosdk", from: "1.0.40")
+    .package(id: "synthesis.halosdk", from: "1.0.42")
 ]
 ```
 
@@ -89,8 +89,8 @@ Starting a contactless payment must be initiated by a clear user action, such as
 
 ```swift
 let result = await HaloSDK.startContactlessPayment(
-    amountMinor: 1500,           // $15.00 in cents
-    currency: "USD",
+    amountMinor: 1500, // Amount is always passed in minor units (e.g. 1500 = 15.00 ZAR)
+    currency: "ZAR",
     merchantReference: "order_12345"
 )
 ```
@@ -185,22 +185,6 @@ try HaloSDK.initialize(authToken: token, environment: .production)
 
 Sandbox mode connects to test services and does not process real payments. It should be used for development and testing only. Production mode is required for live payments and App Store distribution.
 
-### Mock Mode
-
-If you want to test the payment flow without a physical card reader setup, you can enable mock mode by using an auth token that starts with `mock_` or `test_`:
-
-```swift
-
-try HaloSDK.initialize(
-    authToken: "mock_test_token",
-    environment: .sandbox
-)
-
-```
-
-Mock mode simulates the payment result flow and can be used for UI and integration testing without submitting a real Tap to Pay transaction. It is intended for development and automated testing. Mock mode does not replace Apple entitlements or device requirements for real contactless payments.
-
-Use sandbox mode when testing real Tap to Pay on iPhone behavior on a physical device. Use mock mode when validating application logic, UI flows, or automated tests where real card interaction is not required.
 
 ## Error Handling
 
@@ -267,6 +251,59 @@ if error.isFatal {
     // Disable Tap to Pay features
 }
 ```
+
+
+### Handling Auth Token Rejection
+
+When the backend rejects your auth token (401 Unauthorized), the SDK returns `authTokenUnauthorized`. This typically means your token is expired, malformed, or revoked. Here's how to handle it:
+
+```swift
+
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.authTokenUnauthorized {
+
+        // Token was rejected — fetch a new one and reinitialize
+
+        Task {
+
+            let freshToken = await yourBackend.getNewAuthToken()
+
+            try? HaloSDK.initialize(authToken: freshToken, environment: .production)
+
+            // Optionally prompt user to retry payment
+
+        }
+
+    }
+
+```
+
+You can also use the `requiresTokenRefresh` property to catch all token-related errors in one check:
+
+```swift
+
+if error.requiresTokenRefresh {
+
+    // Covers both tokenError and authTokenUnauthorized
+
+    let freshToken = await yourBackend.getNewAuthToken()
+
+    try HaloSDK.initialize(authToken: freshToken, environment: .production)
+
+}
+
+```
+
+**When this happens:**
+
+- Auth token expired on the backend
+
+- Token signature is invalid or malformed
+
+- Token was revoked or invalidated server-side
+
+- Wrong environment (sandbox token in production or vice versa)
 
 ### Event Delegate
 
@@ -452,9 +489,6 @@ Make sure you're running on a physical device, not the simulator. Also check tha
 
 You need the ProximityReader entitlement from Apple. This requires approval through the Apple Developer program for Tap to Pay.
 
-**Payments work in mock mode but fail with real tokens**
-
-Your backend needs to provide valid Apple-signed JWT tokens. Mock tokens (starting with `mock_` or `test_`) bypass the real Apple infrastructure.
 
 **Location not being sent with transactions**
 
@@ -463,3 +497,15 @@ Check that you've added `NSLocationWhenInUseUsageDescription` to your Info.plist
 **"PPS-4003" or "Request Expired" error**
 
 The encrypted card data must be submitted to the backend within 60 seconds of the card tap. If you're seeing this error, there may be network delays or the payment flow is taking too long. The SDK handles this automatically, but slow network conditions can cause timeouts.
+
+**AUTH_TOKEN_UNAUTHORIZED or "Authentication token rejected" error**
+
+Your auth token was rejected by the backend (HTTP 401). This usually means:
+
+- The token has expired — fetch a fresh one from your backend and call `HaloSDK.initialize()` again
+- You're using a sandbox token in production (or vice versa) — make sure the token matches your environment
+- The token signature is invalid — verify your backend is signing tokens correctly
+- The token was revoked server-side — check with your payment provider
+
+The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
+
