@@ -6,26 +6,16 @@ tags:
   - guides
 ---
 
-### Accessing the SDK
-<br/>
 The SDK is hosted in a maven repo, through an S3 bucket in a Halo AWS account.
-<br/>
-<br/>
-A debug version of the SDK is made available to support development efforts, but only the release version will be permitted to transact in production. The debug version has full logging enabled and allows a debugger to be attached to the integrating app.
-<br/>
-<br/>
+
+A debug version of the SDK is made available to support development efforts, but only the release version will be permitted to transact in production. <br/>
+The debug version has full logging enabled and allows a debugger to be attached to the integrating app.
 
 #### Accessing Maven Repo
 
 1. In order to access the SDK, we generate an AWS access key and secret key when you register on the developer portal here.<br/>
    These are sensitive and should not be committed to source control.<br/>
-   Add the credentials to the *local.properties* file located in your android app source.<br/>
-
-```kotlin
-AWS.ACCESSKEY = {{ACCESS_KEY}}
-AWS.SECRETKEY = {{SECRET_KEY}}
-```
-<br/>
+   Add the credentials to the *local.properties* file located in your android app source.
 
 Open the *local.properties* file and insert _aws.accessKey_ and *aws.secretKey* with their values. <br/>
 These credentials are sensitive and should not be committed to source control. Your local.properties should look like this:
