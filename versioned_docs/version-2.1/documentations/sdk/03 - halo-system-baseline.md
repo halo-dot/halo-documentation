@@ -19,7 +19,7 @@ The Halo Dot Solution is an Android Application that enables the process tap on 
 | **Version**           | **Status**           |
 | :-------------------: | -------------------- |
 | 2.0.x                 | DEPRECATED           |
-| 2.1.x                 |  ACTIVE              |
+| 2.1.x                 | ACTIVE               |
 | 4.x.x                 |  ACTIVE **BASELINE** |
 
 ### Operating Systems <a href="#operating-systems" id="operating-systems"></a>
