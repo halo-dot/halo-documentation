@@ -44,7 +44,7 @@ Add it directly to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(id: "synthesis.halosdk", from: "1.0.42")
+    .package(id: "synthesis.halosdk", from: "1.0.45")
 ]
 ```
 
@@ -129,7 +129,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 
 | Error Code | Meaning |
 |-----------|---------|
-| `USER_CANCELLED` | Customer cancelled the payment |
+| `USER_CANCELLED` | Customer cancelled the payment (includes Apple's card reader cancel button and `cancelPayment()`) |
 | `CARD_DECLINED` | Card was declined by the issuer |
 | `NETWORK_ERROR` | Network connectivity issue |
 | `PAYMENT_IN_PROGRESS` | Another payment is already in progress |
@@ -137,6 +137,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `SCREEN_CAPTURE_DETECTED` | Screen recording/mirroring detected |
 | `NOT_INITIALIZED` | SDK wasn't initialized |
 | `TIMEOUT` | Request timed out |
+| `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401) |
 | `104` | Server configuration error (contact support) |
 
 You can also check these programmatically:
