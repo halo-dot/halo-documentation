@@ -44,7 +44,7 @@ Add it directly to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(id: "synthesis.halosdk", from: "1.0.45")
+    .package(id: "synthesis.halosdk", from: "1.0.46")
 ]
 ```
 
