@@ -1,6 +1,8 @@
 ---
-id: integration-guide
+id: quick-start-guide
+title: Quick Start guide
 sidebar_class_name: hidden
+sidebar_display: none
 tags:
   - sdk
   - guides
