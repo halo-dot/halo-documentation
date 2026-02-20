@@ -1,6 +1,8 @@
 ---
 id: integration-guide
+title: Integration Guide
 sidebar_class_name: hidden
+sidebar_display: none
 tags:
   - sdk
   - guides
