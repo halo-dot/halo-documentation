@@ -8,12 +8,6 @@ tags:
   - guides
 ---
 
-As your **Coding Partner**, I'll guide you through creating a simple Android app using **Kotlin** and **Jetpack Compose** (the modern standard for Android UI).
-
-This guide assumes you have **Android Studio** installed.
-
----
-
 #### Quick Start Guide
 
 ##### 1. Project Overview
