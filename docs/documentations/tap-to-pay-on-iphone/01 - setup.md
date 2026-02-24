@@ -7,6 +7,7 @@ tags:
   - tap to pay on iphone
   - iphone
 ---
+
 # Halo.Swift (iOS SDK)
 
 Halo.Swift enables merchants to accept contactless card payments on iPhone using Apple’s Tap to Pay on iPhone technology. The SDK handles device capability checks, the Proximity Reader lifecycle, communication with Apple services, transaction execution, and security enforcement.
@@ -34,6 +35,7 @@ Follow the [JWT Integration Guide](./jwt) to get that sorted first. Once your ba
 ## Installation
 
 Login to AWS CodeArtifact using the following commands:
+
 ```bash
 export AWS_ACCESS_KEY_ID=<provided to you by Halo Dot>
 export AWS_SECRET_ACCESS_KEY=<provided to you by Halo Dot>
@@ -44,55 +46,98 @@ Add it directly to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(id: "synthesis.halosdk", from: "1.0.46")
+
+    .package(id: "synthesis.halosdk", from: "1.0.51")
+
 ]
 ```
 
-Then import it where you need it:
+Then import the module where needed:
 
 ```swift
+
 import HaloSDK
+import Combine  // Required for the token provider
+
 ```
 
 ## Quick Start
 
 ### 1. Initialize the SDK
 
-Your app must call `initialize` to trigger the initial preparation and warming up of Tap to Pay on iPhone at app launch or when the app enters the foreground.
+Your app provides a **token provider closure** that the SDK calls whenever it needs an auth token. The SDK calls it once during initialization (to validate it works), and again automatically whenever the cached token expires or is rejected.
 
 ```swift
+
 do {
-    let capabilities = try HaloSDK.initialize(
-        authToken: "your_auth_token_from_backend",
+
+    let capabilities = try await HaloSDK.initialize(
+
+        tokenProvider: {
+            Future { promise in
+                // Call your backend to get a fresh JWT
+                YourBackend.fetchAuthToken { token, error in
+                    if let token = token {
+                        promise(.success(token))
+                    } else {
+                        promise(.failure(error ?? HaloError.authTokenUnauthorized))
+                    }
+                }
+            }
+        },
+
         environment: .sandbox  // use .production for live payments
+
     )
 
     if capabilities.canAcceptPayments {
+
         print("Ready to accept payments")
+
     }
 
 } catch HaloError.deviceNotSupported(let reason) {
+
     // This device can't accept Tap to Pay
+
     print("Device not supported: \(reason)")
 
+} catch HaloError.authTokenUnauthorized {
+
+    // Token provider failed — check your backend
+
+    print("Token provider returned invalid token")
+
 } catch {
+
     print("Initialization failed: \(error)")
+
 }
 
 ```
 
-The SDK will check if the device supports Tap to Pay and throw an error if it doesn't. You'll get back a `HaloDeviceCapabilities` object that tells you what the device can do.
+The SDK checks device capabilities and throws if the device doesn't support Tap to Pay. You get back a `HaloDeviceCapabilities` object that tells you what the device can do.
+
+**Why a token provider instead of a static token?** Tokens expire. With a provider, the SDK can fetch a fresh token on-demand — before requests if the JWT is expired, or automatically on 401 retry. You don't need to worry about token expiry timing or re-initializing the SDK.
 
 ### 2. Start a Payment
 
-Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements.
+Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements. For [processing Refunds](#processing-refunds)
 
 ```swift
+
 let result = await HaloSDK.startContactlessPayment(
-    amountMinor: 1500, // Amount is always passed in minor units (e.g. 1500 = 15.00 ZAR)
+
+    amountMinor: 1500,           // 15.00 in cents
+
     currency: "ZAR",
+
     merchantReference: "order_12345"
+    // type: .purchase (default) or .refund  
+
+
 )
+
 ```
 
 This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
@@ -104,41 +149,57 @@ startContactlessPayment returns a HaloPaymentResult that represents the final ou
 A declined result may represent a customer cancellation, an issuer decline, a network failure, or another error condition.
 
 ```swift
+
 switch result {
+
 case .approved(let receipt):
+
     // Payment completed successfully
+
     print("Payment approved: \(receipt.transactionId)")
+
     print("Amount: \(receipt.amountMinor) \(receipt.currency)")
+
     print("Card: \(receipt.cardBrand ?? "Unknown") ending in \(receipt.last4 ?? "****")")
-    
+
 case .declined(let errorCode, let errorMessage):
+
     // Payment didn't go through — could be a decline, cancellation, or error
+
     print("Payment declined")
+
     if let code = errorCode {
+
         print("Error code: \(code)")
+
     }
+
     if let message = errorMessage {
+
         print("Reason: \(message)")
+
     }
+
 }
+
 ```
 
 ### Common Error Codes
 
 When a payment is declined, `errorCode` identifies the outcome for application logic and analytics. User-facing messaging should remain clear and non-technical.
 
-| Error Code | Meaning |
-|-----------|---------|
-| `USER_CANCELLED` | Customer cancelled the payment (includes Apple's card reader cancel button and `cancelPayment()`) |
-| `CARD_DECLINED` | Card was declined by the issuer |
-| `NETWORK_ERROR` | Network connectivity issue |
-| `PAYMENT_IN_PROGRESS` | Another payment is already in progress |
-| `DEVICE_NOT_SUPPORTED` | Device does not support Tap to Pay on iPhone |
-| `SCREEN_CAPTURE_DETECTED` | Screen recording/mirroring detected |
-| `NOT_INITIALIZED` | SDK wasn't initialized |
-| `TIMEOUT` | Request timed out |
-| `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401) |
-| `104` | Server configuration error (contact support) |
+| Error Code                | Meaning                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `USER_CANCELLED`          | Customer cancelled the payment (includes Apple's card reader cancel button and `cancelPayment()`) |
+| `CARD_DECLINED`           | Card was declined by the issuer                                                                   |
+| `NETWORK_ERROR`           | Network connectivity issue                                                                        |
+| `PAYMENT_IN_PROGRESS`     | Another payment is already in progress                                                            |
+| `DEVICE_NOT_SUPPORTED`    | Device does not support Tap to Pay on iPhone                                                      |
+| `SCREEN_CAPTURE_DETECTED` | Screen recording/mirroring detected                                                               |
+| `NOT_INITIALIZED`         | SDK wasn't initialized                                                                            |
+| `TIMEOUT`                 | Request timed out                                                                                 |
+| `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401)                                                               |
+| `104`                     | Server configuration error (contact support)                                                      |
 
 You can also check these programmatically:
 
@@ -175,16 +236,58 @@ The SDK supports two environments:
 ```swift
 
 // For development and testing
-
-try HaloSDK.initialize(authToken: token, environment: .sandbox)
+try await HaloSDK.initialize(tokenProvider: myProvider, environment: .sandbox)
 
 // For real payments
-
-try HaloSDK.initialize(authToken: token, environment: .production)
+try await HaloSDK.initialize(tokenProvider: myProvider, environment: .production)
 
 ```
 
 Sandbox mode connects to test services and does not process real payments. It should be used for development and testing only. Production mode is required for live payments and App Store distribution.
+
+
+### Token Provider
+
+The token provider is a closure that returns a `Future<String, Error>`. The SDK calls it:
+
+1. **During initialization** — to validate your backend is working
+2. **Before requests** — if the cached JWT is expired (or within 30 seconds of expiry)
+3. **On 401 retry** — if the backend rejects a token the SDK thought was valid
+
+Here's a typical implementation:
+
+```swift
+
+func makeTokenProvider() -> @Sendable () -> Future<String, Error> {
+    return {
+        Future { promise in
+            // Your async backend call
+            APIClient.shared.getAuthToken { result in
+                switch result {
+                case .success(let token):
+                    promise(.success(token))
+                case .failure(let error):
+                    promise(.failure(error))
+                }
+            }
+        }
+    }
+}
+
+// Use it
+try await HaloSDK.initialize(
+    tokenProvider: makeTokenProvider(),
+    environment: .sandbox
+)
+
+```
+
+**Gotchas:**
+
+- The provider must be `@Sendable` — it can be called from any thread
+- Return quickly — the SDK waits for your provider before proceeding
+- If your provider throws, the SDK treats it as `authTokenUnauthorized`
+- The JWT must have an `exp` claim — the SDK reads it to detect expiry client-side
 
 
 ## Error Handling
@@ -198,40 +301,59 @@ The SDK uses a single `HaloError` enum for all errors. Here's how to handle the 
 ```swift
 
 switch error {
+
 case .notInitialized:
+
     // You forgot to call HaloSDK.initialize()
-    
+
 case .deviceNotSupported(let reason):
+
     // Device can't do Tap to Pay
+
     // reason tells you why: .modelNotSupported, .osVersionNotSupported, etc.
-    
+
 case .deviceNotCompliant:
+
     // Device failed security checks (possibly jailbroken)
-    
+
 case .paymentInProgress:
+
     // There's already a payment happening — wait for it to finish
-    
+
 case .networkError(let reason):
+
     // Network issues — check connectivity and retry
-    
+
+case .authTokenUnauthorized:
+
+    // Auth token was rejected (401) — get a fresh token from your backend
+
 case .accountLinkingError(let reason):
+
     // Merchant account needs to be linked in Settings → Wallet & Apple Pay
-    
+
 case .tokenError(let reason, let detail):
+
     // Connection token issue — might need a fresh token from your backend
-    
+
 case .readerError(let reason, let detail):
+
     // Card reader had a problem — usually retryable
-    
+
 case .userCancelled:
+
     // Customer cancelled the payment
-    
+
 case .cardDeclined:
+
     // The card was declined by the issuer
 
 default:
+
     print("Error: \(error.localizedDescription)")
+
 }
+
 ```
 
 ### Error Properties
@@ -241,17 +363,76 @@ Every `HaloError` has properties that help you decide what to do:
 ```swift
 
 if error.isRetryable {
+
     // Retry the operation (for example refresh token, re-attempt preparation, or retry payment start)
+
 }
 
 if error.requiresUserAction {
+
     // Prompt the user to complete the required step (for example account linking or enabling permissions)
+
 }
 
 if error.isFatal {
+
     // Disable Tap to Pay features
-}
+
 ```
+
+
+### Handling Auth Token Rejection
+
+The SDK automatically refreshes tokens — you typically don't need to handle this yourself. Here's what happens under the hood:
+
+1. **Before each request**, the SDK checks the cached JWT's `exp` claim. If expired (or within 30 seconds of expiry), it calls your token provider for a fresh one.
+
+2. **If the backend returns 401 anyway** (clock skew, revocation, etc.), the SDK clears the cache, calls your provider again, and retries the request once.
+
+3. **If the retry also fails**, the SDK returns `authTokenUnauthorized`.
+
+So when you see `authTokenUnauthorized`, it means your token provider itself is broken — the SDK already tried twice. Check your provider implementation:
+
+```swift
+
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.authTokenUnauthorized {
+
+        // SDK already tried twice with your provider — something's wrong with it
+        // Check: Is your backend returning valid JWTs?
+        // Check: Is the JWT's `exp` claim correct?
+        // Check: Are you using the right environment (sandbox vs production)?
+
+        showAlert(title: "Authentication Error",
+                  message: "Please restart the app or contact support")
+
+    }
+
+```
+
+You can also use the `requiresTokenRefresh` property to catch all token-related errors in one check:
+
+```swift
+
+if error.requiresTokenRefresh {
+
+    // Covers both tokenError and authTokenUnauthorized
+
+    let freshToken = await yourBackend.getNewAuthToken()
+
+    try HaloSDK.initialize(authToken: freshToken, environment: .production)
+
+}
+
+```
+
+
+**When this happens:**
+
+- Your token provider is returning invalid or expired JWTs
+- Your backend is down or returning errors
+- JWT signature is invalid or malformed
 
 
 ### Handling Auth Token Rejection
@@ -304,6 +485,7 @@ if error.requiresTokenRefresh {
 
 - Token was revoked or invalidated server-side
 
+
 - Wrong environment (sandbox token in production or vice versa)
 
 ### Event Delegate
@@ -313,46 +495,77 @@ The SDK notifies your app about errors and reader preparation progress through a
 The example below shows one way to map SDK events to UI state. Replace the UI updates with your application’s own patterns.
 
 ```swift
+
 class PaymentHandler: HaloEventDelegate {
+
     // Called during reader preparation (0.0 to 1.0)
+
     func haloSDK(didUpdatePreparationProgress progress: Double) {
+
         DispatchQueue.main.async {
+
             self.progressView.progress = Float(progress)
+
             self.statusLabel.text = "Preparing Tap to Pay..."
+
         }
 
     }
-    
+
     // Called when reader is ready to accept payments
+
     func haloSDKDidBecomeReady() {
+
         DispatchQueue.main.async {
+
             self.progressView.isHidden = true
+
             self.payButton.isEnabled = true
+
             self.statusLabel.text = "Ready to accept payments"
+
         }
+
     }
 
     // Called if reader preparation fails
+
     func haloSDK(didFailPreparationWithError error: HaloError) {
+
         DispatchQueue.main.async {
+
             self.progressView.isHidden = true
+
             self.statusLabel.text = "Setup failed: \(error.localizedDescription)"
+
         }
+
     }
 
     // Called when any error occurs
+
     func haloSDK(didReceiveError event: HaloErrorEvent) {
+
         Analytics.track("payment_error", properties: [
+
             "error_code": event.errorCode,
+
             "error_name": event.errorName,
+
             "description": event.errorDescription,
+
             "source": event.source.rawValue
+
         ])
+
     }
+
 }
 
 // Set it up early, before or right after initialization
+
 HaloSDK.setEventDelegate(PaymentHandler())
+
 ```
 
 Preparation progress callbacks are triggered during SDK initialization and whenever the system needs to prepare or re-prepare Tap to Pay on iPhone (for example after app foregrounding or a configuration change). Applications should be prepared to receive these callbacks more than once during the app lifecycle.
@@ -398,19 +611,61 @@ Device compatibility is evaluated during SDK initialization based on device mode
 If you need to cancel a payment that's in progress (maybe a timeout in your UI):
 
 ```swift
+
 HaloSDK.cancelPayment()
+
 ```
 
 This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "USER_CANCELLED", errorMessage: "Payment cancelled by user")`.
 
 Applications should call cancelPayment() only in response to a clear user action or application-level timeout. The SDK automatically cancels the payment if required by system, security, or lifecycle conditions, and applications do not need to handle those cases explicitly.
 
+## Processing Refunds
+
+To process a refund, pass `type: .refund` to `startContactlessPayment`. The customer taps their card again, and Apple's reader shows "Refund" instead of "Pay".
+
+```swift
+
+let result = await HaloSDK.startContactlessPayment(
+
+    amountMinor: 500,              // refund amount in cents
+
+    currency: "ZAR",
+
+    merchantReference: "refund_order_12345",
+
+    type: .refund
+
+)
+
+switch result {
+
+case .approved(let receipt):
+
+    print("Refund processed: \(receipt.transactionId)")
+
+case .declined(let errorCode, let errorMessage):
+
+    print("Refund failed: \(errorMessage ?? "Unknown error")")
+
+}
+
+```
+
+**Gotchas:**
+
+- The card must be physically present — this isn't a "card-not-present" refund
+
+- Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
+
 ## Cleanup
 
 When you're done with the SDK (user logs out, switching accounts, etc.):
 
 ```swift
+
 HaloSDK.deinitialize()
+
 ```
 
 This clears all cached tokens and resets the SDK state. You'll need to call `initialize()` again before accepting more payments.
@@ -428,8 +683,11 @@ The SDK can include device location in transaction requests for fraud prevention
 If location permission is denied or unavailable, transactions still proceed normally, but location data is not included in the request headers. If a user has previously denied location permission, iOS will not prompt again and the user must enable it manually in system settings.
 
 **What happens with location:**
+
 - If granted: Location coordinates are sent in the `X-Location` header for fraud scoring
+
 - If denied: Transaction proceeds normally without location data
+
 - If not determined: SDK requests permission automatically (with a 5-second timeout)
 
 ## Transaction Flow
@@ -437,13 +695,19 @@ If location permission is denied or unavailable, transactions still proceed norm
 When you call `startContactlessPayment()`, here's what happens under the hood:
 
 1. **Card read** — Apple's ProximityReader captures encrypted card data
+
 2. **Backend submission** — SDK sends the encrypted data to your payment processor via `POST /transactions/apple`
+
 3. **Result mapping** — Backend response is mapped to `HaloPaymentResult`
 
 The SDK automatically includes these headers with each transaction:
+
 - `X-Device-Installation-Id` — A unique UUID generated once per device install (persisted in Keychain)
+
 - `X-Correlation-Id` — A unique UUID for each transaction (useful for debugging)
+
 - `X-Location` — Device coordinates if location permission is granted
+
 - `Authorization` — Bearer token from your auth configuration
 
 ### Receipt Data
@@ -453,31 +717,48 @@ When a payment is approved, the `HaloReceipt` contains data from both the card r
 ```swift
 
 case .approved(let receipt):
-    receipt.transactionId    // Backend's haloReference
-    receipt.authCode         // Authorization code from processor
-    receipt.cardBrand        // Card type (Visa, Mastercard, etc.)
-    receipt.last4            // Last 4 digits of card
-    receipt.amountMinor      // Amount in minor units
-    receipt.currency         // Currency code
-    receipt.reference        // Your merchant reference
-    receipt.approvedAt       // Timestamp
-```
 
+    receipt.transactionId    // Backend's haloReference
+
+    receipt.authCode         // Authorization code from processor
+
+    receipt.cardBrand        // Card type (Visa, Mastercard, etc.)
+
+    receipt.last4            // Last 4 digits of card
+
+    receipt.amountMinor      // Amount in minor units
+
+    receipt.currency         // Currency code
+
+    receipt.reference        // Your merchant reference
+
+    receipt.approvedAt       // Timestamp
+
+```
 ## Thread Safety
 
 All HaloSDK methods are `@MainActor` — you should call them from the main thread. The async methods (`startContactlessPayment`) can be awaited from any async context and will handle threading internally.
 
 ```swift
+
 // This is fine
+
 Task { @MainActor in
+
     let result = await HaloSDK.startContactlessPayment(...)
+
 }
 
 // This is also fine if you're already in a @MainActor context
+
 @MainActor
+
 func processPayment() async {
+
     let result = await HaloSDK.startContactlessPayment(...)
+
 }
+
 ```
 
 ## Troubleshooting
@@ -490,7 +771,6 @@ Make sure you're running on a physical device, not the simulator. Also check tha
 
 You need the ProximityReader entitlement from Apple. This requires approval through the Apple Developer program for Tap to Pay.
 
-
 **Location not being sent with transactions**
 
 Check that you've added `NSLocationWhenInUseUsageDescription` to your Info.plist. If the user previously denied location permission, they'll need to enable it manually in Settings → Your App → Location. The SDK won't prompt again after a denial.
@@ -501,6 +781,18 @@ The encrypted card data must be submitted to the backend within 60 seconds of th
 
 **AUTH_TOKEN_UNAUTHORIZED or "Authentication token rejected" error**
 
+
+The SDK automatically refreshes expired tokens, so if you're seeing this error, your **token provider** is the problem — not just an expired token. The SDK tried twice (once proactively, once on 401 retry) and both attempts failed.
+
+Check your token provider:
+
+- Is your backend returning valid JWTs with an `exp` claim?
+- Is the `exp` timestamp correct (not already in the past)?
+- Are you using the correct environment (sandbox token for sandbox, production for production)?
+- Is your backend reachable and returning 200 responses?
+
+The SDK reads the JWT's `exp` claim client-side and refreshes proactively — so even clock skew of a few minutes shouldn't cause issues. If you're still getting this error, add logging to your token provider to see what's being returned.
+
 Your auth token was rejected by the backend (HTTP 401). This usually means:
 
 - The token has expired — fetch a fresh one from your backend and call `HaloSDK.initialize()` again
@@ -508,5 +800,5 @@ Your auth token was rejected by the backend (HTTP 401). This usually means:
 - The token signature is invalid — verify your backend is signing tokens correctly
 - The token was revoked server-side — check with your payment provider
 
-The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
 
+The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
