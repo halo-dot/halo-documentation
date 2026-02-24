@@ -122,7 +122,7 @@ The SDK checks device capabilities and throws if the device doesn't support Tap 
 
 ### 2. Start a Payment
 
-Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements.
+Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements. For [processing Refunds](#processing-refunds)
 
 ```swift
 
