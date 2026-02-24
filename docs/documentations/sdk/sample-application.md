@@ -6,13 +6,9 @@ tags:
   - guides
 ---
 
-### Sample Application
-
 #### 1. Download the Test App
-<br/>
-Download our test app from <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">GitHub</a> .
-<br/>
 
+Download our test app from <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">GitHub</a> .
 
 #### 2. Configure The Test App
 
@@ -41,8 +37,6 @@ aws.secretKey=your_secret_key
 ```
 
 `sdk.dir` specifies the location of the Android SDK on your file system.
-
-<br/>
 
 #### 3. Gradle Setup
 

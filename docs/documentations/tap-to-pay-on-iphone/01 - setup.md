@@ -46,7 +46,9 @@ Add it directly to your `Package.swift`:
 
 ```swift
 dependencies: [
+
     .package(id: "synthesis.halosdk", from: "1.0.51")
+
 ]
 ```
 
@@ -132,7 +134,7 @@ let result = await HaloSDK.startContactlessPayment(
 
     merchantReference: "order_12345"
 
-    // type: .purchase (default) or .refund
+    // type: .purchase (default) or .refund  
 
 )
 
@@ -243,6 +245,7 @@ try await HaloSDK.initialize(tokenProvider: myProvider, environment: .production
 
 Sandbox mode connects to test services and does not process real payments. It should be used for development and testing only. Production mode is required for live payments and App Store distribution.
 
+
 ### Token Provider
 
 The token provider is a closure that returns a `Future<String, Error>`. The SDK calls it:
@@ -285,6 +288,7 @@ try await HaloSDK.initialize(
 - Return quickly — the SDK waits for your provider before proceeding
 - If your provider throws, the SDK treats it as `authTokenUnauthorized`
 - The JWT must have an `exp` claim — the SDK reads it to detect expiry client-side
+
 
 ## Error Handling
 
@@ -423,11 +427,65 @@ if error.requiresTokenRefresh {
 
 ```
 
+
 **When this happens:**
 
 - Your token provider is returning invalid or expired JWTs
 - Your backend is down or returning errors
 - JWT signature is invalid or malformed
+
+
+### Handling Auth Token Rejection
+
+When the backend rejects your auth token (401 Unauthorized), the SDK returns `authTokenUnauthorized`. This typically means your token is expired, malformed, or revoked. Here's how to handle it:
+
+```swift
+
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.authTokenUnauthorized {
+
+        // Token was rejected — fetch a new one and reinitialize
+
+        Task {
+
+            let freshToken = await yourBackend.getNewAuthToken()
+
+            try? HaloSDK.initialize(authToken: freshToken, environment: .production)
+
+            // Optionally prompt user to retry payment
+
+        }
+
+    }
+
+```
+
+You can also use the `requiresTokenRefresh` property to catch all token-related errors in one check:
+
+```swift
+
+if error.requiresTokenRefresh {
+
+    // Covers both tokenError and authTokenUnauthorized
+
+    let freshToken = await yourBackend.getNewAuthToken()
+
+    try HaloSDK.initialize(authToken: freshToken, environment: .production)
+
+}
+
+```
+
+**When this happens:**
+
+- Auth token expired on the backend
+
+- Token signature is invalid or malformed
+
+- Token was revoked or invalidated server-side
+
+
 - Wrong environment (sandbox token in production or vice versa)
 
 ### Event Delegate
@@ -723,6 +781,7 @@ The encrypted card data must be submitted to the backend within 60 seconds of th
 
 **AUTH_TOKEN_UNAUTHORIZED or "Authentication token rejected" error**
 
+
 The SDK automatically refreshes expired tokens, so if you're seeing this error, your **token provider** is the problem — not just an expired token. The SDK tried twice (once proactively, once on 401 retry) and both attempts failed.
 
 Check your token provider:
@@ -733,6 +792,14 @@ Check your token provider:
 - Is your backend reachable and returning 200 responses?
 
 The SDK reads the JWT's `exp` claim client-side and refreshes proactively — so even clock skew of a few minutes shouldn't cause issues. If you're still getting this error, add logging to your token provider to see what's being returned.
+
+Your auth token was rejected by the backend (HTTP 401). This usually means:
+
+- The token has expired — fetch a fresh one from your backend and call `HaloSDK.initialize()` again
+- You're using a sandbox token in production (or vice versa) — make sure the token matches your environment
+- The token signature is invalid — verify your backend is signing tokens correctly
+- The token was revoked server-side — check with your payment provider
+
 
 The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
 
