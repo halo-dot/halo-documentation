@@ -133,8 +133,8 @@ let result = await HaloSDK.startContactlessPayment(
     currency: "ZAR",
 
     merchantReference: "order_12345"
-
     // type: .purchase (default) or .refund  
+
 
 )
 
@@ -802,4 +802,3 @@ Your auth token was rejected by the backend (HTTP 401). This usually means:
 
 
 The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
-
