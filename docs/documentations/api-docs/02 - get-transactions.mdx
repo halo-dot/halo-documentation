@@ -405,7 +405,10 @@ The webhook will be called with a JSON body with following information:
   "authorisationCode": "string",
   "amount": "number",
   "currency": "string",
-  "haloReference": "string"
+  "haloReference": "string",
+  "deviceInstallationId": "string",
+  "paymentProviderId"?: any,
+  "paymentProviderFields"?: any
 }
 ```
 
@@ -420,6 +423,9 @@ The webhook will be called with a JSON body with following information:
 | amount | Value of transaction (e.g 100.01) | Number |
 | currency | Currency of the amount (e.g. ZAR, GBP) | String (3) |
 | haloReference | The halo backend transaction id reference | String (UUID) |
+| deviceInstallationId | This id identifies the installation of the app running the Halo.SDK | String |
+| paymentProviderId | This is the id that identifies the merchant at the payment provider they're registered with | Object |
+| paymentProviderFields | These are fields returned by the payment providers which may be used by the merchant e.g. recon references | Object |
 
 ### 4. Retrieve your Webhook
 
