@@ -136,7 +136,8 @@ class JwtToken {
       .withClaim("ksk_pin", Config.KSK)
       .withClaim("usr", Config.USERNAME)
       .withIssuedAt(Date())
-      .sign(Algorithm.RSA512(null, privateKey as RSAPrivateKey))
+      .withExpiresAt(Date(System.currentTimeMillis() + 15 * 60 * 1000))
+      .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
     callback(jwt)
   }
 
@@ -244,7 +245,7 @@ private fun initializeHaloSdk() {
         "1.0.0" // <-- replace with your application version
       )
     )
-  }
+  }.start()
 }
 ```
 
@@ -280,7 +281,7 @@ public interface IHaloCallbacks {
     void onCameraControlLost();
 }
 
-class HaloCallbacks(private val activity: MainActivity, private val timer: Timer) : IHaloCallbacks() {
+class HaloCallbacks(private val activity: MainActivity) : IHaloCallbacks() {
   override fun onAttestationError(details: HaloAttestationHealthResult) {
     Log.d(TAG, "onAttestationError - $details")
   }
@@ -305,9 +306,6 @@ class HaloCallbacks(private val activity: MainActivity, private val timer: Timer
       Log.d(TAG, "onSecurityError - $errorCode; should crash now")
   }
 
-  override fun onGetVerificationToken(result: HaloVerificationTokenResult) {
-      Log.d(TAG, "onGetVerificationToken")
-  }
 
   override fun onCameraControlLost() {
     Log.d(TAG, "onCameraControlLost")
@@ -315,15 +313,17 @@ class HaloCallbacks(private val activity: MainActivity, private val timer: Timer
 }
 ```
 
-#### Start Transaction
+##### Start Transaction
 
 ```kotlin
 
 private fun startTransaction() {
-  val amount = 500
+  val amount = java.math.BigDecimal("500.00")
   val reference = "ref#001"
 
   val result = HaloSDK.startTransaction(amount, reference)
+  // Note: 'result' only reflects the transaction start result. The final transaction
+  // outcome will be delivered asynchronously via the onHaloTransactionResult callback.
   Log.d(TAG, result.toString())
 }
 ```
