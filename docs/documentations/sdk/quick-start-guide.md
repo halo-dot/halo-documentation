@@ -24,8 +24,8 @@ These credentials are sensitive and should not be committed to source control. Y
 
 ```properties
 sdk.dir=~/Library/Android/sdk
-aws.accessKey=your_access_key
-aws.secretKey=your_secret_key
+aws.accessKey={{your_access_key}}
+aws.secretKey={{your_secret_key}}
 ```
 
 2. Add the following to your project-level gradle file (build.gradle). <br/>
@@ -87,6 +87,259 @@ After a gradle sync, you should now be able to import from the za.co.synthesis.h
 
 ```kotlin
 import za.co.synthesis.halo.sdk.HaloSDK
+```
+
+#### Using the SDK
+
+You will need to setup the following before using the SDK:
+
+* Generate a JWT
+* Request the correct Android permissions
+* Initialize the SDK `HaloSDK.initialize()`
+* Implement Halo Callbacks, this is used to communicate with the SDK
+* Start a transaction `HaloSDK.startTransaction(amount, reference)`
+
+##### JWT Generation.
+
+All calls to the Halo SDK require a valid JWT.<br/>
+You will need to generate the JWT using your private key.<br/>
+The public key pair is submitted when you register on the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a> and we will validate the JWT with this public key.
+
+The details in the code snippet below will be used in the `IHaloCallbacks.onRequestJWT` method (see below).
+
+```kotlin
+object Config {
+  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}""".trimIndent()
+   // The iss claim that was provided when signing up on the developer portal
+   const val ISSUER = "{{YOUR_ISSUER}}"
+   const val MERCHANT_ID = "{{YOUR_MERCHANT_ID}}"
+   const val USERNAME = "{{YOUR_USERNAME}}"
+   const val HOST = "{{HOST}}"
+   const val AUD = "{{AUD}}"
+   const val KSK = "{{KSK}}"
+}
+
+class JwtToken {
+  fun getJWT(callback: (String) -> Unit) {
+    // Generate Private Key
+    val privateKey = KeyFactory.getInstance("RSA").generatePrivate(
+        PKCS8EncodedKeySpec(Base64.decode(extractPrivateKey(Config.PRIVATE_KEY_PEM), Base64.DEFAULT))
+    )
+
+    // Create JWT token
+    val jwt = JWT
+      .create()
+      .withAudience(Config.HOST)
+      .withIssuer(Config.ISSUER)
+      .withSubject(Config.MERCHANT_ID)
+      .withClaim("aud_fingerprints", Config.AUD)
+      .withClaim("ksk_pin", Config.KSK)
+      .withClaim("usr", Config.USERNAME)
+      .withIssuedAt(Date())
+      .withExpiresAt(Date(System.currentTimeMillis() + 15 * 60 * 1000))
+      .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
+    callback(jwt)
+  }
+
+  private fun extractPrivateKey(privateKey: String): String {
+    val beginMarker = "-----BEGIN PRIVATE KEY-----"
+    val endMarker = "-----END PRIVATE KEY-----"
+    val startIndex = privateKey.indexOf(beginMarker)
+    val endIndex = privateKey.indexOf(endMarker)
+
+    return if (startIndex != -1 && endIndex != -1) {
+        privateKey.substring(startIndex + beginMarker.length, endIndex).trim()
+    } else {
+        privateKey
+    }
+  }
+}
+```
+
+##### Permission requirements.
+
+Before initialization of the HaloSDK, the app must request the following permissions from the user:
+
+* `android.permission.INTERNET`
+* `android.permission.ACCESS_NETWORK_STATE`
+* `android.permission.CAMERA`
+* `android.permission.READ_PHONE_STATE`
+* `android.permission.READ_EXTERNAL_STORAGE`
+* `android.permission.WRITE_EXTERNAL_STORAGE`
+
+```kotlin
+@Composable
+fun MainScreen(
+    // You usually inject this or get from Local
+    permissionsController: PermissionsController = rememberPermissionsControllerFactory().create()
+) {
+    // Very important: binds permission results to the composition
+    BindEffect(permissionsController)
+
+    var sdkInitialized by remember { mutableStateOf(false) }
+    var permissionRequested by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncher(
+        permissionsController = permissionsController,
+        permissions = listOf(
+            Permission.Camera,
+            Permission.ReadPhoneState,           // Android only – ignored on iOS
+            Permission.ReadExternalStorage,      // maps differently on newer Android / iOS
+            Permission.WriteExternalStorage
+        )
+    )
+
+    LaunchedEffect(Unit) {
+        if (permissionLauncher.checkAllGranted()) {
+            initializeHaloSdk()
+            sdkInitialized = true
+        } else if (!permissionRequested) {
+            permissionRequested = true
+            launch {
+                try {
+                    permissionLauncher.launch()
+                    if (permissionLauncher.checkAllGranted()) {
+                        initializeHaloSdk() // <-- this will give you feedback of the sdk lifecycle (see below)
+                        sdkInitialized = true
+                    } else {
+                        // handle denial / show message / degrade gracefully
+                    }
+                } catch (e: Throwable) {
+                    // denied forever or other error
+                }
+            }
+        }
+    }
+
+    // Your UI – can depend on sdkInitialized
+    if (sdkInitialized) {
+        // Full featured UI
+        HaloContent()
+    } else {
+        // Loading / permission request UI
+        PermissionRequestScreen()
+    }
+}
+```
+
+##### Initialize the SDK
+
+The Halo.SDK must be initialized before any transaction by calling the static initialize method on the SDK and passing a `HaloInitializationParameters` instance as an argument. 
+
+```kotlin
+import za.co.synthesis.halo.sdk.HaloSDK
+import za.co.synthesis.halo.sdk.model.HaloInitializationParameters
+
+private fun initializeHaloSdk() {
+  HaloSDK.onCreate(this, activity)
+  if (isInitialized) {
+      return
+  }
+  Thread {
+    val haloServices = HaloCallbacks(this, timer) // <-- this will give you feedback of the sdk lifecycle (see below)
+    HaloSDK.initialize(
+      HaloInitializationParameters( // <-- see below for the interface details
+        haloServices,
+        60000, // <-- card Tap Timeout in milliseconds
+        "za.co.synthesis.halo.halotestapp", // <-- replace with your application name
+        "1.0.0" // <-- replace with your application version
+      )
+    )
+  }.start()
+}
+```
+
+**HaloInitializationParameters**
+
+```kotlin
+import za.co.synthesis.halo.sdk.model.HaloInitializationParameters
+
+public class HaloInitializationParameters {
+    public IHaloCallbacks haloCallBacks;
+    public Long cardTimeTimeoutMS;
+    public String applicationName;
+    public String applicationVersion;
+}
+```
+
+The result will be communicated, typically asynchronously, to the host application via invoking the callback registered in `IHaloCallbacks.onInitializationResult` and passing a `HaloInitializationResult` instance.
+
+##### Implement Halo Callbacks
+
+**IHaloCallbacks**
+
+```kotlin
+import za.co.synthesis.halo.sdk.model.IHaloCallbacks
+
+public interface IHaloCallbacks {
+    void onInitializationResult(HaloInitializationResult result);
+    void onHaloUIMessage(HaloUIMessage message);
+    void onHaloTransactionResult(HaloTransactionResult result);
+    void onRequestJWT(Function1<? super String, Unit> function1);
+    void onAttestationError(HaloAttestationHealthResult result);
+    void onSecurityError(HaloErrorCode code);
+    void onCameraControlLost();
+}
+
+class HaloCallbacks(private val activity: MainActivity) : IHaloCallbacks() {
+  override fun onAttestationError(details: HaloAttestationHealthResult) {
+    Log.d(TAG, "onAttestationError - $details")
+  }
+
+  override fun onHaloTransactionResult(result: HaloTransactionResult) {
+    Log.d(TAG, "onHaloTransactionResult - $result")
+  }
+
+  override fun onHaloUIMessage(message: HaloUIMessage) {
+    Log.d(TAG, "onHaloUIMessage - $message")
+  }
+
+  override fun onInitializationResult(result: HaloInitializationResult) {
+    Log.d(TAG, "onInitializationResult - $result")
+  }
+
+  override fun onRequestJWT(callback: (String) -> Unit) {
+    JwtToken().getJWT(callback)
+  }
+
+  override fun onSecurityError(errorCode: HaloErrorCode) {
+      Log.d(TAG, "onSecurityError - $errorCode; should crash now")
+  }
+
+
+  override fun onCameraControlLost() {
+    Log.d(TAG, "onCameraControlLost")
+  }
+}
+```
+
+##### Start Transaction
+
+```kotlin
+
+private fun startTransaction() {
+  val amount = java.math.BigDecimal("500.00")
+  val reference = "ref#001"
+
+  val result = HaloSDK.startTransaction(amount, reference)
+  // Note: 'result' only reflects the transaction start result. The final transaction
+  // outcome will be delivered asynchronously via the onHaloTransactionResult callback.
+  Log.d(TAG, result.toString())
+}
+```
+
+**HaloInitializationResult**
+
+```kotlin
+import za.co.synthesis.halo.sdk.model.HaloInitializationResult
+
+public class HaloInitializationResult {
+    public HaloInitializationResultType resultType;
+    public Currency terminalCurrency;
+    public List<String> terminalLanguageCodes;
+    public String terminalCountryCode;
+    public String message;
+}
 ```
 
 ##### For a more technical integration guide:
