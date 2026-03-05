@@ -20,7 +20,7 @@ object Config {
     const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}"""
     const val ISSUER = "{{YOUR_ISSUER}}"
     const val USERNAME = "{{YOUR_USERNAME}}"
-    const val MERCHANT_ID = "{{YOUR_MERCHANT_ID}}"
+    const val MERCHANT_ID = "{{MID}}"
     const val HOST = "{{HOST}}"
     const val AUD = "{{AUD}}"
     const val KSK = "{{KSK}}"

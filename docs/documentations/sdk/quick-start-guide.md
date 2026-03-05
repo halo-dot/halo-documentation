@@ -112,7 +112,7 @@ object Config {
   const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}""".trimIndent()
    // The iss claim that was provided when signing up on the developer portal
    const val ISSUER = "{{YOUR_ISSUER}}"
-   const val MERCHANT_ID = "{{YOUR_MERCHANT_ID}}"
+   const val MERCHANT_ID = "{{MID}}"
    const val USERNAME = "{{YOUR_USERNAME}}"
    const val HOST = "{{HOST}}"
    const val AUD = "{{AUD}}"
@@ -131,7 +131,7 @@ class JwtToken {
       .create()
       .withAudience(Config.HOST)
       .withIssuer(Config.ISSUER)
-      .withSubject(Config.MERCHANT_ID)
+      .withSubject(Config.MID)
       .withClaim("aud_fingerprints", Config.AUD)
       .withClaim("ksk_pin", Config.KSK)
       .withClaim("usr", Config.USERNAME)
