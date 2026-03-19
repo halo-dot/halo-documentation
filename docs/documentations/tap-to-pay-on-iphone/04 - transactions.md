@@ -48,11 +48,11 @@ This is the **primary endpoint** used after a successful tap on the device. It s
 
 The body is validated by the `AppleTransaction` schema and we expects the Apple Tap to Pay reader result data:
 
-```jsonc
+```json
 {
   "merchantReference": "INV-12345", // Your transaction reference (required)
   "generalCardData": "base64-encoded-string", // Apple general card data (Base64, required)
-  "paymentCardData": "base64-encoded-string", // Apple payment card data (Base64, required)
+  "paymentCardData": "base64-encoded-string" // Apple payment card data (Base64, required)
 }
 ```
 
@@ -69,7 +69,7 @@ The body is validated by the `AppleTransaction` schema and we expects the Apple 
 <Tabs>
   <TabItem value="ok:200" label="200: OK (Transaction Created)">
 
-```jsonc
+```json
 {
   "onlineAuthorizationResponse": {
     "type": "Approved",
@@ -88,15 +88,16 @@ The body is validated by the `AppleTransaction` schema and we expects the Apple 
     "isSingleTapAndPin": false,
     "maskedPAN": "476173******0027",
     "pinToken": "1234567890",
-    "proximityReaderId": "1234567890",
-  },
+    "cardReaderId": "1234567890",
+    "cardReaderTransactionId": "82669000000001"
+  }
 }
 ```
 
   </TabItem>
   <TabItem value="ok:201-waiting-for-pin" label="201: Created (Waiting for PIN)">
 
-```jsonc
+```json
 {
   "onlineAuthorizationResponse": {
     "type": "Declined",
@@ -115,15 +116,16 @@ The body is validated by the `AppleTransaction` schema and we expects the Apple 
     "isSingleTapAndPin": true, // Lookout for this flag
     "maskedPAN": "476173******0027",
     "pinToken": "1234567890",
-    "proximityReaderId": "1234567890",
-  },
+    "cardReaderId": "1234567890",
+    "cardReaderTransactionId": "622e42d5-fdf3-4f07-a4cb-0c67e128f12"
+  }
 }
 ```
 
   </TabItem>
   <TabItem value="declined:201" label="201: Created (Declined)">
 
-```jsonc
+```json
 {
   "onlineAuthorizationResponse": {
     "type": "Declined",
@@ -142,8 +144,9 @@ The body is validated by the `AppleTransaction` schema and we expects the Apple 
     "isSingleTapAndPin": false,
     "maskedPAN": "476173******0027",
     "pinToken": "1234567890",
-    "proximityReaderId": "1234567890",
-  },
+    "cardReaderId": "1234567890",
+    "cardReaderTransactionId": "622e42d5-fdf3-4f07-a4cb-0c67e128f12"
+  }
 }
 ```
 
@@ -198,11 +201,11 @@ Use this endpoint when the initial Apple transaction response indicates that **P
 
 Validated by the same `AppleTransaction` schema used for **Submit Apple Transaction**. The SDK sends updated Apple payload data for the PIN/SCA attempt in the same structure:
 
-```jsonc
+```json
 {
   "merchantReference": "INV-12345", // Your transaction reference (same as initial transaction)
   "generalCardData": "base64-encoded-string", // Updated Apple general card data (Base64)
-  "paymentCardData": "base64-encoded-string", // Updated Apple payment card data (Base64, now including PIN/SCA result)
+  "paymentCardData": "base64-encoded-string" // Updated Apple payment card data (Base64, now including PIN/SCA result)
 }
 ```
 
@@ -314,7 +317,8 @@ See **[Common Response: `onlineAuthorizationResponse`](#common-response-onlineau
 | onlineAuthorizationResponse.tags                     | Array   | Raw tag list returned from the payment provider (for advanced / EMV use cases)                |
 | onlineAuthorizationResponse.isSingleTapAndPin        | Boolean | Indicates whether SCA (PIN) is required for this transaction                                  |
 | onlineAuthorizationResponse.pinToken                 | String  | Token used in the Submit Apple PIN call when SCA is required (primarily for Mastercard flows) |
-| onlineAuthorizationResponse.proximityReaderId        | String  | Identifier for the Apple proximity reader used in the transaction                             |
+| onlineAuthorizationResponse.cardReaderId             | string  | Identifier for the Apple proximity reader used in the transaction                             |
+| onlineAuthorizationResponse.cardReaderTransactionId  | string  | Apple proximity reader transaction Identifier                                                 |
 | onlineAuthorizationResponse.amount                   | Number  | Transaction amount in minor units                                                             |
 | onlineAuthorizationResponse.currency                 | String  | ISO currency code, e.g. `ZAR`                                                                 |
 | onlineAuthorizationResponse.merchantReference        | String  | Your original merchant transaction reference                                                  |
