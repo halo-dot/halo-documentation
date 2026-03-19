@@ -47,7 +47,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.58")
+    .package(id: "synthesis.halosdk", from: "1.0.74")
 
 ]
 ```
@@ -120,9 +120,13 @@ The SDK checks device capabilities and throws if the device doesn't support Tap 
 
 **Why a token provider instead of a static token?** Tokens expire. With a provider, the SDK can fetch a fresh token on-demand — before requests if the JWT is expired, or automatically on 401 retry. You don't need to worry about token expiry timing or re-initializing the SDK.
 
+**Why a token provider instead of a static token?** Tokens expire. With a provider, the SDK can fetch a fresh token on-demand — before requests if the JWT is expired, or automatically on 401 retry. You don't need to worry about token expiry timing or re-initializing the SDK.
+
+**Production base URL:** In production, the SDK automatically derives the API base URL from the JWT token's `aud` (audience) claim. For example, if the token's `aud` is `kernelserver.istore.prod.haloplus.io`, the SDK uses `https://kernelserver.istore.prod.haloplus.io` as the base URL. This means the production URL is never hardcoded — it comes from your backend's token configuration.
+
 ### 2. Start a Payment
 
-Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements. For [processing Refunds](#processing-refunds)
+Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements.
 
 ```swift
 
@@ -133,8 +137,8 @@ let result = await HaloSDK.startContactlessPayment(
     currency: "ZAR",
 
     merchantReference: "order_12345"
-    // type: .purchase (default) or .refund  
 
+    // type: .purchase (default) or .refund
 
 )
 
@@ -243,7 +247,9 @@ try await HaloSDK.initialize(tokenProvider: myProvider, environment: .production
 
 ```
 
-Sandbox mode connects to test services and does not process real payments. It should be used for development and testing only. Production mode is required for live payments and App Store distribution.
+Sandbox mode connects to a static test endpoint (`kernelserver.go.dev.haloplus.io`) and does not process real payments. It should be used for development and testing only.
+
+Production mode derives the API base URL dynamically from the JWT token's `aud` (audience) claim. For example, a token with `"aud": "kernelserver.istore.prod.haloplus.io"` results in the SDK using `https://kernelserver.istore.prod.haloplus.io`. This means the production endpoint is controlled entirely by your backend's token configuration — the SDK does not hardcode it.
 
 
 ### Token Provider
@@ -288,6 +294,7 @@ try await HaloSDK.initialize(
 - Return quickly — the SDK waits for your provider before proceeding
 - If your provider throws, the SDK treats it as `authTokenUnauthorized`
 - The JWT must have an `exp` claim — the SDK reads it to detect expiry client-side
+- In production, the JWT must have an `aud` claim — the SDK reads it to determine the API base URL
 
 
 ## Error Handling
@@ -516,118 +523,41 @@ HaloSDK.setEventDelegate(PaymentHandler())
 
 Preparation progress callbacks are triggered during SDK initialization and whenever the system needs to prepare or re-prepare Tap to Pay on iPhone (for example after app foregrounding or a configuration change). Applications should be prepared to receive these callbacks more than once during the app lifecycle.
 
-### Payment Timeline Analytics
+### Performance Logging
 
-The SDK emits timestamped analytics events during the payment lifecycle using `HaloAnalyticsEvent`.
-These are delivered through `haloSDK(didEmitAnalyticsEvent:)` on `HaloEventDelegate` and can be used to:
+The SDK automatically accumulates analytics events during each payment flow and sends them to the backend at the end of the flow. This happens automatically — no configuration needed.
 
-- Build an in-app timeline for a single payment (for example: initialized → ready for tap → card detected → submitted → response received → approved/declined).
-- Forward the same events to your backend analytics or observability pipeline.
+Events are collected from `paymentStarted` until the flow completes:
+- `paymentApproved`
+- `paymentDeclined`
+- `paymentCancelled`
+- `paymentError`
 
-Event types are grouped roughly as:
+The accumulated events are sent to:
+```
+POST /apple/performance-testing
+```
 
-- **Lifecycle**: `sdkInitialized`, `sdkReaderPrepared`, `discoveryShown`
-- **Payment flow**: `paymentStarted`, `paymentValidated`, `readyForTap`, `cardDetected`, `transactionSubmissionStarted`, `transactionResponseReceived`
-- **Outcomes**: `paymentApproved`, `paymentDeclined`, `paymentCancelled`, `paymentError`
+With headers:
+- `X-Device-Installation-Id` — Unique device identifier
+- `X-Correlation-Id` — Unique ID for this payment flow
+- `Authorization` — Bearer token
 
-A common pattern is to collect all `HaloAnalyticsEvent` instances for the current payment in an array, render them as a UI timeline, and then send them as a JSON payload to your backend once the payment completes.
-
-To see a single, human-readable timeline in your console, you can map analytics events to labels and print them as **relative offsets** from the first event:
-
-```swift
-final class PaymentTimelinePrinter: HaloEventDelegate {
-    private var startTime: Date?
-
-    // Called whenever the SDK emits an analytics event
-    func haloSDK(didEmitAnalyticsEvent event: HaloAnalyticsEvent) {
-        if startTime == nil {
-            startTime = event.timestamp
-        }
-        guard let start = startTime else { return }
-
-        let delta = event.timestamp.timeIntervalSince(start)
-        let timestamp = Self.format(delta)
-        let label = Self.label(for: event)
-
-        print("\(timestamp)  \(label)")
-    }
-
-    private static func format(_ interval: TimeInterval) -> String {
-        let totalMillis = Int((interval * 1000.0).rounded())
-        let minutes = totalMillis / 60000
-        let seconds = (totalMillis % 60000) / 1000
-        let millis  = totalMillis % 1000
-        return String(format: "%02d:%02d.%03d", minutes, seconds, millis)
-    }
-
-    private static func label(for event: HaloAnalyticsEvent) -> String {
-        switch event.type {
-        case .sdkInitialized:
-            return "SDK Initialized"
-        case .sdkReaderPrepared:
-            return "SDK Prepared (Reader Ready)"
-        case .discoveryShown:
-            return "Discovery Shown"
-        case .paymentStarted:
-            return "Payment Started"
-        case .paymentValidated:
-            return "Payment Validated"
-        case .readyForTap:
-            return "Ready For Tap"
-        case .cardDetected:
-            return "Card Tapped"
-        case .transactionSubmissionStarted:
-            if event.metadata["isSingleTapAndPin"] == "true" {
-                return "PIN Resubmission Submitted"
-            } else {
-                return "Transaction Submitted"
-            }
-        case .transactionResponseReceived:
-            if event.metadata["isApproved"] == "true" {
-                return "Response Received (Approved)"
-            } else if event.metadata["isSingleTapAndPin"] == "true" {
-                return "Response Received (Declined - PIN Required)"
-            } else {
-                return "Response Received (Declined)"
-            }
-        case .pinCaptureStarted:
-            return "PIN Capture Started"
-        case .pinCaptureSucceeded:
-            return "PIN Entered"
-        case .paymentApproved:
-            return "Payment Approved"
-        case .paymentDeclined:
-            return "Payment Declined"
-        case .paymentCancelled:
-            return "Payment Cancelled"
-        case .paymentError:
-            return "Payment Error"
-        }
-    }
+Payload:
+```json
+{
+    "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
+    "messages": [
+        {"timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted"},
+        {"timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated"},
+        {"timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap"},
+        {"timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected"},
+        {"timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved"}
+    ]
 }
 ```
 
-With this in place, a **Single Tap + PIN** flow might produce console output like:
-
-```text
-00:00.000  SDK Initialized
-00:00.120  Terms & Conditions Shown
-00:02.340  Terms & Conditions Accepted
-00:02.500  Discovery Shown
-00:05.100  SDK Prepared (Reader Ready)
-00:12.340  Card Tapped
-00:12.890  Transaction Submitted
-00:14.200  Response Received (Declined - PIN Required)
-00:14.210  PIN Capture Started
-00:18.500  PIN Entered
-00:18.900  PIN Resubmission Submitted
-00:20.100  Response Received (Approved)
-```
-
-During Single Tap + PIN flows, the SDK automatically uses a dedicated PIN resubmission endpoint (`/transactions/{originalTransactionID}/submitPinApple`) when available. This allows your backend to properly correlate the initial declined transaction with the subsequent approved transaction that includes PIN verification. The `originalTransactionId` field is included in the analytics metadata for `transactionResponseReceived` events when `isSingleTapAndPin` is true.
-
-Your app is responsible for emitting the non-SDK events (for example **Terms & Conditions Shown/Accepted**) into the same timeline if you want them included. The SDK-driven events (initialization, discovery, reader ready, card tap, submissions, responses, approvals/declines) come from `HaloAnalyticsEvent`.
-
+This allows backend correlation of payment flow timing with server-side logs for troubleshooting.
 
 ## Security
 
@@ -717,6 +647,45 @@ case .declined(let errorCode, let errorMessage):
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
 
+
+## Security Validation
+
+The SDK performs automatic security validation on purchase transactions to ensure compliance with payment standards. Transactions may be declined offline based on card data analysis.
+
+```swift
+
+switch result {
+
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.offlineDeclined {
+
+        // Transaction declined due to security validation
+
+        // This occurs when Cryptogram Information Data (tag 9F27) equals "00" 
+
+        // Only affects purchase transactions, not refunds
+
+        print("Payment declined due to security validation")
+
+    }
+
+}
+
+```
+
+**Behavior:**
+
+- **Purchase transactions** are validated and may be declined if Cryptogram Information Data = 00
+- **Refund transactions** are NOT affected by this validation
+- **Performance conscious** - validation runs asynchronously to avoid blocking the UI
+- **Sandbox logging** - detailed decline reasons are logged only in sandbox environment
+- **Production security** - generic messages shown in production to prevent information leakage
+
+**When this happens:**
+
+The SDK analyzes the card's TLV (Tag-Length-Value) data immediately after card read. If a purchase transaction contains Cryptogram Information Data (tag 9F27) with value "00", the transaction is declined before backend submission to prevent potential fraud.
+
 ## Cleanup
 
 When you're done with the SDK (user logs out, switching accounts, etc.):
@@ -757,7 +726,9 @@ When you call `startContactlessPayment()`, here's what happens under the hood:
 
 2. **Backend submission** — SDK sends the encrypted data to your payment processor via `POST /transactions/apple`
 
-3. **Result mapping** — Backend response is mapped to `HaloPaymentResult`
+3. **PIN Resubmission (Single Tap + PIN)** — For transactions requiring PIN verification, the SDK uses `POST /transactions/{originalTransactionID}/submitPinApple` with PIN-encrypted data
+
+4. **Result mapping** — Backend response is mapped to `HaloPaymentResult`
 
 The SDK automatically includes these headers with each transaction:
 
