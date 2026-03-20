@@ -118,6 +118,8 @@ Choose the library that's most commonly used in your technology stack and ensure
 
 Your JWT token must include the following claims in the payload. Use your JWT library to create and sign a token with this structure:
 
+> For generic API authentication header formats (API keys and bearer tokens), see the **[API Docs - Authentication](/docs/documentations/api-docs/authentication)** page.
+
 ### Required Claims
 
 ```jsonc
@@ -125,6 +127,7 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "iss": "your company identifier",
   "sub": "Merchant ID",
   "usr": "user ID",
+  "aud": "JWT Audience", // prod or test DNS, eg  kernelserver.go.dev.haloplus.io"
   "iat": 1707580800, // Created at
   "exp": 1707667200, // time of expiring in seconds
   "refresh_token": false,
