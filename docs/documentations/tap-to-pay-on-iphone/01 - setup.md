@@ -47,7 +47,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.74")
+    .package(id: "synthesis.halosdk", from: "1.0.75")
 
 ]
 ```
@@ -87,6 +87,8 @@ do {
         },
 
         environment: .sandbox  // use .production for live payments
+        // enablePerformanceLogging: true  // opt-in, only if your backend supports /apple/performance-testing
+
 
     )
 
@@ -525,13 +527,26 @@ Preparation progress callbacks are triggered during SDK initialization and whene
 
 ### Performance Logging
 
-The SDK automatically accumulates analytics events during each payment flow and sends them to the backend at the end of the flow. This happens automatically — no configuration needed.
+The SDK can accumulate analytics events during each payment flow and send them to the backend at the end of the flow. This feature is **disabled by default** because most customer backends do not host the required endpoint.
 
-Events are collected from `paymentStarted` until the flow completes:
-- `paymentApproved`
-- `paymentDeclined`
-- `paymentCancelled`
-- `paymentError`
+To enable performance logging, pass `enablePerformanceLogging: true` during initialization:
+
+```swift
+
+try await HaloSDK.initialize(
+    tokenProvider: myProvider,
+    environment: .production,
+    enablePerformanceLogging: true
+)
+
+```
+
+Only enable this if your backend supports the `/apple/performance-testing` endpoint. When disabled, no performance events are accumulated or sent, and there is no impact on payment flows or analytics delegate events.
+
+When enabled, events are collected across three flow types:
+- **T&C acceptance**: `connectionTokenRequested` through `termsAccepted`
+- **Device configuration**: `connectionTokenRequested` through `readerPrepareCompleted`
+- **Transaction**: `paymentStarted` through `paymentApproved` / `paymentDeclined` / `paymentCancelled` / `paymentError`
 
 The accumulated events are sent to:
 ```
