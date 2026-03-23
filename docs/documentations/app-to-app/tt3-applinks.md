@@ -1,11 +1,11 @@
 
-## TT3/Debicheck using Applinks
+## TT3/DebiCheck using Applinks
 
 Integration with Halo.Go application for transactions using Applinks.
 
 <br/>
 
-### Initiate a Applinks Transaction
+### Initiate an Applinks Transaction
 
 Retrieve a ```Transaction URL``` by hitting the endpoint below. You will need the ```API Key``` and ```Merchant
 ID``` from the previous step for this API call.
