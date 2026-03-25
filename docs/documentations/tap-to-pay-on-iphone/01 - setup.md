@@ -47,7 +47,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.75")
+    .package(id: "synthesis.halosdk", from: "1.0.78")
 
 ]
 ```
@@ -767,7 +767,9 @@ case .approved(let receipt):
 
     receipt.authCode         // Authorization code from processor
 
-    receipt.cardBrand        // Card type (Visa, Mastercard, etc.)
+    receipt.cardBrand        // Card scheme (Visa, Mastercard, etc.)
+
+    receipt.cardType         // Card product type (Debit, Credit, etc.)
 
     receipt.last4            // Last 4 digits of card
 
