@@ -17,10 +17,10 @@ You will need the private key you used to generate your public key, your issuer 
 
 ```kotlin
 object Config {
-    const val PRIVATE_KEY_PEM = "{{YOUR_PRIVATE_KEY_PEM}}"
+    const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}"""
     const val ISSUER = "{{YOUR_ISSUER}}"
     const val USERNAME = "{{YOUR_USERNAME}}"
-    const val MERCHANT_ID = "{{YOUR_MERCHANT_ID}}"
+    const val MERCHANT_ID = "{{MID}}"
     const val HOST = "{{HOST}}"
     const val AUD = "{{AUD}}"
     const val KSK = "{{KSK}}"
@@ -32,8 +32,8 @@ These credentials are sensitive and should not be committed to source control. A
 
 ```properties
 sdk.dir=~/Library/Android/sdk
-aws.accessKey=your_access_key
-aws.secretKey=your_secret_key
+aws.accessKey={{your_access_key}}
+aws.secretKey={{your_secret_key}}
 ```
 
 `sdk.dir` specifies the location of the Android SDK on your file system.
