@@ -91,6 +91,14 @@ import za.co.synthesis.halo.sdk.HaloSDK
 
 #### Using the SDK
 
+You will need to setup the following before using the SDK:
+
+* Generate a JWT
+* Request the correct Permission
+* Initialize the SDK `HaloSDK.initialize()`
+* Implement Halo Callbacks
+* Start a transaction `HaloSDK.startTransaction(amount, reference)`
+
 ##### JWT Generation.
 
 All calls to the Halo SDK require a valid JWT.<br/>
@@ -113,9 +121,9 @@ object Config {
    const val ISSUER = "YOUR_ISSUER_HERE"
    const val MERCHANT_ID = "YOUR_MERCHANT_ID_HERE"
    const val USERNAME = "YOUR_USERNAME"
-   const val HOST = "kernelserver.go.dev.haloplus.io"
-   const val AUD = "sha256/njzWuJWBZoQz5FsWiic9uCXrLkNL+qObPavkJqfwhYc="
-   const val KSK = "sha256/1Zna4T6PKcJ3Kq/dbVylb8n62j/AdQYUzWrj/4sk5Q8="
+   const val HOST = "AVAILABLE_ON_DEVELOPER_PORTAL"
+   const val AUD = "AVAILABLE_ON_DEVELOPER_PORTAL"
+   const val KSK = "AVAILABLE_ON_DEVELOPER_PORTAL"
 }
 
 class JwtToken {
@@ -216,8 +224,8 @@ private fun initializeHaloSdk() {
       HaloInitializationParameters(
         haloServices,
         60000,
-        BuildConfig.APPLICATION_ID,
-        BuildConfig.VERSION_NAME
+        "za.co.synthesis.halo.halotestapp", // <-- replace with your application name
+        "1.0.0" // <-- replace with your application version
       )
     )
   }
