@@ -1,4 +1,3 @@
-
 ## Transactions/Payments Acceptance using Deeplinking
 
 Integration with Halo.Go application for transactions using Deeplinking.
