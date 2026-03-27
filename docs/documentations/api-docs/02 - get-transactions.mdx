@@ -427,6 +427,64 @@ The webhook will be called with a JSON body with following information:
 | paymentProviderId | This is the id that identifies the merchant at the payment provider they're registered with | Object |
 | paymentProviderFields | These are fields returned by the payment providers which may be used by the merchant e.g. recon references | Object |
 
+#### Payment Provider Configuration
+
+> **Important:** The structure of payment provider fields depends on the processor handling the transaction.
+
+#### Payment Provider ID
+
+The `Payment Provider ID` varies by processor.
+
+**Postbridge processors:**
+```json
+{
+  "tid": "string",
+  "mid": "string"
+}
+```
+
+**iVeri:**
+
+```json
+{
+  "appId": "string",
+  "userId": "string" // Optional
+}
+```
+
+---
+
+#### Payment Provider Fields
+
+These fields may also differ depending on the processor.
+
+**iVeri example:**
+
+```json
+{
+  "Code": "string",
+  "mid": "string",
+  "tid": "string",
+  "merchantName": "string",
+  "panEntry": "string",
+  "cardType": "string",
+  "reconReference": "string",
+  "acquirerDate": "string",
+  "acquirerTime": "string"
+}
+```
+
+---
+
+#### Verification
+
+> Always confirm the expected structure before proceeding with integration.
+
+Please contact **Halo** to verify the exact structure of both:
+
+* Payment Provider ID
+* Payment Provider Fields
+
 ### 4. Retrieve your Webhook
 
 The callback url can be queried using an API call as well:
