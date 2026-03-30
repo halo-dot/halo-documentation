@@ -3,14 +3,10 @@
 
 Integration with Halo.Go application for transactions using Applinks.
 
-<br/>
-
 ### Initiate a Applinks Transaction
 
 Retrieve a ```Transaction URL``` and ```Reference``` by hitting the endpoint below. You will need the ```API Key``` and ```Merchant
 ID``` from the previous step for this API call.
-
-<br/>
 
 #### Post
 
@@ -20,8 +16,6 @@ ID``` from the previous step for this API call.
 
 The Call to initiate a Applinks Transaction.
 
-<br/>
-
 #### Headers
 
 | Name |Type | Description |
@@ -29,7 +23,6 @@ The Call to initiate a Applinks Transaction.
 | Content-Type* | String | Content Type of The Request: application/json|
 | x-api-key| String | The API Key retrieved from the Merchant Portal|
 
-<br/>
 
 #### Request Body
 
@@ -61,10 +54,7 @@ Please see the example of the request body below:
 }
 ```
 
-<br/>
-
-#### Response
-
+**Response**
 200: OK URL to invoke the Halo Dot Application for a payment
 <br/>
 The response will contain a Transaction URL and Payment Reference that will be used in the intent call.
@@ -78,8 +68,6 @@ Please see the example of the response body below:
     "reference":"c9e1were-8156-444c-894d-e065d71366a6"
 }
 ```
-
-<br/>
 
 #### Use the Generated URL to Call the Halo Dot Go App
 

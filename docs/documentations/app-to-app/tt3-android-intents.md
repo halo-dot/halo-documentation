@@ -7,14 +7,10 @@ We provide a sample code to help you with the intent request function call. The 
 
 >   Note: Experience with Android development is advised
 
-<br/>
-
 ### Initiate a TT3 Intent Transaction
 
 Retrieve a ```Transaction ID``` and payment JWT by hitting the endpoint below. You will need the ```API Key``` and ```Merchant
 ID``` from the previous step for this API call.
-
-<br/>
 
 #### Post
 
@@ -23,8 +19,7 @@ ID``` from the previous step for this API call.
 ```
 
 The Call to initiate an TT3 Intent Transaction.
-
-<br/>
+<span/>
 
 #### Headers
 
@@ -48,8 +43,7 @@ The Call to initiate an TT3 Intent Transaction.
 
 <br/>
 
-#### Response
-
+**Response**
 201: Created TT3 Intent Transaction JWT
 
 The response will contain a Transaction ID and JWT Token that will be used in the Intent call
