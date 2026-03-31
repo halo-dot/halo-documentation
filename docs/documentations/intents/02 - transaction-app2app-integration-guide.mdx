@@ -62,6 +62,7 @@ Once the transaction details are received by the Halo.Go/Halo.Link app, the foll
 3. The app will initiate a card read and wait for the consumer to tap their card on the device to process the payment.
 4. The app will then display the transaction result to the user and return control back to the customer app that initiated the intent transaction with a success or error code.
 
+<span/>
 ## 2. Android Intents API
 
 Steps in this section:
@@ -78,6 +79,7 @@ _Let’s take a closer look at the API request._
 
 The call to the Halo Dot Backend to initiate an Intent Transaction.
 
+<span/>
 **Path Parameters**
 
 | Name                                  | Type   | Description                              |
@@ -102,7 +104,7 @@ The call to the Halo Dot Backend to initiate an Intent Transaction.
 | timestamp<mark style={{color:'red'}}>\*</mark>        | String | ISO Standard Timestamp             |
 | currencyCode<mark style={{color:'red'}}>\*</mark>     | String | ISO Standard Currency Codes        |
 
-
+<span/>
 <Tabs>
     <TabItem value="OkIntent" label="200: OK Intent Transaction JWT">
 ```json
@@ -113,7 +115,7 @@ The call to the Halo Dot Backend to initiate an Intent Transaction.
 ```
     </TabItem>
 </Tabs>
-
+<span/>
 
 **2. Retrieve an Intent Session Token from the Halo Backend**
 
@@ -143,7 +145,7 @@ The call to the Halo backend to retrieve an Intent Session Token.
 | ------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | expiryMinutes | Number | Duration for which the intent session token should last before it expires. If not provided, the session token will expire after 1 hour/60 minutes. If specified please note the the min value is 60 minutes and the max value is 720 minutes. |
 
-
+<span/>
 <Tabs>
     <TabItem value="OkIntentSession" label="200: OK Intent Session Token Result">
 ```json
@@ -153,8 +155,7 @@ The call to the Halo backend to retrieve an Intent Session Token.
 ```
     </TabItem>
 </Tabs>
-
-
+<span/>
 
 **3. Send an Intent Request to the Halo Dot Go**
 
@@ -284,6 +285,7 @@ A reference to the relevant Halo Error codes for this integration:
 | 404 - 405 | Server and Device Errors |
 | 410 | InvalidTransactionReference |
 | 500 and over | Out of Scope |
+<span/>
 
 ## 3. Deeplinking
 

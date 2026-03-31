@@ -6,7 +6,7 @@ tags:
   - guides
 ---
 #### Halo.SDK Integration Guide
-
+<hr/>
 Welcome to the Halo.SDK integration guide! Follow these steps to quickly integrate the Halo.SDK into your Android application.
 
 ##### Getting Started

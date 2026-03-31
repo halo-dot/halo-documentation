@@ -3,14 +3,10 @@
 
 Integration with Halo.Go application for transactions using Applinks.
 
-<br/>
-
 ### Initiate an Applinks Transaction
 
 Retrieve a ```Transaction URL``` by hitting the endpoint below. You will need the ```API Key``` and ```Merchant
 ID``` from the previous step for this API call.
-
-<br/>
 
 #### Post
 
@@ -20,15 +16,12 @@ ID``` from the previous step for this API call.
 
 The Call to initiate a TT3 Applinks Transaction.
 
-<br/>
-
 #### Headers
 
 | Name |Type | Description |
 | ----------- | ----------- |-------------|
 | Content-Type* | String | Content Type of The Request: application/json|
 | x-api-key| String | The API Key retrieved from the Merchant Portal|
-
 <br/>
 
 #### Request Body
@@ -45,8 +38,7 @@ The Call to initiate a TT3 Applinks Transaction.
 | isConsumerApp | Boolean | Indicate if the call is for a Consumer App |
 | collectionDay* | Number | Debit order day |
 | CreditorABSN* | String | Description of Insurer (e.g. Name of insurer)|
-
-
+<br/>
 
 Please see the example of the request body below:
 
@@ -68,8 +60,7 @@ Please see the example of the request body below:
 ```
 <br/>
 
-#### Response
-
+**Response**
 201: Created URL to invoke the Halo Dot Application for a payment
 <br/>
 The response will contain a Transaction ID and JWT Token that will be used in the intent call.
