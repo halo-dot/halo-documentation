@@ -22,7 +22,7 @@ Generate a unique API Key for your user, below. Note the warning pop-up when gen
 
 #### App to App Integration Guides
 
-We support both App-to-App and web-to-app integration models.This enables the calling application to invoke the Halo Dot application pre-authenticated and pre-populated directly on the tap screen. The result is a lightweight integration approach that requires minimal development effort while providing a clean and controlled user experience.
+We support both App-to-App and web-to-app integration models. This enables the calling application to invoke the Halo Dot application pre-authenticated and pre-populated directly on the tap screen. The result is a lightweight integration approach that requires minimal development effort while providing a clean and controlled user experience.
 
 <hr />
 
