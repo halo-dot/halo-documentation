@@ -7,6 +7,7 @@ tags:
   - tap to pay on iphone
   - iphone
 ---
+
 # JWT Integration Guide
 
 This guide explains how clients can generate JWT tokens for authentication with our backend system using the **RS256 (RSA-SHA256)** algorithm for JWT signing.
@@ -76,6 +77,7 @@ You must provide your **public key** to our backend team so we can verify your J
    - Support ticket with subject: "JWT Public Key Submission - [Your Company Name]"
 
 3. **Include the following information**:
+
    ```
    Company Name: [Your Company Name]
    Environment:
@@ -134,7 +136,6 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "x-tid": "Terminal ID",
   "mcc": "Merchant Category Code",
   "mbn": "Your Business Name",
-  "tpid": "Transaction Provider ID"
 }
 ```
 

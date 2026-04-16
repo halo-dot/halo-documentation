@@ -1,6 +1,6 @@
 ---
 id: tap-to-pay-proximity-token
-title: Backend APIs - Proximity Token
+title: Proximity Token API
 description: Generate the Apple proximity token used by Tap to Pay on iPhone.
 tags:
   - sdk
@@ -84,6 +84,3 @@ This endpoint **does not require a request body**.
 - **500 Internal Server Error**: The JWT is syntactically valid but missing required business claims or configuration, for example:
   - **Missing `mbn`**: Merchant business name is required.
   - **Missing `mcc`**: Merchant category code is required.
-  - **Missing or invalid terminal profile ID**:
-    - `x-tid` claim is missing from the JWT, or
-    - `x-tid` does not match a configured terminal profile ID (`appleTerminalProfileId`) for the acquirer.
