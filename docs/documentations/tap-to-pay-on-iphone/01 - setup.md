@@ -576,26 +576,7 @@ Payload:
 }
 ```
 
-With this in place, a **Single Tap + PIN** flow might produce console output like:
-
-```text
-00:00.000  SDK Initialized
-00:00.120  Terms & Conditions Shown
-00:02.340  Terms & Conditions Accepted
-00:02.500  Discovery Shown
-00:05.100  SDK Prepared (Reader Ready)
-00:12.340  Card Tapped
-00:12.890  Transaction Submitted
-00:14.200  Response Received (Declined - PIN Required)
-00:14.210  PIN Capture Started
-00:18.500  PIN Entered
-00:18.900  PIN Resubmission Submitted
-00:20.100  Response Received (Approved)
-```
-
-During Single Tap + PIN flows, the SDK automatically uses a dedicated PIN resubmission endpoint (`/transactions/{originalTransactionID}/submitPinApple`) when available. This allows your backend to properly correlate the initial declined transaction with the subsequent approved transaction that includes PIN verification. The `originalTransactionId` field is included in the analytics metadata for `transactionResponseReceived` events when `isSingleTapAndPin` is true.
-
-Your app is responsible for emitting the non-SDK events (for example **Terms & Conditions Shown/Accepted**) into the same timeline if you want them included. The SDK-driven events (initialization, discovery, reader ready, card tap, submissions, responses, approvals/declines) come from `HaloAnalyticsEvent`.
+This allows backend correlation of payment flow timing with server-side logs for troubleshooting.
 
 ## Security
 
