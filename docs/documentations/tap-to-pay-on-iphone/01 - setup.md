@@ -255,6 +255,7 @@ Sandbox mode connects to a static test endpoint (`kernelserver.go.dev.haloplus.i
 
 Production mode derives the API base URL dynamically from the JWT token's `aud` (audience) claim. For example, a token with `"aud": "kernelserver.istore.prod.haloplus.io"` results in the SDK using `https://kernelserver.istore.prod.haloplus.io`. This means the production endpoint is controlled entirely by your backend's token configuration — the SDK does not hardcode it.
 
+
 ### Token Provider
 
 The token provider is a closure that returns a `Future<String, Error>`. The SDK calls it:
@@ -298,6 +299,7 @@ try await HaloSDK.initialize(
 - If your provider throws, the SDK treats it as `authTokenUnauthorized`
 - The JWT must have an `exp` claim — the SDK reads it to detect expiry client-side
 - In production, the JWT must have an `aud` claim — the SDK reads it to determine the API base URL
+
 
 ## Error Handling
 
@@ -544,35 +546,31 @@ try await HaloSDK.initialize(
 Only enable this if your backend supports the `/apple/performance-testing` endpoint. When disabled, no performance events are accumulated or sent, and there is no impact on payment flows or analytics delegate events.
 
 When enabled, events are collected across three flow types:
-
 - **T&C acceptance**: `connectionTokenRequested` through `termsAccepted`
 - **Device configuration**: `connectionTokenRequested` through `readerPrepareCompleted`
 - **Transaction**: `paymentStarted` through `paymentApproved` / `paymentDeclined` / `paymentCancelled` / `paymentError`
 
 The accumulated events are sent to:
-
 ```
 POST /apple/performance-testing
 ```
 
 With headers:
-
 - `X-Device-Installation-Id` — Unique device identifier
 - `X-Correlation-Id` — Unique ID for this payment flow
 - `Authorization` — Bearer token
 
 Payload:
-
 ```json
 {
-  "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
-  "messages": [
-    { "timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted" },
-    { "timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated" },
-    { "timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap" },
-    { "timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected" },
-    { "timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved" }
-  ]
+    "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
+    "messages": [
+        {"timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted"},
+        {"timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated"},
+        {"timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap"},
+        {"timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected"},
+        {"timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved"}
+    ]
 }
 ```
 
@@ -666,6 +664,7 @@ case .declined(let errorCode, let errorMessage):
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
 
+
 ## Security Validation
 
 The SDK performs automatic security validation on purchase transactions to ensure compliance with payment standards. Transactions may be declined offline based on card data analysis.
@@ -680,7 +679,7 @@ case .declined(let errorCode, let errorMessage):
 
         // Transaction declined due to security validation
 
-        // This occurs when Cryptogram Information Data (tag 9F27) equals "00"
+        // This occurs when Cryptogram Information Data (tag 9F27) equals "00" 
 
         // Only affects purchase transactions, not refunds
 
@@ -785,7 +784,6 @@ case .approved(let receipt):
     receipt.approvedAt       // Timestamp
 
 ```
-
 ## Thread Safety
 
 All HaloSDK methods are `@MainActor` — you should call them from the main thread. The async methods (`startContactlessPayment`) can be awaited from any async context and will handle threading internally.
@@ -832,6 +830,7 @@ The encrypted card data must be submitted to the backend within 60 seconds of th
 
 **AUTH_TOKEN_UNAUTHORIZED or "Authentication token rejected" error**
 
+
 The SDK automatically refreshes expired tokens, so if you're seeing this error, your **token provider** is the problem — not just an expired token. The SDK tried twice (once proactively, once on 401 retry) and both attempts failed.
 
 Check your token provider:
@@ -849,5 +848,6 @@ Your auth token was rejected by the backend (HTTP 401). This usually means:
 - You're using a sandbox token in production (or vice versa) — make sure the token matches your environment
 - The token signature is invalid — verify your backend is signing tokens correctly
 - The token was revoked server-side — check with your payment provider
+
 
 The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
