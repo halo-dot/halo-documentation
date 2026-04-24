@@ -22,7 +22,9 @@ You'll need the following before getting started:
 
 - iPhone XS or newer. Older models do not have the required NFC hardware
 
-- The ProximityReader entitlement from Apple, requested through your Apple Developer account
+- The ProximityReader entitlement from Apple, requested through your Apple Developer account as `admin user`
+- - https://developer.apple.com/contact/request/tap-to-pay-on-iphone/
+- - https://developer.apple.com/documentation/ProximityReader/setting-up-the-entitlement-for-tap-to-pay-on-iPhone
 
 - A merchant account enrolled in Apple’s Tap to Pay on iPhone program
 
