@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.80")
+    .package(id: "synthesis.halosdk", from: "1.0.81")
 
 ]
 ```
@@ -126,7 +126,7 @@ The SDK checks device capabilities and throws if the device doesn't support Tap 
 
 **Why a token provider instead of a static token?** Tokens expire. With a provider, the SDK can fetch a fresh token on-demand — before requests if the JWT is expired, or automatically on 401 retry. You don't need to worry about token expiry timing or re-initializing the SDK.
 
-**Production base URL:** In production, the SDK automatically derives the API base URL from the JWT token's `aud` (audience) claim. For example, if the token's `aud` is `kernelserver.istore.prod.haloplus.io`, the SDK uses `https://kernelserver.istore.prod.haloplus.io` as the base URL. This means the production URL is never hardcoded — it comes from your backend's token configuration.
+**Production base URL:** In production, the SDK automatically derives the API base URL from the JWT token's `aud` (audience) claim. For example, if the token's `aud` is `kernelserver.{xyz}.prod.haloplus.io`, the SDK uses `https://kernelserver.{xyz}.prod.haloplus.io` as the base URL. This means the production URL is never hardcoded — it comes from your backend's token configuration.
 
 ### 2. Start a Payment
 
@@ -207,26 +207,70 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `NOT_INITIALIZED`         | SDK wasn't initialized                                                                            |
 | `TIMEOUT`                 | Request timed out                                                                                 |
 | `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401)                                                               |
+| `LOCATION_ERROR`          | Location services required but unavailable (see Location Permissions section)                     |
 | `104`                     | Server configuration error (contact support)                                                      |
 
 You can also check these programmatically:
 
 ```swift
 case .declined(let errorCode, let errorMessage):
+
     switch errorCode {
+
     case HaloErrorCode.userCancelled:
+
         // User tapped cancel — maybe show "Try again?" prompt
+
         break
+
     case HaloErrorCode.cardDeclined:
+
         // Card didn't work — ask for different payment method
+
         break
+
     case HaloErrorCode.networkError:
+
         // Network issue — worth retrying
+
         break
+
+    case HaloErrorCode.authTokenUnauthorized:
+
+        // Auth token rejected — fetch a new token from your backend and reinitialize
+
+        break
+
+    case HaloErrorCode.offlineDeclined:
+
+        // Transaction declined due to security validation
+
+        // Cryptogram Information Data (9F27) = 00 in purchase transactions
+
+        break
+
+    case HaloErrorCode.cardNotSupported:
+
+        // Card not supported for this transaction type
+
+        break
+
+    case HaloErrorCode.locationError:
+
+        // Location services required but unavailable
+
+        // Guide user to enable location in Settings
+
+        break
+
     default:
+
         // Show the error message to the user
+
         showAlert(title: "Payment Failed", message: errorMessage ?? "Please try again")
+
     }
+
 }
 
 ```
@@ -254,7 +298,6 @@ try await HaloSDK.initialize(tokenProvider: myProvider, environment: .production
 Sandbox mode connects to a static test endpoint (`kernelserver.go.dev.haloplus.io`) and does not process real payments. It should be used for development and testing only.
 
 Production mode derives the API base URL dynamically from the JWT token's `aud` (audience) claim. For example, a token with `"aud": "kernelserver.istore.prod.haloplus.io"` results in the SDK using `https://kernelserver.istore.prod.haloplus.io`. This means the production endpoint is controlled entirely by your backend's token configuration — the SDK does not hardcode it.
-
 
 ### Token Provider
 
@@ -299,7 +342,6 @@ try await HaloSDK.initialize(
 - If your provider throws, the SDK treats it as `authTokenUnauthorized`
 - The JWT must have an `exp` claim — the SDK reads it to detect expiry client-side
 - In production, the JWT must have an `aud` claim — the SDK reads it to determine the API base URL
-
 
 ## Error Handling
 
@@ -351,6 +393,12 @@ case .readerError(let reason, let detail):
 
     // Card reader had a problem — usually retryable
 
+case .locationError(let reason):
+
+    // Location services unavailable — guide user to enable in Settings
+
+    // reason tells you why: .servicesDisabled, .permissionDenied, .timeout, .unavailable
+
 case .userCancelled:
 
     // Customer cancelled the payment
@@ -358,6 +406,7 @@ case .userCancelled:
 case .cardDeclined:
 
     // The card was declined by the issuer
+
 
 default:
 
@@ -546,31 +595,35 @@ try await HaloSDK.initialize(
 Only enable this if your backend supports the `/apple/performance-testing` endpoint. When disabled, no performance events are accumulated or sent, and there is no impact on payment flows or analytics delegate events.
 
 When enabled, events are collected across three flow types:
+
 - **T&C acceptance**: `connectionTokenRequested` through `termsAccepted`
 - **Device configuration**: `connectionTokenRequested` through `readerPrepareCompleted`
 - **Transaction**: `paymentStarted` through `paymentApproved` / `paymentDeclined` / `paymentCancelled` / `paymentError`
 
 The accumulated events are sent to:
+
 ```
 POST /apple/performance-testing
 ```
 
 With headers:
+
 - `X-Device-Installation-Id` — Unique device identifier
 - `X-Correlation-Id` — Unique ID for this payment flow
 - `Authorization` — Bearer token
 
 Payload:
+
 ```json
 {
-    "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
-    "messages": [
-        {"timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted"},
-        {"timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated"},
-        {"timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap"},
-        {"timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected"},
-        {"timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved"}
-    ]
+  "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
+  "messages": [
+    { "timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted" },
+    { "timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated" },
+    { "timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap" },
+    { "timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected" },
+    { "timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved" }
+  ]
 }
 ```
 
@@ -664,7 +717,6 @@ case .declined(let errorCode, let errorMessage):
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
 
-
 ## Security Validation
 
 The SDK performs automatic security validation on purchase transactions to ensure compliance with payment standards. Transactions may be declined offline based on card data analysis.
@@ -679,7 +731,7 @@ case .declined(let errorCode, let errorMessage):
 
         // Transaction declined due to security validation
 
-        // This occurs when Cryptogram Information Data (tag 9F27) equals "00" 
+        // This occurs when Cryptogram Information Data (tag 9F27) equals "00"
 
         // Only affects purchase transactions, not refunds
 
@@ -717,23 +769,125 @@ This clears all cached tokens and resets the SDK state. You'll need to call `ini
 
 ## Location Permissions
 
-The SDK can include device location in transaction requests for fraud prevention. This is optional but recommended. To enable it, add this key to your app's `Info.plist`:
+The SDK requires device location for all transaction requests as a fraud prevention and security measure. **Location access is mandatory** — payments cannot proceed without it.
+
+### Required Configuration
+
+Add this key to your app's `Info.plist`:
 
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>Location is used to help verify transactions and prevent fraud.</string>
+<string>Location access is required to process payments securely and prevent fraud.</string>
 
 ```
 
-If location permission is denied or unavailable, transactions still proceed normally, but location data is not included in the request headers. If a user has previously denied location permission, iOS will not prompt again and the user must enable it manually in system settings.
+**Important**: Without this Info.plist entry, iOS will not show the location permission dialog, and all payment attempts will fail.
+
+### How Location Works
+
+1. **First payment**: When a user initiates their first payment, iOS shows a system permission dialog asking for location access
+2. **Permission granted**: The SDK captures coordinates and includes them in the `X-Location` header for all subsequent payments
+3. **Permission denied**: The payment fails immediately with a `LOCATION_ERROR` error code before Apple's card reader UI appears
+4. **Subsequent payments**: If permission was previously granted, location is captured automatically with no additional prompts
+
+### Location Error Handling
+
+When location is unavailable or denied, the SDK returns a `.declined` result with `errorCode: HaloErrorCode.locationError`:
+
+```swift
+
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.locationError {
+
+        // Location permission denied or unavailable
+
+        // Guide user to enable location in Settings
+
+        showLocationSettingsAlert()
+
+    }
+
+```
+
+### Location Error Reasons
+
+The SDK provides specific reasons for location failures via `HaloError.locationError(reason:)`:
+
+- **`.servicesDisabled`**: Location Services are disabled in device Settings
+- **`.permissionDenied`**: User denied location permission for this app
+- **`.timeout`**: Location request timed out (user didn't respond to permission dialog)
+- **`.unavailable`**: Location data unavailable for other reasons
+
+### Best Practices
+
+**1. Pre-request location permission (Recommended)**
+
+To avoid the permission dialog appearing during the payment flow, request location permission earlier (e.g., during onboarding or app launch):
+
+```swift
+
+import CoreLocation
+
+func requestLocationPermissionEarly() {
+
+    let status = CLLocationManager().authorizationStatus
+
+    if status == .notDetermined {
+
+        // Request permission before first payment
+
+        CLLocationManager().requestWhenInUseAuthorization()
+
+    }
+
+}
+
+```
+
+**2. Provide clear guidance when permission is denied**
+
+```swift
+
+func showLocationSettingsAlert() {
+
+    let alert = UIAlertController(
+
+        title: "Location Access Required",
+
+        message: "To process payments securely, please enable location access in Settings > Privacy & Security > Location Services.",
+
+        preferredStyle: .alert
+
+    )
+
+    alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+
+        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+
+            UIApplication.shared.open(settingsURL)
+
+        }
+
+    })
+
+    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+    present(alert, animated: true)
+
+}
+
+```
 
 **What happens with location:**
 
-- If granted: Location coordinates are sent in the `X-Location` header for fraud scoring
+- If granted: Location coordinates are sent in the `X-Location` header in format `"accuracy;longitude;latitude"`
 
-- If denied: Transaction proceeds normally without location data
+- If denied: Payment fails immediately with `LOCATION_ERROR` before card reader UI appears
 
-- If not determined: SDK requests permission automatically (with a 5-second timeout)
+- If not determined: SDK requests permission automatically when payment starts
+
+- The SDK handles location with a 5-second timeout to avoid blocking the payment flow
 
 ## Transaction Flow
 
@@ -784,6 +938,7 @@ case .approved(let receipt):
     receipt.approvedAt       // Timestamp
 
 ```
+
 ## Thread Safety
 
 All HaloSDK methods are `@MainActor` — you should call them from the main thread. The async methods (`startContactlessPayment`) can be awaited from any async context and will handle threading internally.
@@ -820,6 +975,15 @@ Make sure you're running on a physical device, not the simulator. Also check tha
 
 You need the ProximityReader entitlement from Apple. This requires approval through the Apple Developer program for Tap to Pay.
 
+**Location permission denied or LOCATION_ERROR**
+
+Location access is required for all payments. If you're seeing `LOCATION_ERROR`:
+
+1. Check that `NSLocationWhenInUseUsageDescription` is in your Info.plist
+2. If the user denied permission, they must enable it manually in Settings → Your App → Location
+3. Consider pre-requesting location permission during app launch or onboarding to avoid payment-time prompts
+4. The SDK validates location before showing Apple's card reader UI, so users get immediate feedback if location is unavailable
+
 **Location not being sent with transactions**
 
 Check that you've added `NSLocationWhenInUseUsageDescription` to your Info.plist. If the user previously denied location permission, they'll need to enable it manually in Settings → Your App → Location. The SDK won't prompt again after a denial.
@@ -829,7 +993,6 @@ Check that you've added `NSLocationWhenInUseUsageDescription` to your Info.plist
 The encrypted card data must be submitted to the backend within 60 seconds of the card tap. If you're seeing this error, there may be network delays or the payment flow is taking too long. The SDK handles this automatically, but slow network conditions can cause timeouts.
 
 **AUTH_TOKEN_UNAUTHORIZED or "Authentication token rejected" error**
-
 
 The SDK automatically refreshes expired tokens, so if you're seeing this error, your **token provider** is the problem — not just an expired token. The SDK tried twice (once proactively, once on 401 retry) and both attempts failed.
 
@@ -848,6 +1011,5 @@ Your auth token was rejected by the backend (HTTP 401). This usually means:
 - You're using a sandbox token in production (or vice versa) — make sure the token matches your environment
 - The token signature is invalid — verify your backend is signing tokens correctly
 - The token was revoked server-side — check with your payment provider
-
 
 The SDK sets `error.requiresTokenRefresh = true` for this error, so you can catch it alongside other token issues.
