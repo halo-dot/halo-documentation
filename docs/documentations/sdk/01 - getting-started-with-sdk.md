@@ -70,8 +70,8 @@ repositories {
 }
 
 dependencies {
-    releaseImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.8"
-    debugImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.8-debug"
+    releaseImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.17"
+    debugImplementation group: "za.co.synthesis.halo", name: "sdk", version: "4.0.17-debug"
 }
 ```
 
