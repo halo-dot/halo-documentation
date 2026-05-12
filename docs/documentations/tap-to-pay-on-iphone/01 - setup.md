@@ -207,7 +207,8 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `NOT_INITIALIZED`         | SDK wasn't initialized                                                                            |
 | `TIMEOUT`                 | Request timed out                                                                                 |
 | `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401)                                                               |
-| `LOCATION_ERROR`          | Location services required but unavailable (see Location Permissions section)                     |
+| `LOCATION_ERROR`          | Location services required but unavailable (see [Location Permissions](#location-permissions) section)                     |
+| `MERCHANT_BLOCKED`        | Merchant account temporarily blocked by risk engine (see [Merchant Blocked](#merchant-blocked) section)                |
 | `104`                     | Server configuration error (contact support)                                                      |
 
 You can also check these programmatically:
@@ -260,6 +261,14 @@ case .declined(let errorCode, let errorMessage):
         // Location services required but unavailable
 
         // Guide user to enable location in Settings
+
+        break
+
+    case HaloErrorCode.merchantBlocked:
+
+        // Merchant account temporarily blocked by risk engine
+
+        // See Merchant Blocked section for details
 
         break
 
@@ -407,6 +416,11 @@ case .cardDeclined:
 
     // The card was declined by the issuer
 
+case .merchantBlocked:
+
+    // Merchant account temporarily blocked by risk engine
+
+    // See Merchant Blocked section for details
 
 default:
 
@@ -476,6 +490,43 @@ case .declined(let errorCode, let errorMessage):
 - Your backend is down or returning errors
 - JWT signature is invalid or malformed
 - Wrong environment (sandbox token in production or vice versa)
+
+### Merchant Blocked
+
+The SDK may return a `MERCHANT_BLOCKED` error code when the merchant account has been temporarily blocked by the risk engine. This is a security measure to prevent potential fraud or misuse.
+
+**Common causes:**
+
+- A merchant has logged in on a high number of devices
+- Multiple merchant IDs registered on the same device
+- Unusual activity patterns detected by the risk engine
+
+**Resolution:**
+
+In most cases, the block is automatically removed after 24 hours. If the issue persists beyond this period, contact support for assistance.
+
+```swift
+case .declined(let errorCode, let errorMessage):
+
+    if errorCode == HaloErrorCode.merchantBlocked {
+
+        // Merchant account temporarily blocked by risk engine
+
+        // Typically resolves within 24 hours
+
+        showAlert(title: "Account Temporarily Blocked",
+                  message: "Your account has been temporarily blocked for security reasons. Please try again in 24 hours or contact support.")
+
+    }
+
+```
+
+**What to tell users:**
+
+- The block is temporary and typically lifts within 24 hours
+- This is an automated security measure
+- No action is required from the merchant's side in most cases
+- If the block persists after 24 hours, contact support
 
 ### Event Delegate
 
