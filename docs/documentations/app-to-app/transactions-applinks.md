@@ -68,7 +68,7 @@ Please see the example of the response body below:
     "reference":"c9e1were-8156-444c-894d-e065d71366a6"
 }
 ```
-
+<hr />
 #### Use the Generated URL to Call the Halo Dot Go App
 
 The generated link returned by the API call can then be used to invoke the Halo Dot Go application and start process transactions
