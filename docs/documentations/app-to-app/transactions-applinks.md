@@ -16,6 +16,8 @@ ID``` from the previous step for this API call.
 
 The Call to initiate a Applinks Transaction.
 
+<hr />
+
 #### Headers
 
 | Name |Type | Description |
@@ -23,6 +25,7 @@ The Call to initiate a Applinks Transaction.
 | Content-Type* | String | Content Type of The Request: application/json|
 | x-api-key| String | The API Key retrieved from the Merchant Portal|
 
+<hr />
 
 #### Request Body
 
