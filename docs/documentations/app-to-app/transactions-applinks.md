@@ -39,29 +39,10 @@ The Call to initiate a Applinks Transaction.
 | isConsumerApp* | Boolean | Indicate if the call is for a Consumer App |
 | Image* | JSON | Set to true to generate a QR code - ("required*: false")|
 
-
-
-Please see the example of the request body below:
-
-```
-{
-    "merchantId": "[your_merchant_id]",
-    "paymentReference": "[your_payment_reference]",
-    "amount": [your_payment_amount],
-    "timestamp":"Thu Aug 25 09:43:59 SAST 2022",
-    "currencyCode": "ZAR",
-    "isConsumerApp": false,
-    "Image": {
-        "required": false
-    }
-}
-```
-
-**Response**
-200: OK URL to invoke the Halo Dot Application for a payment
+**Response** 200: OK URL to invoke the Halo Dot Application for a payment
 <br/>
 The response will contain a Transaction URL and Payment Reference that will be used in the intent call.
-
+<br/>
 Please see the example of the response body below:
 
 ```json
