@@ -39,17 +39,14 @@ The Call to initiate a Applinks Transaction.
 | isConsumerApp* | Boolean | Indicate if the call is for a Consumer App |
 | Image* | JSON | Set to true to generate a QR code - ("required*: false")|
 
-**Response** 200: OK URL to invoke the Halo Dot Application for a payment
-<br/>
-The response will contain a Transaction URL and Payment Reference that will be used in the intent call.
-<br/>
-Please see the example of the response body below:
+#### Example Response
 
 ```json
 {
 
     "url": "https://halompos.page.link/DYfL4EZEzvAzBfBAS",
-    "reference":"c9e1were-8156-444c-894d-e065d71366a6"
+    "reference":"c9e1were-8156-444c-894d-e065d71366a6",
+    "qrCode": "data:image/png;base64,..."
 }
 ```
 

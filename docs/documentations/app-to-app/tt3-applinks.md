@@ -16,14 +16,6 @@ ID``` from the previous step for this API call.
 
 The Call to initiate a TT3 Applinks Transaction.
 
-#### Headers
-
-| Name |Type | Description |
-| ----------- | ----------- |-------------|
-| Content-Type* | String | Content Type of The Request: application/json|
-| x-api-key| String | The API Key retrieved from the Merchant Portal|
-<br/>
-
 #### Request Body
 
 | Name |Type | Description |
@@ -38,43 +30,19 @@ The Call to initiate a TT3 Applinks Transaction.
 | isConsumerApp | Boolean | Indicate if the call is for a Consumer App |
 | collectionDay* | Number | Debit order day |
 | CreditorABSN* | String | Description of Insurer (e.g. Name of insurer)|
-<br/>
 
-Please see the example of the request body below:
-
-```
-{
-    "merchantId" : 499,
-    "accountNumber": "1001009452",
-    "collectionDay":"25",
-    "creditorABSN":"Clientele",
-    "id": "7703310666187",
-    "maxCollectionAmount": "100",
-    "contractReference": "retest6",
-    "timestamp": "Thu Aug 25 09:43:59 SAST 2022",
-    "isConsumerApp": false,
-    "image": {
-        "required": false
-        }
-}
-```
-<br/>
-
-**Response**
-201: Created URL to invoke the Halo Dot Application for a payment
-<br/>
-The response will contain a Transaction ID and JWT Token that will be used in the intent call.
-
-Please see the example of the response body below:
+#### Example Response
 
 ```json
 {
 
     "url": "https://halompos.page.link/DYfL4EZEzvAzBfBAS",
-    "reference":"c9e1were-8156-444c-894d-e065d71366a6"
+    "reference":"c9e1were-8156-444c-894d-e065d71366a6",
+    "qrCode": "data:image/png;base64,..."
 }
 ```
-<br/>
+
+<hr />
 
 #### Use the Generated URL to Call the Halo Dot Go App
 
