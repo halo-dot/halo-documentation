@@ -30,7 +30,6 @@ The Call to initiate a TT3 Applinks Transaction.
 | isConsumerApp | Boolean | Indicate if the call is for a Consumer App |
 | collectionDay* | Number | Debit order day |
 | CreditorABSN* | String | Description of Insurer (e.g. Name of insurer)|
-<br/>
 
 #### Example Response
 
@@ -38,10 +37,12 @@ The Call to initiate a TT3 Applinks Transaction.
 {
 
     "url": "https://halompos.page.link/DYfL4EZEzvAzBfBAS",
-    "reference":"c9e1were-8156-444c-894d-e065d71366a6"
+    "reference":"c9e1were-8156-444c-894d-e065d71366a6",
+    "qrCode": "data:image/png;base64,..."
 }
 ```
-<br/>
+
+<hr />
 
 #### Use the Generated URL to Call the Halo Dot Go App
 
