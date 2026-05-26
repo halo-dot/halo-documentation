@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.86")
+    .package(id: "synthesis.halosdk", from: "1.0.90")
 
 ]
 ```
@@ -192,34 +192,68 @@ case .declined(let errorCode, let errorMessage):
 
 ### Common Error Codes
 
-When a payment is declined, `errorCode` identifies the outcome for application logic and analytics. User-facing messaging should remain clear and non-technical.
+When a payment is declined, `errorCode` identifies the outcome for application logic and analytics. Error codes match Apple's `PaymentCardReaderError` case names exactly where applicable. User-facing messaging should remain clear and non-technical.
 
-| Error Code | Meaning | When It Happens | What Consumer App Should Do |
-|-----------|---------|-----------------|----------------------------|
-| `USER_CANCELLED` | Customer cancelled the payment | User tapped cancel button or app called `cancelPayment()` | Show "Payment cancelled" - optionally prompt to try again |
-| `CARD_DECLINED` | Card was declined by issuer | Card tap completed but issuer declined | Ask for different payment method |
-| `NETWORK_ERROR` | Network connectivity issue | No internet or connection lost during payment | Show: "Tap to Pay requires your phone to be connected to the internet. Check your network settings and try again." |
-| `TIMEOUT` | Payment session timed out | User didn't tap card within 60 seconds | Show: "Payment session timed out" - allow retry |
-| `APP_IN_BACKGROUND` | Phone call in progress or app interrupted | Phone call received, Control Center pulled, notification banner | If phone call: "Phone call in progress. Tap to Pay can't be used while a call is in progress." If other interruption: "Payment interrupted. Please try again." |
-| `DEVICE_NOT_SUPPORTED` | Device doesn't support Tap to Pay | No passcode set, iOS outdated, or device incompatible | Show specific guidance based on errorMessage (see error details below) |
-| `PAYMENT_IN_PROGRESS` | Another payment is already in progress | User tapped pay button twice or previous payment didn't complete | Wait for current payment to finish before starting new one |
-| `SCREEN_CAPTURE_DETECTED` | Screen recording/mirroring detected | User started screen recording during payment | Abort payment - show security warning |
-| `NOT_INITIALIZED` | SDK wasn't initialized | Called payment before `HaloSDK.initialize()` | Call `initialize()` first |
-| `AUTH_TOKEN_UNAUTHORIZED` | Auth token rejected by server (401) | Backend rejected JWT token twice | Fetch new token from backend and reinitialize SDK |
-| `LOCATION_ERROR` | Location services unavailable | User denied location permission or services disabled | Guide user to enable location in Settings → Privacy → Location Services |
-| `ACCOUNT_LINKING_ERROR` | Merchant account not linked to Apple | First-time setup incomplete or account issue | SDK automatically calls `linkAccount()` to show linking UI - no manual action needed |
-| `TOKEN_ERROR` | Connection token issue | Token expired, empty, or invalid | Restart payment - SDK will fetch fresh token automatically |
-| `READER_ERROR` | Card reader had a problem | Reader busy, memory full, or prepare failed | Retry payment or show specific guidance based on errorMessage |
-| `STORE_FORWARD_ERROR` | Store and forward mode error | Offline mode session issues | Check offline payment configuration |
-| `DEVICE_BANNED` | Device banned from Tap to Pay | Apple blocked device (security/compliance) | Show: "Device banned until [date]. Please contact support." |
-| `MERCHANT_NOT_ALLOWED` | Merchant configuration error | Invalid merchant ID, blocked, or missing entitlement | Contact support to verify merchant enrollment |
-| `SYSTEM_ERROR` | Temporary system issue | Transient attestation failure or session conflict | Auto-retry once - if persists, show: "Payment session error. Please try again." |
-| `INVALID_AMOUNT` | Invalid payment amount | Amount is zero, negative, or not in minor units | Validate amount before calling SDK |
-| `INVALID_CURRENCY` | Invalid currency code | Currency not supported or malformed | Use valid ISO 4217 currency codes (e.g., "USD", "ZAR") |
-| `INVALID_REFERENCE` | Invalid merchant reference | Reference is empty or too long | Provide valid reference (max 64 characters) |
-| `104` | Server configuration error | Backend misconfiguration | Contact support |
-| `OFFLINE_DECLINED` | Transaction declined offline | Cryptogram Information Data = 00 (security validation) | Show: "Transaction declined due to security validation" |
-| `CARD_NOT_SUPPORTED` | Card not supported for transaction type | Card type incompatible with purchase/refund | Ask for different card or payment method |
+| Error Code | Apple Error | Meaning | What Consumer App Should Do |
+|-----------|-------------|---------|----------------------------|
+| `userCancelled` | — | Customer cancelled the payment | Show "Payment cancelled" - optionally prompt to try again |
+| `cardDeclined` | — | Card was declined by issuer | Ask for different payment method |
+| `networkError` | `networkError` | Network connectivity issue | Show: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again." |
+| `networkAuthenticationError` | `networkAuthenticationError` | Network authentication failure | Show: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again." |
+| `serviceConnectionError` | `serviceConnectionError` | Internal service unavailable | Show: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again." |
+| `timeout` | — | Payment session timed out | Allow retry |
+| `readNotAllowedDuringCall` | `readNotAllowedDuringCall` | Phone call in progress | Show: "Tap to Pay on iPhone can't be used while a call is in progress." |
+| `requestInterrupted` | `requestInterrupted` | App interrupted during read | Show: "Tap to Pay on iPhone can't be used while a call is in progress." |
+| `backgroundRequestNotAllowed` | `backgroundRequestNotAllowed` | App went to background | Bring app to foreground and retry - do not show modal alert if triggered from background init |
+| `passcodeDisabled` | `passcodeDisabled` | No passcode set on device | Show: "Tap to Pay on iPhone requires you to set a passcode on your device. To set a passcode, go to Settings > Face ID & Passcode or Settings > Touch ID & Passcode." |
+| `osVersionNotSupported` | `osVersionNotSupported` | iOS version too old | Show: "Tap to Pay on iPhone requires the latest version of iOS. To update, go to Settings > General > Software Update." |
+| `modelNotSupported` | `modelNotSupported` | Device model not supported | Show generic error alert |
+| `unsupported` | `unsupported` | Unsupported hardware or configuration | Show generic error alert |
+| `deviceBanned` | `deviceBanned` | Device banned by Apple | Show: "Device banned until [date]. Please contact support." |
+| `paymentInProgress` | — | Another payment is already running | Wait for current payment to finish |
+| `screenCaptureDetected` | — | Screen recording/mirroring detected | Abort payment - show security warning |
+| `notInitialized` | — | SDK wasn't initialized | Call `initialize()` first |
+| `authTokenUnauthorized` | — | Auth token rejected (401) | Fetch new token from backend and reinitialize SDK |
+| `locationError` | — | Location services unavailable | Guide user to enable location in Settings → Privacy → Location Services |
+| `accountNotLinked` | `accountNotLinked` | Merchant account not linked | SDK automatically calls `linkAccount()` — no manual action needed |
+| `accountLinkingRequiresiCloudSignIn` | `accountLinkingRequiresiCloudSignIn` | iCloud sign-in required | Show: "Tap to Pay on iPhone requires you to sign in with an Apple Account. To sign in, go to Settings > Sign in to your iPhone." |
+| `accountLinkingFailed` | `accountLinkingFailed` | Account linking failed | Show: "An error occurred while linking the Apple Account for Tap to Pay on iPhone. Try again with a different Apple Account." |
+| `accountLinkingCheckFailed` | `accountLinkingCheckFailed` | Account status check failed | Show generic error alert |
+| `accountLinkingCancelled` | `accountLinkingCancelled` | User cancelled account linking | Provide way to resume linking |
+| `accountAlreadyLinked` | `accountAlreadyLinked` | Account already linked | No action needed |
+| `accountDeactivated` | `accountDeactivated` | Account deactivated | Show generic error alert |
+| `invalidReaderToken` | `invalidReaderToken` | Invalid reader token | Check token generation in backend |
+| `emptyReaderToken` | `emptyReaderToken` | Empty reader token | Check token generation in backend |
+| `tokenExpired` | `tokenExpired` | Reader token expired | SDK will fetch fresh token automatically |
+| `prepareFailed` | `prepareFailed` | Reader preparation failed | Show specific guidance based on errorMessage (2031/2033/pairing) |
+| `readerBusy` | `readerBusy` | Card reader is busy | Retry payment |
+| `notReady` | `notReady` | Reader session not ready | Retry payment |
+| `prepareExpired` | `prepareExpired` | Reader session expired | Retry payment |
+| `readerMemoryFull` | `readerMemoryFull` | Reader memory full | Show: "Reader memory is full. Please remove one or more cards from Apple Wallet and try again." |
+| `merchantBlocked` | `merchantBlocked` | Merchant blocked (exceeded device limit) | Show generic error alert |
+| `invalidMerchant` | `invalidMerchant` | Invalid merchant configuration | Contact support to verify merchant enrollment |
+| `notAllowed` | `notAllowed` | Entitlement or configuration issue | Contact support to verify merchant enrollment |
+| `storeAndForwardNotAllowed` | `storeAndForwardNotAllowed` | Store and forward not allowed | Check offline payment configuration |
+| `storeAndForwardSessionExpired` | `storeAndForwardSessionExpired` | Store and forward session expired | Check offline payment configuration |
+| `storeAndForwardSessionInvalidated` | `storeAndForwardSessionInvalidated` | Store and forward session invalidated | Check offline payment configuration |
+| `storeAndForwardTokenIssuerChanged` | `storeAndForwardTokenIssuerChanged` | Token issuer changed in offline mode | Check offline payment configuration |
+| `invalidAmount` | — | Invalid payment amount | Validate amount before calling SDK |
+| `invalidCurrency` | — | Invalid currency code | Use valid ISO 4217 currency codes (e.g., "USD", "ZAR") |
+| `invalidReference` | — | Invalid merchant reference | Provide valid reference (max 64 characters) |
+| `transactionError` | — | Server transaction error | Show generic error alert |
+| `offlineDeclined` | — | Transaction declined offline | Show: "Transaction declined due to security validation" |
+| `cardNotSupported` | — | Card not supported for transaction | Ask for different card or payment method |
+| `unknown` | `unknown` | Unexpected Apple error | Show generic error alert |
+| `systemError` | — | System-level error | Show generic error alert |
+| `104` | — | Server configuration error | Contact support |
+
+**Generic error alert** (for `unknown`, `systemError`, `merchantBlocked`, and any unrecognised code):
+```
+Title:    "Tap to Pay on iPhone Unavailable"
+Body:     "An error occurred while starting Tap to Pay on iPhone. Try again later. If the error persists, contact support."
+Primary:  "Contact Support"
+Secondary: "Close"
+```
 
 You can also check these programmatically:
 
@@ -441,25 +475,31 @@ The SDK provides user-friendly error messages that follow Apple's Tap to Pay gui
 
 #### Device Not Supported Errors
 
-When `errorCode == HaloErrorCode.deviceNotSupported`, check the `errorMessage` for specific guidance:
+These are returned as distinct `errorCode` values — no need to inspect `errorMessage` to disambiguate:
 
-**No Passcode Set:**
+**`passcodeDisabled`** — No passcode set on device:
 ```swift
-// errorMessage: "Passcode Required: Tap to Pay requires you to set a passcode on your device. Go to Settings > Face ID & Passcode or Settings > Touch ID & Passcode."
+// errorMessage: "Tap to Pay on iPhone requires you to set a passcode on your device. To set a passcode, go to Settings > Face ID & Passcode or Settings > Touch ID & Passcode."
 ```
 Consumer app should: Show alert with link to Settings → Face ID & Passcode
 
-**iOS Version Outdated:**
+**`osVersionNotSupported`** — iOS version too old:
 ```swift
-// errorMessage: "Software Update Required: Tap to Pay requires the latest version of iOS. Go to Settings > General > Software Update."
+// errorMessage: "Tap to Pay on iPhone requires the latest version of iOS. To update, go to Settings > General > Software Update."
 ```
 Consumer app should: Show alert with link to Settings → General → Software Update
 
-**Device Incompatible:**
+**`modelNotSupported`** — Device model not capable:
 ```swift
-// errorMessage: "This device does not support Tap to Pay"
+// errorMessage: (generic error alert)
 ```
 Consumer app should: Disable Tap to Pay features permanently for this device
+
+**`unsupported`** — Unsupported hardware or configuration:
+```swift
+// errorMessage: (generic error alert)
+```
+Consumer app should: Show generic error alert
 
 #### Timeout Errors
 
@@ -473,121 +513,105 @@ Consumer app should: Allow retry - user may need guidance on tapping card
 
 #### Phone Call and App Interruption Errors
 
-When `errorCode == HaloErrorCode.appInBackground`:
+#### Phone Call and App Interruption Errors
 
-**Phone Call In Progress:**
+**`readNotAllowedDuringCall`** — Phone call in progress (also covers `requestInterrupted`):
 ```swift
-// errorMessage: "Phone call in progress. Tap to Pay can't be used while a call is in progress."
+// errorMessage: "Tap to Pay on iPhone can't be used while a call is in progress."
 ```
-Consumer app should: Show alert with OK button - user must end call first before retrying
+Consumer app should: Show alert — user must end the call first before retrying
 
-**Other App Interruption (Control Center, notification, background):**
+**`backgroundRequestNotAllowed`** — App went to background during init or payment:
 ```swift
-// errorMessage: "Payment interrupted. Please try again."
+// errorMessage: (generic error alert)
 ```
-Consumer app should: Allow immediate retry - this is transient
+Consumer app should: Bring app to foreground and retry — do not show modal alert if triggered from background init
 
 #### Network Errors
 
-When `errorCode == HaloErrorCode.networkError`:
+**`networkError` / `networkAuthenticationError` / `serviceConnectionError`**:
 ```swift
-// errorMessage: "Network Error: Tap to Pay requires your phone to be connected to the internet. Check your network settings and try again."
+// errorMessage: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again."
 ```
 Consumer app should: Show alert with option to retry when connectivity restored
 
 #### Reader Errors
 
-When `errorCode == HaloErrorCode.readerError`, check `errorMessage` for specific guidance:
-
-**Reader Memory Full:**
+**`readerMemoryFull`**:
 ```swift
 // errorMessage: "Reader memory is full. Please remove one or more cards from Apple Wallet and try again."
 ```
 Consumer app should: Guide user to remove cards from Apple Wallet, then retry
 
-**iOS Configuration Incompatible (error 2031):**
+**`prepareFailed`** — iOS configuration incompatible (error 2031):
 ```swift
-// errorMessage: "Software Update Required: Tap to Pay requires the latest version of iOS. Go to Settings > General > Software Update."
+// errorMessage: "Tap to Pay on iPhone requires the latest version of iOS. To update, go to Settings > General > Software Update."
 ```
 Consumer app should: Show alert with link to iOS update
 
-**Software Update Issue (error 2033):**
+**`prepareFailed`** — Software update issue (error 2033):
 ```swift
-// errorMessage: "Software Update Issue: Please reinstall iOS using a computer. Contact support for assistance."
+// errorMessage: "A software update issue occurred. Please reinstall iOS using a computer. Contact support for assistance."
 ```
 Consumer app should: Show support contact information
 
-**Secure Pairing Violation:**
+**`prepareFailed`** — Secure pairing violation:
 ```swift
-// errorMessage: "Hardware Issue: Please bring your device to an Apple Store for diagnostic and repair."
+// errorMessage: "A hardware issue was detected. Please bring your device to an Apple Store for diagnostic and repair."
 ```
 Consumer app should: Show Apple Store locator or support contact
 
-**Generic Reader Error:**
+**`readerBusy` / `notReady` / `prepareExpired`**:
 ```swift
-// errorMessage: "Failed to prepare card reader. Please try again."
+// errorMessage: (generic error alert)
 ```
-Consumer app should: Allow retry - usually transient
+Consumer app should: Allow retry — usually transient
 
 #### Account Linking Errors
 
-When `errorCode == HaloErrorCode.accountLinkingError`:
-```swift
-// errorMessage: "Account linking error: [reason]"
-// reason can be: notLinked, failed, cancelled, checkFailed, deactivated, requiresiCloudSignIn, alreadyLinked
-```
+Each account linking outcome now has its own distinct `errorCode`. The SDK automatically calls `linkAccount()` to present Apple's account linking UI — no manual intervention is required.
 
-**SDK Behavior:**
-The SDK automatically calls `linkAccount()` to present Apple's account linking UI to the merchant. This happens during the payment flow - no manual intervention is required.
-
-**Consumer app should:**
-- Allow the SDK to handle the linking flow automatically
-- If user cancels the linking UI (`reason == cancelled`), they can retry payment to see linking UI again
-- If linking fails (`reason == failed`), SDK will retry - if persistent, show support contact
-- If `requiresiCloudSignIn`, SDK shows iOS sign-in prompt automatically
+| `errorCode` | Meaning | What to do |
+|---|---|---|
+| `accountNotLinked` | Account not yet linked | SDK handles automatically |
+| `accountLinkingCancelled` | User cancelled linking UI | Prompt to retry payment |
+| `accountLinkingFailed` | Linking failed after retries | Show: "An error occurred while linking the Apple Account for Tap to Pay on iPhone. Try again with a different Apple Account." |
+| `accountLinkingCheckFailed` | Status check failed | Show generic error alert |
+| `accountLinkingRequiresiCloudSignIn` | iCloud sign-in needed | Show: "Tap to Pay on iPhone requires you to sign in with an Apple Account. To sign in, go to Settings > Sign in to your iPhone." |
+| `accountAlreadyLinked` | Already linked | No action needed |
+| `accountDeactivated` | Account deactivated | Show generic error alert |
 
 #### System Errors (Transient)
 
 When `errorCode == HaloErrorCode.systemError`:
-
-**First Occurrence (auto-retry):**
 ```swift
-// errorMessage: "Payment session error. Please try again."
+// errorMessage: (generic error alert)
 ```
-SDK automatically retries once - consumer app should wait for retry result
-
-**After Interruption:**
-```swift
-// errorMessage: "Payment interrupted. Please restart the payment."
-```
-Consumer app should: Allow user to restart payment
+SDK automatically retries once — consumer app should wait for retry result, then allow user to restart payment
 
 #### Device Banned
 
 When `errorCode == HaloErrorCode.deviceBanned`:
 ```swift
-// errorMessage: "Device banned until [date]. Please contact support."
+// errorMessage: Apple-provided ban message (includes ban expiry date if applicable)
 ```
 Consumer app should: Disable Tap to Pay and show support contact
 
 #### Token Errors
 
-When `errorCode == HaloErrorCode.tokenError`:
-```swift
-// errorMessage: "Token error: [reason]"
-// reason can be: emptyReaderToken, invalidReaderToken, tokenExpired
-```
-Consumer app should: Restart payment - SDK automatically fetches fresh token
+| `errorCode` | Meaning | What to do |
+|---|---|---|
+| `invalidReaderToken` | Invalid reader token | Check token generation in backend |
+| `emptyReaderToken` | Empty reader token | Check token generation in backend |
+| `tokenExpired` | Reader token expired | SDK will fetch fresh token automatically |
 
 #### Merchant Errors
 
-When `errorCode == HaloErrorCode.merchantNotAllowed`:
-```swift
-// errorMessage: "Merchant error: [reason]"
-// reason can be: notAllowed, invalidMerchant, blocked
-```
-Consumer app should: Contact support to verify merchant enrollment
-
+| `errorCode` | Meaning | What to do |
+|---|---|---|
+| `merchantBlocked` | Merchant blocked (exceeded device limit) | Show generic error alert — contact support |
+| `invalidMerchant` | Invalid merchant configuration | "The merchant configuration is invalid. Please contact support to verify merchant enrollment." |
+| `notAllowed` | Entitlement or configuration issue | Contact support to verify merchant enrollment |
 
 ### Error Properties
 
@@ -612,7 +636,6 @@ if error.isFatal {
     // Disable Tap to Pay features
 
 ```
-
 
 ### Complete Error Handling Example
 
@@ -657,72 +680,73 @@ case .declined(let errorCode, let errorMessage):
         // User didn't tap card in time (60s)
         showRetryPrompt(message: "Payment timed out. Please try again.")
         
-    case HaloErrorCode.deviceNotSupported:
-        // Device issue - show specific guidance
-        if errorMessage?.contains("Passcode Required") == true {
-            showAlert(
-                title: "Passcode Required",
-                message: errorMessage,
-                action: openSettings
-            )
-        } else if errorMessage?.contains("Software Update") == true {
-            showAlert(
-                title: "iOS Update Required",
-                message: errorMessage,
-                action: openSettings
-            )
-        } else {
-            // Device incompatible - disable feature
-            disableTapToPay()
-        }
+    case HaloErrorCode.passcodeDisabled:
+        showAlert(
+            title: "Passcode Required",
+            message: errorMessage,
+            action: openSettings
+        )
         
-    case HaloErrorCode.appInBackground:
-        // Phone call or other app interruption
-        if errorMessage?.contains("Phone call") == true {
-            // Phone call in progress - show Apple's recommended alert
-            showAlert(
-                title: "Phone Call in Progress",
-                message: "Tap to Pay can't be used while a call is in progress.",
-                buttons: [.ok]
-            )
-        } else {
-            // Other interruption (Control Center, notification, background)
-            showRetryPrompt(message: errorMessage)
-        }
+    case HaloErrorCode.osVersionNotSupported:
+        showAlert(
+            title: "iOS Update Required",
+            message: errorMessage,
+            action: openSettings
+        )
         
-    case HaloErrorCode.readerError:
-        // Reader issue - check for specific guidance
-        if errorMessage?.contains("memory is full") == true {
-            showAlert(
-                title: "Reader Memory Full",
-                message: errorMessage
-            )
-        } else if errorMessage?.contains("Hardware Issue") == true {
-            showAlert(
-                title: "Hardware Issue",
-                message: "Please contact Apple Support."
-            )
-        } else {
-            // Generic reader error - allow retry
-            showRetryPrompt(message: errorMessage)
-        }
+    case HaloErrorCode.modelNotSupported,
+         HaloErrorCode.unsupported:
+        // Device incompatible - disable feature
+        disableTapToPay()
         
-    case HaloErrorCode.accountLinkingError:
-        // Account linking - SDK handles this automatically
-        if errorMessage?.contains("cancelled") == true {
-            // User cancelled the linking UI - they can retry payment
-            showRetryPrompt(message: "Account linking was cancelled. Would you like to try again?")
-        } else if errorMessage?.contains("failed") == true {
-            // Linking failed after retries
-            showAlert(
-                title: "Account Linking Failed",
-                message: "Unable to link your account. Please contact support if this persists."
-            )
-        } else {
-            // Other linking error - SDK will handle automatically
-            // Just show generic retry prompt
-            showRetryPrompt(message: errorMessage)
-        }
+    case HaloErrorCode.readNotAllowedDuringCall,
+         HaloErrorCode.requestInterrupted:
+        // Phone call in progress - show Apple's recommended alert
+        showAlert(
+            title: "Phone Call in Progress",
+            message: errorMessage ?? "Tap to Pay on iPhone can't be used while a call is in progress.",
+            buttons: [.ok]
+        )
+        
+    case HaloErrorCode.backgroundRequestNotAllowed:
+        // App was backgrounded - bring to foreground and retry
+        showRetryPrompt(message: errorMessage)
+        
+    case HaloErrorCode.readerMemoryFull:
+        showAlert(
+            title: "Reader Memory Full",
+            message: errorMessage
+        )
+        
+    case HaloErrorCode.prepareFailed:
+        // Check errorMessage for hardware/software specific guidance
+        showAlert(
+            title: "Setup Failed",
+            message: errorMessage ?? "An error occurred. Please try again."
+        )
+        
+    case HaloErrorCode.readerBusy,
+         HaloErrorCode.notReady,
+         HaloErrorCode.prepareExpired:
+        // Transient reader state - allow retry
+        showRetryPrompt(message: errorMessage)
+        
+    case HaloErrorCode.accountLinkingCancelled:
+        // User cancelled the linking UI - they can retry payment
+        showRetryPrompt(message: "Account linking was cancelled. Would you like to try again?")
+        
+    case HaloErrorCode.accountLinkingFailed:
+        showAlert(
+            title: "Account Linking Failed",
+            message: errorMessage ?? "Unable to link your account. Please contact support if this persists."
+        )
+        
+    case HaloErrorCode.accountLinkingRequiresiCloudSignIn:
+        showAlert(
+            title: "Sign in to Apple Account",
+            message: errorMessage,
+            action: openSettings
+        )
         
     case HaloErrorCode.locationError:
         // Location permission needed
@@ -747,13 +771,19 @@ case .declined(let errorCode, let errorMessage):
         )
         disableTapToPay()
         
+    case HaloErrorCode.merchantBlocked,
+         HaloErrorCode.invalidMerchant,
+         HaloErrorCode.notAllowed:
+        // Merchant configuration issue
+        showAlert(
+            title: "Tap to Pay on iPhone Unavailable",
+            message: "An error occurred while starting Tap to Pay on iPhone. Try again later. If the error persists, contact support.",
+            buttons: [.contactSupport, .close]
+        )
+        
     case HaloErrorCode.systemError:
         // Transient error - SDK may have auto-retried
         showRetryPrompt(message: errorMessage)
-        
-    case HaloErrorCode.tokenError:
-        // Token issue - restart payment
-        showRetryPrompt(message: "Please try again.")
         
     default:
         // Generic error - show message
@@ -826,43 +856,6 @@ case .declined(let errorCode, let errorMessage):
 - Your backend is down or returning errors
 - JWT signature is invalid or malformed
 - Wrong environment (sandbox token in production or vice versa)
-
-### Merchant Blocked
-
-The SDK may return a `MERCHANT_BLOCKED` error code when the merchant account has been temporarily blocked by the risk engine. This is a security measure to prevent potential fraud or misuse.
-
-**Common causes:**
-
-- A merchant has logged in on a high number of devices
-- Multiple merchant IDs registered on the same device
-- Unusual activity patterns detected by the risk engine
-
-**Resolution:**
-
-In most cases, the block is automatically removed after 24 hours. If the issue persists beyond this period, contact support for assistance.
-
-```swift
-case .declined(let errorCode, let errorMessage):
-
-    if errorCode == HaloErrorCode.merchantBlocked {
-
-        // Merchant account temporarily blocked by risk engine
-
-        // Typically resolves within 24 hours
-
-        showAlert(title: "Account Temporarily Blocked",
-                  message: "Your account has been temporarily blocked for security reasons. Please try again in 24 hours or contact support.")
-
-    }
-
-```
-
-**What to tell users:**
-
-- The block is temporary and typically lifts within 24 hours
-- This is an automated security measure
-- No action is required from the merchant's side in most cases
-- If the block persists after 24 hours, contact support
 
 ### Event Delegate
 
@@ -982,35 +975,31 @@ try await HaloSDK.initialize(
 Only enable this if your backend supports the `/apple/performance-testing` endpoint. When disabled, no performance events are accumulated or sent, and there is no impact on payment flows or analytics delegate events.
 
 When enabled, events are collected across three flow types:
-
 - **T&C acceptance**: `connectionTokenRequested` through `termsAccepted`
 - **Device configuration**: `connectionTokenRequested` through `readerPrepareCompleted`
 - **Transaction**: `paymentStarted` through `paymentApproved` / `paymentDeclined` / `paymentCancelled` / `paymentError`
 
 The accumulated events are sent to:
-
 ```
 POST /apple/performance-testing
 ```
 
 With headers:
-
 - `X-Device-Installation-Id` — Unique device identifier
 - `X-Correlation-Id` — Unique ID for this payment flow
 - `Authorization` — Bearer token
 
 Payload:
-
 ```json
 {
-  "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
-  "messages": [
-    { "timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted" },
-    { "timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated" },
-    { "timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap" },
-    { "timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected" },
-    { "timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved" }
-  ]
+    "correlationId": "8d101b46-e203-43d9-bea6-233ce3a7050b",
+    "messages": [
+        {"timestamp": "2026-03-04T09:50:38.679Z", "message": "paymentStarted"},
+        {"timestamp": "2026-03-04T09:50:38.879Z", "message": "paymentValidated"},
+        {"timestamp": "2026-03-04T09:50:39.679Z", "message": "readyForTap"},
+        {"timestamp": "2026-03-04T09:50:41.679Z", "message": "cardDetected"},
+        {"timestamp": "2026-03-04T09:50:45.879Z", "message": "paymentApproved"}
+    ]
 }
 ```
 
@@ -1062,7 +1051,7 @@ HaloSDK.cancelPayment()
 
 ```
 
-This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "USER_CANCELLED", errorMessage: "Payment cancelled by user")`.
+This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "userCancelled", errorMessage: "Payment cancelled by user")`.
 
 Applications should call cancelPayment() only in response to a clear user action or application-level timeout. The SDK automatically cancels the payment if required by system, security, or lifecycle conditions, and applications do not need to handle those cases explicitly.
 
@@ -1118,7 +1107,7 @@ case .declined(let errorCode, let errorMessage):
 
         // Transaction declined due to security validation
 
-        // This occurs when Cryptogram Information Data (tag 9F27) equals "00"
+        // This occurs when Cryptogram Information Data (tag 9F27) equals "00" 
 
         // Only affects purchase transactions, not refunds
 
@@ -1174,7 +1163,7 @@ Add this key to your app's `Info.plist`:
 
 1. **First payment**: When a user initiates their first payment, iOS shows a system permission dialog asking for location access
 2. **Permission granted**: The SDK captures coordinates and includes them in the `X-Location` header for all subsequent payments
-3. **Permission denied**: The payment fails immediately with a `LOCATION_ERROR` error code before Apple's card reader UI appears
+3. **Permission denied**: The payment fails immediately with a `locationError` error code before Apple's card reader UI appears
 4. **Subsequent payments**: If permission was previously granted, location is captured automatically with no additional prompts
 
 ### Location Error Handling
@@ -1270,7 +1259,7 @@ func showLocationSettingsAlert() {
 
 - If granted: Location coordinates are sent in the `X-Location` header in format `"accuracy;longitude;latitude"`
 
-- If denied: Payment fails immediately with `LOCATION_ERROR` before card reader UI appears
+- If denied: Payment fails immediately with `locationError` before card reader UI appears
 
 - If not determined: SDK requests permission automatically when payment starts
 
