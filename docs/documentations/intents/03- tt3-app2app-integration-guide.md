@@ -164,6 +164,7 @@ The call to the Halo Dot Backend to initiate an Applink Transaction and retrieve
 | ---------------------------------------- | ------ | ---------------------------------------- |
 | env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
 
+<br />
 #### Headers
 
 | Name                                              | Type   | Description                                    |
@@ -187,7 +188,7 @@ The call to the Halo Dot Backend to initiate an Applink Transaction and retrieve
 | CreditorABSN<mark style={{color:'red'}}>\*</mark>        | String  | Description of Insurer (e.g. Name of insurer)                                                |
 | instalmentAmount                                         | String  | Instalment amount of the Debit Order (e.g. 100.01)                                           |
 | instalmentVisibility                                     | Enum    | This field is to set what should be displayed to the user: both, maximumOnly, instalmentOnly |
-
+<br />
 
 
 ```json

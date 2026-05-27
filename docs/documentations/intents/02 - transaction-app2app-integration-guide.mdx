@@ -374,8 +374,9 @@ The call to the Halo backend to retrieve an Applink.
 | Name                                  | Type   | Description                              |
 | ------------------------------------- | ------ | ---------------------------------------- |
 | env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+<br />
 
-**Headers**
+#### Headers
 
 | Name                                            | Type   | Description                                                              |
 | ----------------------------------------------- | ------ | ------------------------------------------------------------------------ |
@@ -383,7 +384,7 @@ The call to the Halo backend to retrieve an Applink.
 | x-api-key<mark style={{color:'red'}}>\*</mark>     | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
 | Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead)         |
 
-**Request Body**
+#### Request Body
 
 | Name                                               | Type    | Description                                                 |
 | -------------------------------------------------- | ------- |-------------------------------------------------------------|
@@ -394,7 +395,7 @@ The call to the Halo backend to retrieve an Applink.
 | currencyCode<mark style={{color:'red'}}>\*</mark>     | String  | ISO Standard Currency Codes                                 |
 | isConsumerApp<mark style={{color:'red'}}>\*</mark>    | Boolean | Indicate if the call is for a Consumer App                  |
 | image<mark style={{color:'red'}}>\*</mark>            | JSON    | Set to true to generate a QR code - \{ "required": false \} |
-
+<br />
 
 <Tabs>
     <TabItem value="OkApp" label="200: Ok Applink to invoke Halo.Go/Halo.Link">
