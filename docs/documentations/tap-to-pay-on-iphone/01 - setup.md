@@ -203,7 +203,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `serviceConnectionError` | `serviceConnectionError` | Internal service unavailable | Show: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again." |
 | `timeout` | — | Payment session timed out | Allow retry |
 | `readNotAllowedDuringCall` | `readNotAllowedDuringCall` | Phone call in progress | Show: "Tap to Pay on iPhone can't be used while a call is in progress." |
-| `requestInterrupted` | `requestInterrupted` | App interrupted during read | Show: "Tap to Pay on iPhone can't be used while a call is in progress." |
+| `requestInterrupted` | `requestInterrupted` | App interrupted during read | Show: "Tap to Pay on iPhone was interrupted. If you're on a call, end it and try again." |
 | `backgroundRequestNotAllowed` | `backgroundRequestNotAllowed` | App went to background | Bring app to foreground and retry - do not show modal alert if triggered from background init |
 | `passcodeDisabled` | `passcodeDisabled` | No passcode set on device | Show: "Tap to Pay on iPhone requires you to set a passcode on your device. To set a passcode, go to Settings > Face ID & Passcode or Settings > Touch ID & Passcode." |
 | `osVersionNotSupported` | `osVersionNotSupported` | iOS version too old | Show: "Tap to Pay on iPhone requires the latest version of iOS. To update, go to Settings > General > Software Update." |
