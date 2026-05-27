@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.90")
+    .package(id: "synthesis.halosdk", from: "1.0.91")
 
 ]
 ```
@@ -515,11 +515,18 @@ Consumer app should: Allow retry - user may need guidance on tapping card
 
 #### Phone Call and App Interruption Errors
 
-**`readNotAllowedDuringCall`** — Phone call in progress (also covers `requestInterrupted`):
+**`readNotAllowedDuringCall`** — Phone call in progress :
 ```swift
 // errorMessage: "Tap to Pay on iPhone can't be used while a call is in progress."
 ```
 Consumer app should: Show alert — user must end the call first before retrying
+
+**`requestInterrupted`** — App interrupted during read (notification, system dialog, Face ID, etc.):
+```swift
+// errorMessage: "Tap to Pay on iPhone was interrupted. If you're on a call, end it and try again."
+```
+Consumer app should: Show alert and allow retry — note: the message mentions a call, but this error can also occur from non-call interruptions. Apple does not provide enough context to distinguish the cause.
+
 
 **`backgroundRequestNotAllowed`** — App went to background during init or payment:
 ```swift
@@ -542,6 +549,12 @@ Consumer app should: Show alert with option to retry when connectivity restored
 // errorMessage: "Reader memory is full. Please remove one or more cards from Apple Wallet and try again."
 ```
 Consumer app should: Guide user to remove cards from Apple Wallet, then retry
+
+**`prepareFailed`** — Reader preparation failed (including attestation failures on app launch):
+```swift
+// errorMessage: "Failed to prepare the card reader."
+```
+Consumer app should: Check `errorMessage` for specific guidance. Common causes include network unavailability during attestation (error 2023), iOS configuration incompatibility (error 2031), and secure pairing violations. The SDK now correctly identifies this as a reader error rather than a generic system error.
 
 **`prepareFailed`** — iOS configuration incompatible (error 2031):
 ```swift
