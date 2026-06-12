@@ -1,3 +1,9 @@
+---
+id: react-native-plugin
+title: Integration Guide for React Native Plugin
+exclude_from_broken_links_checking: true
+---
+
 # Integration Guide for React Native Plugin {#integration-guide-for-react-native-plugin}
 
 A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sdk-react-native** plugin in a React Native Android application.
