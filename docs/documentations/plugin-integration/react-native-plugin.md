@@ -1,4 +1,4 @@
-# Integration Guide for React Native Plugin
+# Integration Guide for React Native Plugin {#integration-guide-for-react-native-plugin}
 
 A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sdk-react-native** plugin in a React Native Android application.
 
@@ -8,7 +8,7 @@ A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sd
 
 ---
 
-## Table of Contents
+## Table of Contents {#table-of-contents}
 
 - [Integration Guide for React Native Plugin](#integration-guide-for-react-native-plugin)
   - [Table of Contents](#table-of-contents)
@@ -46,13 +46,13 @@ A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sd
 
 ---
 
-## Overview
+## Overview {#overview}
 
 The **Halo Dot SDK** is an **isolating MPoC SDK** for payment processing with attestation and monitoring capabilities. It turns an NFC-capable Android phone into a card-present payment terminal, no extra hardware required. The architecture diagram above illustrates the SDK boundary, integrator touchpoints, and interactions with the Halo payment gateway.
 
 ---
 
-## Requirements
+## Requirements {#requirements}
 
 You'll need the following to integrate the Halo Dot SDK:
 
@@ -72,7 +72,7 @@ You'll need the following to integrate the Halo Dot SDK:
 
 ---
 
-## Developer Portal Registration
+## Developer Portal Registration {#developer-portal-registration}
 
 You must register on the **QA/UAT** environment before testing in production. The developer portal allows you to:
 
@@ -82,7 +82,7 @@ You must register on the **QA/UAT** environment before testing in production. Th
 4. Obtain JWT configuration details (issuer, audience/host, etc.)
 5. Obtain AWS access key and secret key (used to download the SDK)
 
-### Registration Steps
+### Registration Steps {#registration-steps}
 
 1. Access the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and register
 2. Verify your account via OTP
@@ -101,9 +101,9 @@ You must register on the **QA/UAT** environment before testing in production. Th
 
 ---
 
-## Getting Started
+## Getting Started {#getting-started}
 
-### Create a React Native App
+### Create a React Native App {#create-a-react-native-app}
 
 If you don't already have a React Native project, create one:
 
@@ -112,7 +112,7 @@ npx react-native init MyHaloApp
 cd MyHaloApp
 ```
 
-### Environment Setup
+### Environment Setup {#environment-setup}
 
 1. **Java**: Ensure Java 21 is installed. Run `java -version` to check.
 2. **Android minSdk**: Confirm `minSdkVersion` is **29** or higher in `android/app/build.gradle`:
@@ -130,7 +130,7 @@ cd MyHaloApp
 
    > If you encounter issues setting these values, see the [FAQ](#faq--troubleshooting).
 
-### Plugin Installation
+### Plugin Installation {#plugin-installation}
 
 1. Install the npm package:
 
@@ -173,7 +173,7 @@ cd MyHaloApp
    }
    ```
 
-### Native Module Setup
+### Native Module Setup {#native-module-setup}
 
 5. Open `android/app/src/main/kotlin/.../MainActivity.kt` and extend `HaloReactActivity` instead of `ReactActivity`:
 
@@ -193,7 +193,7 @@ cd MyHaloApp
 
    > This replaces `ReactActivity` so that NFC foreground dispatch and the Halo SDK lifecycle are managed automatically.
 
-### AndroidManifest Permissions
+### AndroidManifest Permissions {#androidmanifest-permissions}
 
 6. Add the required permissions to `android/app/src/main/AndroidManifest.xml`:
 
@@ -254,9 +254,9 @@ cd MyHaloApp
 
 ---
 
-## Mobile Backend Requirements
+## Mobile Backend Requirements {#mobile-backend-requirements}
 
-### JWT
+### JWT {#jwt}
 
 All calls to the Halo SDK require a **valid JWT**. The SDK requests one via the `onRequestJWT` callback whenever it needs to authenticate. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://www.npmjs.com/package/jsrsasign" target="_blank">jsrsasign</a> to generate JWTs.
 
@@ -334,15 +334,15 @@ export function getJwt(): string {
 > - Provide the JWT via the SDK callback `onRequestJWT`.
 > - Always use the algorithm (`RS256` or `RS512`) configured for your tenant in the Developer Portal. If mismatched, signature validation will fail.
 
-### JWT Lifetime
+### JWT Lifetime {#jwt-lifetime}
 
 Keep JWT lifetimes **short** to minimize risk. A lifetime of **15 minutes** is recommended.
 
-### JWT Signing Public Key Format
+### JWT Signing Public Key Format {#jwt-signing-public-key-format}
 
 Publish the JWT public key as a **certificate** in a text-friendly format (e.g., **Base64-encoded PEM** `.crt`/`.pem`).
 
-### JWT Claims
+### JWT Claims {#jwt-claims}
 
 The JWT must include the following (standard unless noted):
 
@@ -367,9 +367,9 @@ with **Bearer** auth.
 
 ---
 
-## Usage in Your React Native App
+## Usage in Your React Native App {#usage-in-your-react-native-app}
 
-### Request Permissions
+### Request Permissions {#request-permissions}
 
 Request Android runtime permissions before initialising the SDK. Android 12+ (API 31+) uses new Bluetooth permission names.
 
@@ -401,7 +401,7 @@ export async function requestHaloPermissions(): Promise<void> {
 }
 ```
 
-### Set Up Callbacks
+### Set Up Callbacks {#set-up-callbacks}
 
 The SDK communicates back to your app through an `IHaloCallbacks` object you provide. Each callback corresponds to a different type of event.
 
@@ -470,7 +470,7 @@ export function buildCallbacks(options: {
 }
 ```
 
-### Initialize the SDK
+### Initialize the SDK {#initialize-the-sdk}
 
 Call `HaloSdk.initialize` once, before running any transactions. A good place is in a `useEffect` when your payment screen mounts.
 
@@ -502,7 +502,7 @@ async function setupSdk(
 }
 ```
 
-### Start a Transaction
+### Start a Transaction {#start-a-transaction}
 
 Once the SDK is initialised, you can charge a card:
 
@@ -522,7 +522,7 @@ await HaloSdk.cancelTransaction();
 
 ---
 
-## Full Example
+## Full Example {#full-example}
 
 A minimal but complete payment screen:
 
@@ -646,9 +646,9 @@ export default function App() {
 
 ---
 
-## API Reference
+## API Reference {#api-reference}
 
-### `HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)`
+### `HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)` {#halosdkinitializecallbacks-packagename-version-timeout-animations}
 
 Initialises the SDK. Must be called before any transaction methods.
 
@@ -660,7 +660,7 @@ Initialises the SDK. Must be called before any transaction methods.
 | `onStartTransactionTimeOut` | `number?` | `300000` | Time in ms to wait for a card tap |
 | `enableSchemeAnimations` | `boolean?` | `false` | Show Visa/Mastercard/Amex animations on approval |
 
-### `HaloSdk.startTransaction(amount, reference, currency)`
+### `HaloSdk.startTransaction(amount, reference, currency)` {#halosdkstarttransactionamount-reference-currency}
 
 Starts a purchase transaction. Prompts the user to tap their card.
 
@@ -672,15 +672,15 @@ Starts a purchase transaction. Prompts the user to tap their card.
 
 Returns `Promise<HaloStartTransactionResult>` — resolves when the card tap is registered. The final outcome arrives via `onHaloTransactionResult`.
 
-### `HaloSdk.cardRefundTransaction(amount, reference, currency)`
+### `HaloSdk.cardRefundTransaction(amount, reference, currency)` {#halosdkcardrefundtransactionamount-reference-currency}
 
 Starts a card-present refund. Accepts the same parameters as `startTransaction`.
 
-### `HaloSdk.cancelTransaction()`
+### `HaloSdk.cancelTransaction()` {#halosdkcanceltransaction}
 
 Cancels the current in-progress transaction (e.g. if the user presses Cancel while waiting for a tap).
 
-### Callbacks (`IHaloCallbacks`)
+### Callbacks (`IHaloCallbacks`) {#callbacks-ihalocallbacks}
 
 | Callback | When it fires |
 | --- | --- |
@@ -692,7 +692,7 @@ Cancels the current in-progress transaction (e.g. if the user presses Cancel whi
 | `onSecurityError(errorCode)` | JWT invalid, merchant revoked, or other security failure |
 | `onCameraControlLost()` | SDK has finished using the camera |
 
-### Result Types
+### Result Types {#result-types}
 
 `resultType` and `errorCode` are plain strings serialised from native Android enums.
 
@@ -722,20 +722,20 @@ Cancels the current in-progress transaction (e.g. if the user presses Cancel whi
 
 ---
 
-## Documentation
+## Documentation {#documentation}
 
 - **<a href="/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
 
 ---
 
-## Testing
+## Testing {#testing}
 
 - All transactions are **null and void** until the **NDA** is executed.
 - You can test with a virtual card, e.g., **<a href="https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet" target="_blank">Visa Mobile CDET</a>**.
 
 ---
 
-## FAQ / Troubleshooting
+## FAQ / Troubleshooting {#faq--troubleshooting}
 
 **Q: How do I set `compileSdkVersion` / `minSdkVersion` if they're causing issues?**
 
