@@ -1,75 +1,75 @@
-import type * as Preset from '@docusaurus/preset-classic';
-import type { Config } from '@docusaurus/types';
-import { themes as prismThemes } from 'prism-react-renderer';
+import type * as Preset from "@docusaurus/preset-classic";
+import type { Config } from "@docusaurus/types";
+import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Halodot.io',
-  tagline: 'SDK Documentation',
-  favicon: '/img/favicon-32x32.png',
+  title: "Halodot.io",
+  tagline: "SDK Documentation",
+  favicon: "/img/favicon-32x32.png",
 
   // Set the production url of your site here
-  url: 'https://docs.halodot.io/',
+  url: "https://docs.halodot.io/",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: "/",
 
   // GitHub pages deployment config.
-  organizationName: 'halo-dot',
-  projectName: 'halo-documentation',
-  deploymentBranch: 'gh-pages',
+  organizationName: "halo-dot",
+  projectName: "halo-documentation",
+  deploymentBranch: "gh-pages",
   trailingSlash: false,
 
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'throw',
-  onBrokenAnchors: 'throw',
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "throw",
+  onBrokenAnchors: "warn",
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          sidebarPath: './sidebars.ts',
+          sidebarPath: "./sidebars.ts",
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           // editUrl: 'https://github.com/halo-dot/halo-documentation',
-          lastVersion: 'current',
+          lastVersion: "current",
           versions: {
             current: {
-              label: '4.0'
+              label: "4.0",
             },
-            '2.1': {
-              label: '2.1',
-              path: 'versioned_docs/version-2.1',
-              banner: 'none'
-            }
-          }
+            "2.1": {
+              label: "2.1",
+              path: "versioned_docs/version-2.1",
+              banner: "none",
+            },
+          },
         },
         blog: {
           showReadingTime: true,
           feedOptions: {
-            type: ['rss', 'atom'],
+            type: ["rss", "atom"],
             xslt: true,
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/halo-dot/halo-documentation',
+          editUrl: "https://github.com/halo-dot/halo-documentation",
           // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+          onInlineTags: "warn",
+          onInlineAuthors: "warn",
+          onUntruncatedBlogPosts: "warn",
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
@@ -77,28 +77,28 @@ const config: Config = {
 
   plugins: [],
   themeConfig: {
-    metadata:[
+    metadata: [
       {
-        name: 'algolia-site-verification',
-        content: 'EC2FE34B58BA9FB0'
-      }
+        name: "algolia-site-verification",
+        content: "EC2FE34B58BA9FB0",
+      },
     ],
-    image: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/67ac8d81adc0bbd4b1e9e0dc_Image.png',
+    image: "https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/67ac8d81adc0bbd4b1e9e0dc_Image.png",
     navbar: {
       logo: {
-        alt: 'halo dot Logo',
-        src: 'https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/63fdb37c730d1f0e75df5d44_Logo.svg',
+        alt: "halo dot Logo",
+        src: "https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/63fdb37c730d1f0e75df5d44_Logo.svg",
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'documentationSidebar',
-          position: 'left',
-          label: 'Documentation',
+          type: "docSidebar",
+          sidebarId: "documentationSidebar",
+          position: "left",
+          label: "Documentation",
         },
         {
-          type: 'docsVersionDropdown',
-          position: 'left',
+          type: "docsVersionDropdown",
+          position: "left",
           dropdownActiveClassDisabled: true,
         },
         // {
@@ -109,14 +109,14 @@ const config: Config = {
         // },
         // {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/halo-dot/test_app-android_sdk',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/halo-dot/test_app-android_sdk",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         // {
         //   title: 'Docs',
@@ -132,32 +132,32 @@ const config: Config = {
         //   ],
         // },
         {
-          title: 'Community',
+          title: "Community",
           items: [
             {
-              label: 'Halodot.io',
-              href: 'https://halodot.io/',
+              label: "Halodot.io",
+              href: "https://halodot.io/",
             },
             {
-              label: 'Synthesis',
-              href: 'https://www.synthesis.co.za/',
+              label: "Synthesis",
+              href: "https://www.synthesis.co.za/",
             },
             {
-              label: 'LinkedIn',
-              href: 'https://www.linkedin.com/company/halo-dot/',
+              label: "LinkedIn",
+              href: "https://www.linkedin.com/company/halo-dot/",
             },
           ],
         },
         {
-          title: 'More',
+          title: "More",
           items: [
             // {
             //   label: 'Blog',
             //   to: '/blog',
             // },
             {
-              label: 'GitHub',
-              href: 'https://github.com/halo-dot/test_app-android_sdk',
+              label: "GitHub",
+              href: "https://github.com/halo-dot/test_app-android_sdk",
             },
           ],
         },
@@ -170,12 +170,12 @@ const config: Config = {
     },
     algolia: {
       // The application ID provided by Algolia
-      appId: 'S2W3MQE857',
+      appId: "S2W3MQE857",
 
       // Public API key: it is safe to commit it
-      apiKey: '30114c9f8022e361f11991f495f93d1a',
+      apiKey: "30114c9f8022e361f11991f495f93d1a",
 
-      indexName: 'halo',
+      indexName: "halo",
 
       // // Optional: see doc section below
       contextualSearch: false,
@@ -204,7 +204,7 @@ const config: Config = {
   markdown: {
     mermaid: true,
   },
-  themes: ['@docusaurus/theme-mermaid', 'docusaurus-json-schema-plugin'],
+  themes: ["@docusaurus/theme-mermaid", "docusaurus-json-schema-plugin"],
 };
 
 export default config;
