@@ -1,0 +1,88 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+Follow these steps to integrate the Halo SDK UI into your Android project.
+
+## 1. Configure Repositories
+
+In your `settings.gradle.kts` (or `settings.gradle`), ensure you have the necessary repositories configured.
+
+<Tabs>
+<TabItem value="kotlin" label="Kotlin DSL">
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        // Repository where Halo SDK UI is hosted
+        maven { url = uri("https://maven.pkg.github.com/halodot/halo-android-sdk") }
+    }
+}
+```
+
+</TabItem>
+<TabItem value="groovy" label="Groovy">
+
+```groovy
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://maven.pkg.github.com/halodot/halo-android-sdk" }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## 2. Add Dependency
+
+Add the following to your module's `build.gradle.kts` (or `build.gradle`):
+
+<Tabs>
+<TabItem value="kotlin" label="Kotlin DSL">
+
+```kotlin
+dependencies {
+    implementation("io.halodot:sdk_ui:0.0.1")
+}
+```
+
+</TabItem>
+<TabItem value="groovy" label="Groovy">
+
+```groovy
+dependencies {
+    implementation 'io.halodot:sdk_ui:0.0.1'
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::tip
+Replace `0.0.1` with the latest version available.
+:::
+
+## 🛡️ Permissions
+
+The SDK requires several permissions for NFC, location (for compliance), and network access. These are automatically merged into your app's manifest.
+
+| Permission | Purpose |
+|------------|---------|
+| `android.permission.INTERNET` | Network communication with Halo backend |
+| `android.permission.NFC` | Reading payment cards via NFC |
+| `android.permission.ACCESS_FINE_LOCATION` | Required for payment compliance (location verification) |
+| `android.permission.ACCESS_COARSE_LOCATION` | Alternative location permission for compliance |
+
+:::warning
+You should use the built-in helper or standard Android APIs to request these permissions at runtime before launching a transaction.
+:::

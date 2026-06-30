@@ -1,0 +1,50 @@
+---
+sidebar_position: 1
+---
+
+# Introduction
+
+The **Halo SDK UI** provides a modern, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the complexities of transaction flows, card reading animations, and status reporting, allowing you to focus on your core business logic.
+
+## 🚀 Features
+
+- **Ready-to-use UI**: Fullscreen transaction flow including card reading and success/failure states.
+- **Theming & Customization**: Support for Light Mode, Dark Mode, and custom color schemes.
+- **Modern Tech Stack**: Built entirely with Kotlin and Jetpack Compose.
+- **Seamless Integration**: Simple API to launch transactions and receive results via Kotlin Coroutines.
+- **Brand Identity**: Customizable company name and logo within the SDK UI.
+
+## 📋 Prerequisites
+
+Before you begin, ensure your project meets the following requirements:
+
+- **Android 10.0 (API level 29)** or higher.
+- **Jetpack Compose** enabled in your project.
+- **Halo SDK Credentials**: A valid SDK token provided by Synthesis/Halo.
+- **Activity Requirements**: The host activity must be a `ComponentActivity` (or subclass) that supports Jetpack Compose.
+
+:::info Activity Requirements
+The activity passed to `HaloSdkUi.init()` **must** be a `ComponentActivity` (or a subclass like `AppCompatActivity`). This is required because the SDK uses Jetpack Compose's `setContent` to render its UI.
+:::
+
+### Example Activity Declaration
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize SDK here
+        HaloSdkUi.init(
+            activity = this,
+            packageName = packageName,
+            packageVersion = BuildConfig.VERSION_NAME,
+            companyName = "My App",
+            companyLogo = null,
+            onTokenRequest = { fetchTokenFromBackend() }
+        )
+
+        // ... set your own content if needed
+    }
+}
+```
