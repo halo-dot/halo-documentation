@@ -1,0 +1,104 @@
+---
+sidebar_position: 3
+---
+
+# Configuration
+
+Tailor the Halo SDK UI to your application's needs through initialization and custom theming.
+
+## Initialization
+
+Initialize the SDK once, typically in your main `Activity` or `Application` class.
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `activity` | `ComponentActivity` | The host activity that will host the SDK UI. |
+| `packageName` | `String` | Your app's package name (e.g., `applicationContext.packageName`) |
+| `packageVersion` | `String` | Your app's version name (e.g., `"1.0.0"`) |
+| `companyName` | `String` | Display name of your company shown in the SDK header |
+| `companyLogo` | `String` | URL of your company logo image (optional, pass `null` for default) |
+| `onTokenRequest` | `() -> String` | Callback that must return a valid Halo SDK token. |
+
+### Example
+
+```kotlin
+import io.halodot.sdk_ui.HaloSdkUi
+
+val success = HaloSdkUi.init(
+    activity = this, // this must be a ComponentActivity
+    packageName = applicationContext.packageName,
+    packageVersion = "1.0.0",
+    companyName = "My Awesome App",
+    companyLogo = "https://example.com/logo.png",
+    onTokenRequest = {
+        // Return your Halo SDK Token here (e.g., fetch from your backend)
+        "YOUR_SDK_TOKEN"
+    }
+)
+```
+
+---
+
+## Theming
+
+Tailor the SDK's look and feel to match your app's brand.
+
+### Theme Mode
+
+Control whether the SDK follows the system theme or forces a specific mode.
+
+| Mode | Description |
+|------|-------------|
+| `HaloThemeMode.LIGHT` | Forces light theme |
+| `HaloThemeMode.DARK` | Forces dark theme |
+| `HaloThemeMode.SYSTEM` | Follows system theme (default) |
+
+```kotlin
+import io.halodot.sdk_ui.events.HaloThemeMode
+
+// Set to LIGHT, DARK, or SYSTEM (default)
+HaloSdkUi.setThemeMode(HaloThemeMode.SYSTEM)
+```
+
+### Custom Theme
+
+You can fully customize the SDK's appearance via `HaloTheme`.
+
+```kotlin
+import io.halodot.sdk_ui.models.HaloTheme
+import io.halodot.sdk_ui.models.HaloColorScheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+val myCustomTheme = HaloTheme(
+    light = HaloColorScheme.default().copy(
+        primary = Color(0xFF6200EE),
+        onPrimary = Color.White
+    ),
+    dark = HaloColorScheme.defaultDark().copy(
+        primary = Color(0xFFBB86FC)
+    ),
+    shape = 12.dp,
+    paddingHorizontal = 24.dp,
+    paddingVertical = 12.dp
+)
+
+HaloSdkUi.setTheme(myCustomTheme)
+```
+
+#### HaloColorScheme Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `primary` | `Color` | Main brand color (buttons, highlights) |
+| `onPrimary` | `Color` | Text/icon color on primary background |
+| `background` | `Color` | Main background color |
+| `onBackground` | `Color` | Text/icon color on background |
+| `surface` | `Color` | Card/container background |
+| `onSurface` | `Color` | Text/icon color on surface |
+| `error` | `Color` | Error/decline color |
+| `onError` | `Color` | Text/icon color on error |
+| `success` | `Color` | Success/approved color |
+| `onSuccess` | `Color` | Text/icon color on success |
