@@ -8,12 +8,12 @@ tags:
 
 #### 1. Download the Test App
 
-Download our test app from <a href="{{REPO_URL}}" target="_blank">GitHub</a> .
+Download our test app from <a href="{{REPO_URL}}" target="_blank" rel="noopener noreferrer">GitHub</a>.
 
 #### 2. Configure The Test App
 
 <hr/>
-Open `"{{CONFIG_PATH}}"` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 
+Open `{{CONFIG_PATH}}` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 
 You will need the private key you used to generate your public key, your issuer name, and your username (you can use the email or phone number used to register).
 
 <hr/>
