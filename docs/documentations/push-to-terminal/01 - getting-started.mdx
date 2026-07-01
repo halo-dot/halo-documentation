@@ -1,0 +1,44 @@
+---
+description: >-
+  Get started with Push to Terminal. Send payment requests directly to a
+  specific device via push notification.
+---
+
+# Getting Started with Push to Terminal
+
+## 1. What is Push to Terminal?
+
+Push to Terminal allows a merchant to send a payment request directly to a specific device via Firebase push notification. Instead of the customer scanning a QR code or opening an applink, the merchant selects a device from their list and pushes the payment to it.
+
+The device receives the push notification, opens the Halo.Go app, and begins processing the payment automatically.
+
+If the push notification fails (device offline, no Firebase token), the system automatically falls back to generating an applink URL with a QR code.
+
+## 2. Prerequisites
+
+1. Register on the <a href="https://go.merchantportal.prod.haloplus.io/" target="_blank">Merchant Portal</a> and retrieve your `Merchant ID` and `API Key`.
+2. At least one device must be registered and linked to your merchant account via the Halo.Go app.
+3. The device must have a valid Firebase Cloud Messaging (FCM) token -- this happens automatically when the Halo.Go app is installed and initialized.
+
+## 3. How It Works
+
+The Push to Terminal flow consists of four steps:
+
+1. **List Devices** -- Merchant calls `GET /devices` to see all linked devices with their IDs and friendly names.
+2. **Push Payment** -- Merchant calls `POST /push/terminal` with the device ID, amount, currency, and reference. The backend sends a Firebase push notification to the device.
+3. **Device Processes Payment** -- The device receives the push, opens the Halo.Go app, and processes the card payment.
+4. **Webhook Callback** -- After the transaction completes, the backend sends the result (approved/declined) to the merchant's callback URL via `POST /push/terminal/webhook`.
+
+## 4. Authentication
+
+All endpoints require authenticated access. See [Authentication](/docs/documentations/api-docs/authentication) for more details.
+
+You can authenticate using either:
+- **API Key** via the `x-api-key` header
+- **JWT** via the `Authorization: Bearer <token>` header
+
+Both can be retrieved from the <a href="https://go.merchantportal.prod.haloplus.io/" target="_blank">Merchant Portal</a>.
+
+## 5. Next Steps
+
+See the [Integration Guide](/docs/documentations/push-to-terminal/integration-guide) for detailed API documentation with request/response examples.
