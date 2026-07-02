@@ -69,10 +69,10 @@ You’ll need the following to integrate the Halo Dot SDK:
 
 ## Developer Portal Registration
 
-You are required to register on our QA (UAT - User Acceptance Testing environment) before testing in production.
-The developer portal enables you to obtain the following :
+You are required to register on our QA (UAT — User Acceptance Testing) environment before testing in production.
+The developer portal enables you to obtain the following:
 
-1. Accept the Non Disclosure Agreement(NDA)
+1. Accept the Non-Disclosure Agreement (NDA)
 2. Access the SDK
 3. Submit your public key (for JWT verification)
 4. Obtain JWT configuration details (issuer, audience/host, etc.)
