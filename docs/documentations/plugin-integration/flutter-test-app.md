@@ -76,10 +76,7 @@ flutter pub get
 
 ---
 
-## 5. Configure JWT (for Testing)
-
-The test app includes a local utility to generate JSON Web Tokens (JWT) for authentication during testing. You need to configure your environment variables in the source files.
-
+The test app includes a local utility to generate JSON Web Tokens (JWT) for authentication during testing. You need to configure the required values directly in the source files.
 ### Step A: Update `lib/config.dart`
 
 Provide your specific private keys and environment targets:
