@@ -2,130 +2,158 @@
 sidebar_class_name: hidden
 ---
 
-# Test App Setup
+# Test App Setup Guide
 
-Use this guide to run the **Halo SDK Flutter plugin test app** and verify integration end-to-end.
+Use this guide to launch and run the **Halo SDK Flutter plugin test app** (<a href="https://github.com/halo-dot/halo_sdk_plugins/tree/main/test_apps/flutter" target="_blank">GitHub link</a>).
+<br/>This reference application allows you to quickly verify your end-to-end integration in a sandbox environment.
 
-> For the full step by step Flutter plugin integration guide for your app, see the plugin’s
-<a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">documentation</a>.
+> 📘 **Looking for the full integration guide?**<br/>
+> For a comprehensive, step-by-step guide on integrating the plugin into your own production application, see the official <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">Plugin Documentation on pub.dev</a>.
 
 ---
 
-## 1) Prerequisites
+## 1. Prerequisites
 
-* **Java:** JDK **17**
+Before getting started, ensure your environment matches the validated development stack below:
 
-  > The example was tested on Java 17. Earlier/later versions haven’t been validated.
+* **Java:** JDK **17** *(Earlier or later versions have not been tested)*
 * **Flutter:** **3.24.0**
-* **Dart:** **3.5.0** (DevTools **2.37.2**)
-* Android toolchain set up (Android SDK, platform tools, emulator or device)
-* Git
+* **Dart:** **3.5.0** *(DevTools 2.37.2)*
+* **Android Toolchain:** Properly configured Android SDK, platform tools, and an active emulator or physical test device.
+* **Version Control:** Git installed.
 
-Check your setup:
+You can verify your local environment versions by running:
 
 ```bash
 java -version
 flutter --version
+
 ```
 
 ---
 
-## 2) Get the Source
+## 2. Clone and Open the Repository
+
+Clone the plugin repository and navigate directly to the Flutter test application subdirectory:
 
 ```bash
+# Clone the repository
 git clone https://github.com/halo-dot/halo_sdk_plugins
+
+# Navigate to the Flutter test app directory
 cd halo_sdk_plugins/test_apps/flutter
+
 ```
 
-Open the `test_apps/flutter` directory in your preferred IDE (Android Studio, VS Code, etc.).
+Once inside, open the `test_apps/flutter` directory in your preferred IDE (such as VS Code or Android Studio).
 
 ---
 
-## 3) Configure AWS Credentials (Android)
+## 3. Configure Android AWS Credentials
 
-Create or edit `test_apps/flutter/android/local.properties` and add:
+The Android side of the test app requires AWS credentials to resolve dependencies.
+
+Create a new file (or edit the existing one) at `test_apps/flutter/android/local.properties` and add your access keys:
 
 ```properties
-aws.accesskey=<accesskey>
-aws.secretkey=<secretkey>
+aws.accesskey={{your_access_key}}
+aws.secretkey={{your_secret_key}}
+
 ```
 
-> ⚠️ **Security tip:** Never commit real credentials. Use placeholders or environment-specific secrets management.
+> ⚠️ **Security Warning:** Never commit real credentials to your version control system. Keep `local.properties` added to your `.gitignore` file.
 
 ---
 
-## 4) Install Dependencies
+## 4. Install Project Dependencies
 
-From `test_apps/flutter`:
+Fetch the required Flutter packages by running the following command from the root of the `test_apps/flutter` directory:
 
 ```bash
 flutter pub get
+
 ```
 
 ---
 
-## 5) JWT Configs (for Testing)
+The test app includes a local utility to generate JSON Web Tokens (JWT) for authentication during testing. You need to configure the required values directly in the source files.
+### Step A: Update `lib/config.dart`
 
-Add your JWT configuration in `lib/config.dart` so the app can generate a token for you.
+Provide your specific private keys and environment targets:
+
 ```dart
 // lib/config.dart
 class Config {
-  static const String privateKeyPem = """Your Private Key"""; // <-- add private key here (Don't commit your private key)
-  static const String publicKey = """Your Public Key"""; // <-- add public key here
-  static const String issuer = ""; // <-- add issuer here
-  static const String username = ""; // <-- add username here
-  static const String merchantId = ""; // <-- add merchant ID here
-  static const String host = "kernelserver.go.dev.haloplus.io";
-  static const String aud = ""; // <-- add your audience key
-  static const String ksk = ""; // <-- add your ksk
+  static const String privateKeyPem = """{{YOUR_PRIVATE_KEY_PEM}}"""; // <-- Add private key here (Do not commit this file with real keys!)
+  static const String issuer = "{{YOUR_ISSUER}}";                     // <-- Add your issuer string
+  static const String username = "{{YOUR_USERNAME}}";                 // <-- Add your test username
+  static const String merchantId = "{{MID}}";                         // <-- Add your Merchant ID (MID)
+  static const String host = "{{HOST}}";                             // <-- e.g., kernelserver.qa.haloplus.io
+  static const String aud = "{{AUD}}";                               // <-- Add your audience key
+  static const String ksk = "{{KSK}}";                               // <-- Add your KSK pin
 }
+
 ```
 
-Under `lib/jwt_token.dart` update the jwt expression as show below
+### Step B: Verify `lib/jwt_token.dart`
+
+Ensure the token payload structure matches your environment expectations:
 
 ```dart
 // lib/jwt_token.dart
- final jwt = JWT(
-      {'aud_fingerprints': Config.aud, 'ksk_pin': Config.ksk, 'usr': Config.username},
-      audience: Audience([Config.host]),
-      issuer: Config.issuer,
-      subject: Config.merchantId,
-    );
+final jwt = JWT(
+  {
+    'aud_fingerprints': Config.aud, 
+    'ksk_pin': Config.ksk, 
+    'usr': Config.username
+  },
+  audience: Audience([Config.host]),
+  issuer: Config.issuer,
+  subject: Config.merchantId,
+);
+
 ```
 
 ---
 
-## 6) Run the App
+## 6. Run the Application
 
-Use the Flutter CLI or your IDE:
+Launch the application using your IDE's run tools or directly from your terminal:
 
 ```bash
 flutter run
+
 ```
 
-Select a connected Android device or emulator when prompted.
+If prompted, select your connected Android physical device or active emulator from the target list.
 
 ---
 
-## 7) Verify the Integration
+## 7. Verify Successful Integration
 
-* App builds and launches without errors.
-* Halo SDK features exposed by the plugin are reachable in the test app UI.
-* Network calls (if applicable) succeed with your credentials/JWT.
+Once the app is running, check off the following milestones to ensure complete setup:
+
+* [ ] **Build Check:** The application builds and boots up on the device without throwing compilation errors.
+* [ ] **UI Accessibility:** Halo SDK features exposed by the plugin are interactive and visible within the test app UI layout.
+* [ ] **Network Health:** Outbound network calls complete successfully using your supplied AWS and JWT configurations.
 
 ---
 
 ## Troubleshooting
 
-* **Java version errors:** Ensure `JAVA_HOME` points to JDK 17.
-* **Flutter/Dart mismatches:** Use the tested versions (Flutter 3.24.0, Dart 3.5.0).
-* **Dependency resolution issues:** Re-run `flutter pub get` and `flutter clean && flutter pub get`.
-* **Credential problems:** Confirm `android/local.properties` contains `aws.accesskey` and `aws.secretkey` and that values are valid in the target environment.
-* **JWT failures:** Check token validity/expiration and the correctness of your `config.dart` or `jwt_token.dart` entries.
+If you run into issues while launching the test application, review these common solutions:
+
+| Issue | Cause | Resolution |
+| --- | --- | --- |
+| **Java compilation / gradle errors** | Wrong active Java version. | Ensure your `JAVA_HOME` environment variable explicitly points to **JDK 17**. |
+| **Plugin / Package dependency mismatches** | Toolchain versions mismatched. | Ensure you are using **Flutter 3.24.0** and **Dart 3.5.0**. |
+| **Stale build cache errors** | Outdated or cached artifacts. | Clear local cache and re-fetch: run `flutter clean && flutter pub get`. |
+| **Dependency resolution or AWS errors** | Missing or invalid local properties. | Double-check that your `android/local.properties` contains valid `aws.accesskey` and `aws.secretkey` variables. |
+| **Authentication or handshake failures** | Invalid or expired token payload. | Verify the correctness of your keys, expiration settings, and strings inside `lib/config.dart`. |
 
 ---
 
-## Notes
+## Additional Resources
 
-* This test app is intended as a reference implementation to demonstrate how to integrate the Halo SDK Flutter plugin into a Flutter app.
-* For deeper API usage, configuration options, and platform specifics, consult the SDK README at <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">halo sdk flutter plugin</a>.
+* This repository serves strictly as a reference implementation to showcase idiomatic usage of the SDK plugin.
+* For comprehensive API design specs, advanced configuration arguments, and platform-specific native settings, read the <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">Halo SDK Flutter Plugin README on pub.dev</a>.
