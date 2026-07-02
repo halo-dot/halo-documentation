@@ -10,7 +10,6 @@ A production-focused guide to integrating the <a href="https://docs.halodot.io/d
 - [Integration Guide for Flutter Plugin Release 2.0](#integration-guide-for-flutter-plugin-release-20)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
-  - [](#)
   - [Requirements](#requirements)
   - [Developer Portal Registration](#developer-portal-registration)
     - [Registration Steps](#registration-steps)
