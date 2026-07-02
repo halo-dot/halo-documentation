@@ -185,7 +185,7 @@ class Config {
   static const String privateKeyPem = String.fromEnvironment('PRIVATE_KEY', defaultValue: '');
   static const String issuer = '{{YOUR_ISSUER}}';
   static const String username = '{{YOUR_USERNAME}}';
-  static const String merchantId = '{MID}';
+  static const String merchantId = '{{MID}}';
   static const String host = '{{HOST}}';
   static const String aud = '{{AUD}}';
   static const String ksk = '{{KSK}}';
