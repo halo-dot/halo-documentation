@@ -156,4 +156,4 @@ If you run into issues while launching the test application, review these common
 ## Additional Resources
 
 * This repository serves strictly as a reference implementation to showcase idiomatic usage of the SDK plugin.
-* For comprehensive API design specs, advanced configuration arguments, and platform-specific native settings, read the Halo SDK Flutter Plugin README.
+* For comprehensive API design specs, advanced configuration arguments, and platform-specific native settings, read the <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">Halo SDK Flutter Plugin README on pub.dev</a>.
