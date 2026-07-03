@@ -4,39 +4,47 @@ sidebar_position: 3
 
 # Configuration
 
-Tailor the Halo SDK UI to your application's needs through initialization and custom theming.
+Tailor the Halo SDK UI to your application's needs through the `HDConfig` class and custom theming.
 
 ## Initialization
 
-Initialize the SDK once, typically in your main `Activity` or `Application` class.
+Initialize the SDK once, typically in your main `Activity` or `Application` class. Configuration is managed via the `HDConfig` object.
 
-### Parameters
+### HDConfig Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `activity` | `ComponentActivity` | The host activity that will host the SDK UI. |
-| `packageName` | `String` | Your app's package name (e.g., `applicationContext.packageName`) |
-| `packageVersion` | `String` | Your app's version name (e.g., `"1.0.0"`) |
-| `companyName` | `String` | Display name of your company shown in the SDK header |
-| `companyLogo` | `String` | URL of your company logo image (optional, pass `null` for default) |
-| `onTokenRequest` | `() -> String` | Callback that must return a valid Halo SDK token. |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `activity` | `ComponentActivity` | - | The host activity that will host the SDK UI. |
+| `packageName` | `String` | - | Your app's package name. |
+| `packageVersion` | `String` | - | Your app's version name. |
+| `companyName` | `String` | - | Display name of your company shown in the header. |
+| `companyLogo` | `String` | - | URL of your company logo (optional, pass `""` for default). |
+| `onTokenRequest` | `() -> String` | - | Callback that must return a valid Halo SDK token. |
+| `showTransactionResult`| `Boolean` | `true` | Whether to show the built-in success/failure screens. |
+| `theme` | `HaloTheme` | `HaloTheme()` | Custom color and shape configuration. |
+| `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow system theme. |
+| `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Configure which card scheme logos are shown. |
 
 ### Example
 
 ```kotlin
-import io.halodot.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDConfig
 
-val success = HaloSdkUi.init(
-    activity = this, // this must be a ComponentActivity
+val config = HDConfig(
+    activity = this,
     packageName = applicationContext.packageName,
     packageVersion = "1.0.0",
     companyName = "My Awesome App",
     companyLogo = "https://example.com/logo.png",
     onTokenRequest = {
-        // Return your Halo SDK Token here (e.g., fetch from your backend)
+        // Return your Halo SDK Token here
         "YOUR_SDK_TOKEN"
-    }
+    },
+    showTransactionResult = true // Set to false if you want to handle the result UI yourself
 )
+
+val success = HaloSdkUi.init(config)
 ```
 
 ---
@@ -47,7 +55,7 @@ Tailor the SDK's look and feel to match your app's brand.
 
 ### Theme Mode
 
-Control whether the SDK follows the system theme or forces a specific mode.
+Control whether the SDK follows the system theme or forces a specific mode. You can set this in `HDConfig` or update it at runtime.
 
 | Mode | Description |
 |------|-------------|
@@ -56,19 +64,19 @@ Control whether the SDK follows the system theme or forces a specific mode.
 | `HaloThemeMode.SYSTEM` | Follows system theme (default) |
 
 ```kotlin
-import io.halodot.sdk_ui.events.HaloThemeMode
+import za.co.synthesis.halo.sdk_ui.events.HaloThemeMode
 
-// Set to LIGHT, DARK, or SYSTEM (default)
+// Update at runtime
 HaloSdkUi.setThemeMode(HaloThemeMode.SYSTEM)
 ```
 
 ### Custom Theme
 
-You can fully customize the SDK's appearance via `HaloTheme`.
+Define your brand's appearance via `HaloTheme` and pass it to your `HDConfig`.
 
 ```kotlin
-import io.halodot.sdk_ui.models.HaloTheme
-import io.halodot.sdk_ui.models.HaloColorScheme
+import za.co.synthesis.halo.sdk_ui.models.HaloTheme
+import za.co.synthesis.halo.sdk_ui.models.HaloColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -85,20 +93,52 @@ val myCustomTheme = HaloTheme(
     paddingVertical = 12.dp
 )
 
-HaloSdkUi.setTheme(myCustomTheme)
+val config = HDConfig(
+    // ... other props
+    theme = myCustomTheme
+)
 ```
 
 #### HaloColorScheme Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `primary` | `Color` | Main brand color (buttons, highlights) |
-| `onPrimary` | `Color` | Text/icon color on primary background |
-| `background` | `Color` | Main background color |
-| `onBackground` | `Color` | Text/icon color on background |
-| `surface` | `Color` | Card/container background |
-| `onSurface` | `Color` | Text/icon color on surface |
-| `error` | `Color` | Error/decline color |
-| `onError` | `Color` | Text/icon color on error |
-| `success` | `Color` | Success/approved color |
-| `onSuccess` | `Color` | Text/icon color on success |
+| `primary` | `Color` | Main brand color (buttons, highlights). |
+| `onPrimary` | `Color` | Text/icon color on primary background. |
+| `background` | `Color` | Main background color. |
+| `onBackground` | `Color` | Text/icon color on background. |
+| `surface` | `Color` | Card/container background. |
+| `onSurface` | `Color` | Text/icon color on surface. |
+| `error` | `Color` | Error/decline color. |
+| `onError` | `Color` | Text/icon color on error. |
+| `success` | `Color` | Success/approved color. |
+| `onSuccess` | `Color` | Text/icon color on success. |
+
+---
+
+## Scheme Logos
+
+Control which payment scheme logos are displayed in the SDK UI using `HDSchemeLogos`. By default, all supported logos are enabled.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `nfc` | `Boolean` | `true` | Show the NFC/Contactless indicator |
+| `visa` | `Boolean` | `true` | Show the Visa logo |
+| `mastercard` | `Boolean` | `true` | Show the Mastercard logo |
+| `amex` | `Boolean` | `true` | Show the American Express logo |
+| `discover` | `Boolean` | `true` | Show the Discover logo |
+| `elo` | `Boolean` | `true` | Show the Elo logo |
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HDSchemeLogos
+
+val myLogos = HDSchemeLogos(
+    amex = false,
+    discover = false
+)
+
+val config = HDConfig(
+    // ... other props
+    schemeLogos = myLogos
+)
+```

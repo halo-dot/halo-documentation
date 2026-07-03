@@ -30,19 +30,23 @@ The activity passed to `HaloSdkUi.init()` **must** be a `ComponentActivity` (or 
 ### Example Activity Declaration
 
 ```kotlin
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDConfig
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Initialize SDK here
-        HaloSdkUi.init(
+        val config = HDConfig(
             activity = this,
             packageName = packageName,
             packageVersion = BuildConfig.VERSION_NAME,
             companyName = "My App",
-            companyLogo = null,
+            companyLogo = "",
             onTokenRequest = { fetchTokenFromBackend() }
         )
+        val success = HaloSdkUi.init(config)
 
         // ... set your own content if needed
     }

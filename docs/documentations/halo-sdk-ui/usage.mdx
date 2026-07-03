@@ -23,7 +23,7 @@ The `launch` function handles the entire UI flow.
 If the amount is known, the SDK skips the keypad and goes directly to the "Tap Card" screen.
 
 ```kotlin
-import io.halodot.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
 import java.math.BigDecimal
 
 fun startPayment(amount: BigDecimal) {
@@ -60,6 +60,10 @@ fun openKeypad() {
 ## Handling Results
 
 The `launch` function returns a `HaloTransactionResult?`.
+
+:::note
+If `showTransactionResult` was set to `false` in `HDConfig`, the SDK will return the result immediately after the transaction process completes without showing its own success or failure screens.
+:::
 
 ### Result Types
 

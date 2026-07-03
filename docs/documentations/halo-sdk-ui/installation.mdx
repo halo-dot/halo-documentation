@@ -9,33 +9,47 @@ import TabItem from '@theme/TabItem';
 
 Follow these steps to integrate the Halo SDK UI into your Android project.
 
-## 1. Configure Repositories
+## 1. Configure Credentials
 
-In your `settings.gradle.kts` (or `settings.gradle`), ensure you have the necessary repositories configured.
+To access the SDK, you will receive an AWS access key and secret key upon registration on the developer portal. These are sensitive credentials and should **not** be committed to source control.
+
+Add these to your `local.properties` file:
+
+```properties
+aws.accesskey=< PROVIDED IN EMAIL >
+aws.secretkey=< PROVIDED IN EMAIL >
+```
+
+## 2. Configure Repositories
+
+In your `settings.gradle.kts` (or `settings.gradle`), load the credentials and configure the S3-hosted Maven repository.
 
 <Tabs>
 <TabItem value="kotlin" label="Kotlin DSL">
 
 ```kotlin
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootDir.resolve("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
         // Repository where Halo SDK UI is hosted
-        maven { url = uri("https://maven.pkg.github.com/halodot/halo-android-sdk") }
-    }
-}
-```
-
-</TabItem>
-<TabItem value="groovy" label="Groovy">
-
-```groovy
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://maven.pkg.github.com/halodot/halo-android-sdk" }
+        maven {
+            name = "releases"
+            url = uri("s3://synthesis-halo-artifacts/releases")
+            credentials(AwsCredentials::class) {
+                accessKey = localProperties.getProperty("aws.accesskey")
+                secretKey = localProperties.getProperty("aws.secretkey")
+            }
+        }
     }
 }
 ```
@@ -43,30 +57,15 @@ dependencyResolutionManagement {
 </TabItem>
 </Tabs>
 
-## 2. Add Dependency
+## 3. Add Dependency
 
-Add the following to your module's `build.gradle.kts` (or `build.gradle`):
-
-<Tabs>
-<TabItem value="kotlin" label="Kotlin DSL">
+Add the following to your module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("io.halodot:sdk_ui:0.0.1")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.1")
 }
 ```
-
-</TabItem>
-<TabItem value="groovy" label="Groovy">
-
-```groovy
-dependencies {
-    implementation 'io.halodot:sdk_ui:0.0.1'
-}
-```
-
-</TabItem>
-</Tabs>
 
 :::tip
 Replace `0.0.1` with the latest version available.
