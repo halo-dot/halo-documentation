@@ -17,17 +17,18 @@ If the push notification fails (device offline, no Firebase token), the system a
 ## 2. Prerequisites
 
 1. Register on the <a href="https://go.merchantportal.prod.haloplus.io/" target="_blank">Merchant Portal</a> and retrieve your `Merchant ID` and `API Key`.
-2. At least one device must be registered and linked to your merchant account via the Halo.Go app.
-3. The device must have a valid Firebase Cloud Messaging (FCM) token -- this happens automatically when the Halo.Go app is installed and initialized.
+2. At least one device must be registered via `POST /devices` with a valid Firebase token.
+3. The Firebase token is obtained when the Halo.Go app is installed and initialized on the device.
 
 ## 3. How It Works
 
-The Push to Terminal flow consists of four steps:
+The Push to Terminal flow consists of three steps:
 
-1. **List Devices** -- Merchant calls `GET /devices` to see all linked devices with their IDs and friendly names.
-2. **Push Payment** -- Merchant calls `POST /push/terminal` with the device ID, amount, currency, and reference. The backend sends a Firebase push notification to the device.
+1. **Register Device** -- Merchant calls `POST /devices` with the device installation ID and Firebase token to register the device.
+2. **Push Payment** -- Merchant calls `POST /devices/push` with the device ID, amount, currency, and reference. The backend sends a Firebase push notification to the device.
 3. **Device Processes Payment** -- The device receives the push, opens the Halo.Go app, and processes the card payment.
-4. **Webhook Callback** -- After the transaction completes, the backend sends the result (approved/declined) to the merchant's callback URL via `POST /push/terminal/webhook`.
+
+If the push fails, the response includes a fallback QR code URL.
 
 ## 4. Authentication
 
