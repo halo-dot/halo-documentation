@@ -33,14 +33,13 @@ A production-focused guide to integrating the <a href="https://docs.halodot.io/d
   - [Testing](#testing)
   - [FAQ / Troubleshooting](#faq--troubleshooting)
 
----
+<hr />
 
 ## Overview
 
 The <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide" target="_blank">**Halo Dot SDK**</a> is an **isolating MPoC SDK** for payment processing with attestation and monitoring capabilities. The architecture diagram below illustrates the SDK boundary, integrator touchpoints, and interactions with third‑party payment gateways.
 
 ![Halo Dot SDK Architecture](https://static.dev.haloplus.io/static/mpos/readme/assets/full_process_MIPS_1200.png)
----
 
 ## Requirements
 
@@ -63,8 +62,6 @@ You’ll need the following to integrate the Halo Dot SDK:
 > - `minSdkVersion`: **29** or higher
 > - `compileSdkVersion`: **34** or higher
 > - `targetSdkVersion`: **34** or higher
-
----
 
 ## Developer Portal Registration
 
@@ -93,8 +90,6 @@ The developer portal enables you to obtain the following:
 6. Retrieve your **Access key** and **Secret key** — these are used in your IDE to access the Halo SDK (see [Plugin Installation](#plugin-installation))
 
    <img src="https://static.dev.haloplus.io/static/mpos/readme/assets/access_key.png" alt="access key." width="450" />
-
----
 
 ## Getting Started
 
@@ -163,13 +158,13 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    }
    ```
 
----
-
 ## Mobile Backend Requirements
 
 ### JWT
 
-All calls to the Halo SDK require a **valid JWT**. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
+All calls to the Halo SDK require a **valid JWT**. <br />
+The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). <br />
+We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
 
 Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation).
 
@@ -258,8 +253,6 @@ curl --location --request POST 'https://kernelserver.qa.haloplus.io/tokens/check
 ```
 
 with **Bearer** auth.
-
----
 
 ## Usage in Your Flutter App
 
@@ -437,20 +430,14 @@ Sdkflutterplugin.startTransaction(1.00, 'Some merchant reference', 'ZAR');
 
 From this point, UI messages and results will arrive via your callbacks. Use them to update your UI accordingly.
 
----
-
 ## Documentation
 
 - **<a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
-
----
 
 ## Testing
 
 - All transactions are **null and void** until the **NDA** is executed.
 - You can test with a virtual card, e.g., **<a href="https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet" target="_blank">Visa Mobile CDET</a>**.
-
----
 
 ## FAQ / Troubleshooting
 
@@ -493,5 +480,3 @@ See the configuration above — define it in `local.properties` and read it from
 - Ensure `aws.accesskey` and `aws.secretkey` are correctly set in `local.properties`
 
 > **Algorithm note**: Some snippets show `RS512` while claim tables reference `RS256`. **Always use the algorithm specified for your tenant in the Developer Portal**. If mismatched, signature validation will fail.
-
----
