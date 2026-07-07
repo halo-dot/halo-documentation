@@ -3,6 +3,6 @@
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "The Halo SDK UI provides a modern, Jetpack Compose-based interface for integrating Halo payment services into your Android application."
+    "description": "The Halo UI SDK provides a ready-made, Jetpack Compose-based interface for integrating Halo payment services into your Android application."
   }
 }

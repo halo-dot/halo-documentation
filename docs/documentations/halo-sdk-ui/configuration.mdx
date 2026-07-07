@@ -4,41 +4,48 @@ sidebar_position: 3
 
 # Configuration
 
-Tailor the Halo SDK UI to your application's needs through the `HDConfig` class and custom theming.
+Tailor the Halo UI SDK to your application's needs through the `HDConfig` class and custom theming.
 
 ## Initialization
 
-Initialize the SDK once, typically in your main `Activity` or `Application` class. Configuration is managed via the `HDConfig` object.
+Initialize the SDK once, typically in your main activity's `onCreate`. Configuration is managed via the `HDConfig` object. The activity passed to `HDConfig` **must** be a `ComponentActivity` (or subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
 
 ### HDConfig Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `activity` | `ComponentActivity` | - | The host activity that will host the SDK UI. |
-| `packageName` | `String` | - | Your app's package name. |
-| `packageVersion` | `String` | - | Your app's version name. |
-| `companyName` | `String` | - | Display name of your company shown in the header. |
-| `companyLogo` | `String` | - | URL of your company logo (optional, pass `""` for default). |
+| `activity` | `ComponentActivity` | - | The activity that will host the SDK UI. |
+| `merchantDetails` | `HDMerchantDetails` | - | Your app and company details. |
 | `onTokenRequest` | `() -> String` | - | Callback that must return a valid Halo SDK token. |
-| `showTransactionResult`| `Boolean` | `true` | Whether to show the built-in success/failure screens. |
-| `theme` | `HaloTheme` | `HaloTheme()` | Custom color and shape configuration. |
-| `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow system theme. |
-| `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Configure which card scheme logos are shown. |
+| `showTransactionResult`| `Boolean` | `true` | Whether to show the SDK's built-in success/failure screens. |
+| `theme` | `HaloTheme` | `HaloTheme()` | Colors, shapes, and logo configuration. |
+| `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow the system theme. |
+| `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Which card scheme logos are shown. |
+
+### HDMerchantDetails Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `packageName` | `String` | Your app's package name (e.g., `applicationContext.packageName`) |
+| `packageVersion` | `String` | Your app's version name (e.g., `"1.0.0"`) |
+| `merchantName` | `String` | Display name of your company shown in the SDK header |
 
 ### Example
 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.HaloSdkUi
 import za.co.synthesis.halo.sdk_ui.models.HDConfig
+import za.co.synthesis.halo.sdk_ui.models.HDMerchantDetails
 
 val config = HDConfig(
     activity = this,
-    packageName = applicationContext.packageName,
-    packageVersion = "1.0.0",
-    companyName = "My Awesome App",
-    companyLogo = "https://example.com/logo.png",
+    merchantDetails = HDMerchantDetails(
+        packageName = applicationContext.packageName,
+        packageVersion = "1.0.0",
+        merchantName = "My Awesome App",
+    ),
     onTokenRequest = {
-        // Return your Halo SDK Token here
+        // Return your Halo SDK token here (e.g., fetch from your backend)
         "YOUR_SDK_TOKEN"
     },
     showTransactionResult = true // Set to false if you want to handle the result UI yourself
@@ -46,6 +53,10 @@ val config = HDConfig(
 
 val success = HaloSdkUi.init(config)
 ```
+
+:::note
+`init` returns `false` if initialization fails.
+:::
 
 ---
 
@@ -72,25 +83,56 @@ HaloSdkUi.setThemeMode(HaloThemeMode.SYSTEM)
 
 ### Custom Theme
 
-Define your brand's appearance via `HaloTheme` and pass it to your `HDConfig`.
+Define your brand's colors, shapes, and logo via `HaloTheme` and pass it to your `HDConfig`.
+
+#### HaloTheme Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `light` | `HaloColorScheme` | `HaloColorScheme.default()` | Color scheme for light mode |
+| `dark` | `HaloColorScheme` | `HaloColorScheme.defaultDark()` | Color scheme for dark mode |
+| `shape` | `Dp` | `8.dp` | Corner radius for buttons and containers |
+| `paddingHorizontal` | `Dp` | `24.dp` | Horizontal padding inside containers |
+| `paddingVertical` | `Dp` | `12.dp` | Vertical padding inside containers |
+| `logo` | `HDCompanyLogo` | `HDCompanyLogo()` | Company logo configuration |
+
+#### HaloColorScheme Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `primary` | `Color` | Main brand color (buttons, highlights) |
+| `secondary` | `Color` | Secondary accent color |
+| `surface` | `Color` | Background color |
+| `onSurface` | `Color` | Text/icon color on surface |
+| `onPrimary` | `Color` | Text/icon color on primary background |
+| `outline` | `Color` | Border and divider color |
+| `error` | `Color` | Error/decline color |
+
+#### HDCompanyLogo Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `lightMode` | `String?` | `null` | URL or path to the logo for light mode |
+| `darkMode` | `String?` | `null` | URL or path to the logo for dark mode |
+| `aspectRatio` | `Float?` | `null` | Optional aspect ratio for the logo |
 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.models.HaloTheme
 import za.co.synthesis.halo.sdk_ui.models.HaloColorScheme
+import za.co.synthesis.halo.sdk_ui.models.HDCompanyLogo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 val myCustomTheme = HaloTheme(
     light = HaloColorScheme.default().copy(
         primary = Color(0xFF6200EE),
-        onPrimary = Color.White
+        onPrimary = Color.White,
     ),
     dark = HaloColorScheme.defaultDark().copy(
-        primary = Color(0xFFBB86FC)
+        primary = Color(0xFFBB86FC),
     ),
     shape = 12.dp,
-    paddingHorizontal = 24.dp,
-    paddingVertical = 12.dp
+    logo = HDCompanyLogo(lightMode = "https://example.com/logo.png"),
 )
 
 val config = HDConfig(
@@ -98,21 +140,6 @@ val config = HDConfig(
     theme = myCustomTheme
 )
 ```
-
-#### HaloColorScheme Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `primary` | `Color` | Main brand color (buttons, highlights). |
-| `onPrimary` | `Color` | Text/icon color on primary background. |
-| `background` | `Color` | Main background color. |
-| `onBackground` | `Color` | Text/icon color on background. |
-| `surface` | `Color` | Card/container background. |
-| `onSurface` | `Color` | Text/icon color on surface. |
-| `error` | `Color` | Error/decline color. |
-| `onError` | `Color` | Text/icon color on error. |
-| `success` | `Color` | Success/approved color. |
-| `onSuccess` | `Color` | Text/icon color on success. |
 
 ---
 

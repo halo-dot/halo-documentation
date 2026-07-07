@@ -4,27 +4,24 @@ sidebar_position: 1
 
 # Introduction
 
-The **Halo SDK UI** provides a modern, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the complexities of transaction flows, card reading animations, and status reporting, allowing you to focus on your core business logic.
+The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the transaction flow, card reading animations, and status reporting, so you can focus on your core business logic.
 
 ## 🚀 Features
 
-- **Ready-to-use UI**: Fullscreen transaction flow including card reading and success/failure states.
-- **Theming & Customization**: Support for Light Mode, Dark Mode, and custom color schemes.
-- **Modern Tech Stack**: Built entirely with Kotlin and Jetpack Compose.
-- **Seamless Integration**: Simple API to launch transactions and receive results via Kotlin Coroutines.
-- **Brand Identity**: Customizable company name and logo within the SDK UI.
+- **Ready-to-use UI**: Fullscreen transaction flow including amount entry, card reading, and success/failure states.
+- **Theming**: Light mode, dark mode, custom colors, shapes, and company logo.
+- **Simple API**: Launch a transaction and receive the result via Kotlin Coroutines.
 
 ## 📋 Prerequisites
 
 Before you begin, ensure your project meets the following requirements:
 
 - **Android 10.0 (API level 29)** or higher.
-- **Jetpack Compose** enabled in your project.
 - **Halo SDK Credentials**: A valid SDK token provided by Synthesis/Halo.
-- **Activity Requirements**: The host activity must be a `ComponentActivity` (or subclass) that supports Jetpack Compose.
+- A `ComponentActivity` (or subclass such as `AppCompatActivity`) to host the SDK.
 
 :::info Activity Requirements
-The activity passed to `HaloSdkUi.init()` **must** be a `ComponentActivity` (or a subclass like `AppCompatActivity`). This is required because the SDK uses Jetpack Compose's `setContent` to render its UI.
+The activity passed to `HDConfig` **must** be a `ComponentActivity` (or a subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
 :::
 
 ### Example Activity Declaration
@@ -32,6 +29,7 @@ The activity passed to `HaloSdkUi.init()` **must** be a `ComponentActivity` (or 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.HaloSdkUi
 import za.co.synthesis.halo.sdk_ui.models.HDConfig
+import za.co.synthesis.halo.sdk_ui.models.HDMerchantDetails
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,11 +38,12 @@ class MainActivity : ComponentActivity() {
         // Initialize SDK here
         val config = HDConfig(
             activity = this,
-            packageName = packageName,
-            packageVersion = BuildConfig.VERSION_NAME,
-            companyName = "My App",
-            companyLogo = "",
-            onTokenRequest = { fetchTokenFromBackend() }
+            merchantDetails = HDMerchantDetails(
+                packageName = packageName,
+                packageVersion = BuildConfig.VERSION_NAME,
+                merchantName = "My App",
+            ),
+            onTokenRequest = { fetchTokenFromBackend() },
         )
         val success = HaloSdkUi.init(config)
 

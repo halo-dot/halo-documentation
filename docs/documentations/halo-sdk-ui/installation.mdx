@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 # Installation
 
-Follow these steps to integrate the Halo SDK UI into your Android project.
+Follow these steps to integrate the Halo UI SDK into your Android project.
 
 ## 1. Configure Credentials
 
@@ -41,7 +41,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Repository where Halo SDK UI is hosted
+        // Repository where the Halo UI SDK is hosted
         maven {
             name = "releases"
             url = uri("s3://synthesis-halo-artifacts/releases")
@@ -73,15 +73,14 @@ Replace `0.0.1` with the latest version available.
 
 ## 🛡️ Permissions
 
-The SDK requires several permissions for NFC, location (for compliance), and network access. These are automatically merged into your app's manifest.
+The SDK's permissions are automatically merged into your app's manifest, and the required runtime permissions (camera, location, phone state, and Bluetooth on Android 12+) are requested automatically when `HaloSdkUi.init()` is called.
 
 | Permission | Purpose |
 |------------|---------|
-| `android.permission.INTERNET` | Network communication with Halo backend |
-| `android.permission.NFC` | Reading payment cards via NFC |
-| `android.permission.ACCESS_FINE_LOCATION` | Required for payment compliance (location verification) |
-| `android.permission.ACCESS_COARSE_LOCATION` | Alternative location permission for compliance |
-
-:::warning
-You should use the built-in helper or standard Android APIs to request these permissions at runtime before launching a transaction.
-:::
+| `INTERNET` | Network communication with the Halo backend |
+| `NFC` | Reading payment cards |
+| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | Payment compliance (location verification) |
+| `CAMERA` | Device security verification |
+| `READ_PHONE_STATE` | Device identification |
+| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | External card reader support (Android 12+) |
+| `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | Feedback on card tap |

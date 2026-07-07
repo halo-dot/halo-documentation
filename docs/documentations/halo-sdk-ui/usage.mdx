@@ -4,19 +4,19 @@ sidebar_position: 4
 
 # Usage
 
-The Halo SDK UI uses Kotlin Coroutines to provide a clean, asynchronous way to launch the UI and wait for a result.
+The Halo UI SDK uses Kotlin Coroutines to provide a clean, asynchronous way to launch the UI and wait for a result.
 
 ## Launching a Transaction
 
-The `launch` function handles the entire UI flow.
+`HaloSdkUi.launch` is a suspend function that opens the SDK UI and returns when the transaction completes.
 
 ### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `amount` | `BigDecimal?` | The transaction amount. If `null` or `BigDecimal.ZERO`, a keypad is shown. |
-| `currency` | `String` | ISO currency code (e.g., `"ZAR"`, `"USD"`). |
-| `merchantRef` | `String?` | Optional merchant reference. |
+| `amount` | `BigDecimal?` | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
+| `merchantRef` | `String?` | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
+| `currency` | `String?` | ISO currency code (e.g., `"ZAR"`, `"USD"`). Defaults to `"ZAR"` if `null`. Must be supported by Halo. |
 
 ### 1. Direct Transaction Mode
 
@@ -30,8 +30,8 @@ fun startPayment(amount: BigDecimal) {
     lifecycleScope.launch {
         val result = HaloSdkUi.launch(
             amount = amount,
+            merchantRef = "REF-9921",
             currency = "ZAR",
-            merchantRef = "REF-9921"
         )
         handleResult(result)
     }
@@ -40,15 +40,15 @@ fun startPayment(amount: BigDecimal) {
 
 ### 2. Manual Amount Entry Mode
 
-If you pass `null` or `BigDecimal.ZERO` for the amount, the SDK shows a keypad first.
+If you pass `null` or zero for the amount, the SDK shows a keypad first where the user can enter the amount (and optionally a reference).
 
 ```kotlin
 fun openKeypad() {
     lifecycleScope.launch {
         val result = HaloSdkUi.launch(
             amount = null,
+            merchantRef = null,
             currency = "ZAR",
-            merchantRef = null
         )
         handleResult(result)
     }
@@ -59,21 +59,23 @@ fun openKeypad() {
 
 ## Handling Results
 
-The `launch` function returns a `HaloTransactionResult?`.
+The `launch` function returns a `HaloTransactionResult?` containing a `resultType`, transaction references, and (for completed transactions) a `receipt`.
 
 :::note
-If `showTransactionResult` was set to `false` in `HDConfig`, the SDK will return the result immediately after the transaction process completes without showing its own success or failure screens.
+If `showTransactionResult` is `false` in `HDConfig`, the SDK returns the result as soon as the transaction completes, without showing its own success/failure screens.
 :::
 
 ### Result Types
 
-| Type | Description | Receipt? |
-|------|-------------|----------|
-| `Approved` | Transaction was successful | Yes |
-| `Declined` | Payment was declined by the bank | Yes |
-| `Cancelled` | User closed the SDK | No |
-| `Failed` | A technical error occurred | No |
-| `Timeout` | Transaction timed out | No |
+Common result types:
+
+| Type | Description |
+|------|-------------|
+| `Approved` | Transaction was successful |
+| `Declined` | Payment was declined by the bank or issuer |
+| `Cancelled` | User closed the SDK before completion |
+| `CardTapTimeOutExpired` | Card was not tapped in time |
+| `NetworkError` / `ProcessingError` | A technical error occurred |
 
 ### Implementation Example
 
@@ -82,20 +84,18 @@ import za.co.synthesis.halo.haloCommonInterface.HaloTransactionResult
 import za.co.synthesis.halo.haloCommonInterface.HaloTransactionResultType
 
 fun handleResult(result: HaloTransactionResult?) {
-    if (result == null) return
-
-    when (result.resultType) {
+    when (result?.resultType) {
         HaloTransactionResultType.Approved -> {
-            println("Transaction Approved: ${result.receipt?.transactionId}")
+            println("Approved: ${result.merchantTransactionReference}")
         }
         HaloTransactionResultType.Declined -> {
-            println("Transaction Declined")
+            println("Declined")
         }
         HaloTransactionResultType.Cancelled -> {
-            println("Transaction Cancelled by User")
+            println("Cancelled by user")
         }
         else -> {
-            println("Transaction Status: ${result.resultType}")
+            println("Transaction status: ${result?.resultType}")
         }
     }
 }
