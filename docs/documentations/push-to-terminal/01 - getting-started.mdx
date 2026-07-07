@@ -12,23 +12,18 @@ Push to Terminal allows a merchant to send a payment request directly to a speci
 
 The device receives the push notification, opens the Halo.Go app, and begins processing the payment automatically.
 
-If the push notification fails (device offline, no Firebase token), the system automatically falls back to generating an applink URL with a QR code.
-
 ## 2. Prerequisites
 
 1. Register on the <a href="https://go.merchantportal.prod.haloplus.io/" target="_blank">Merchant Portal</a> and retrieve your `Merchant ID` and `API Key`.
-2. At least one device must be registered via `POST /devices` with a valid Firebase token.
+2. At least one device must be registered via `POST /devices` with a valid Firebase token and friendly name.
 3. The Firebase token is obtained when the Halo.Go app is installed and initialized on the device.
 
 ## 3. How It Works
 
-The Push to Terminal flow consists of three steps:
+Push to Terminal has two parts:
 
-1. **Register Device** -- Merchant calls `POST /devices` with the device installation ID and Firebase token to register the device.
-2. **Push Payment** -- Merchant calls `POST /devices/push` with the device ID, amount, currency, and reference. The backend sends a Firebase push notification to the device.
-3. **Device Processes Payment** -- The device receives the push, opens the Halo.Go app, and processes the card payment.
-
-If the push fails, the response includes a fallback QR code URL.
+1. **Device Management** -- Merchant registers devices via `POST /devices` with the device installation ID, Firebase token, and a friendly name. Devices can be listed, updated, and removed.
+2. **Push Payment** -- When initiating a payment, the existing transaction API sends a push notification to the selected device. If push fails, the merchant can use the applink URL / QR code already returned in the transaction API response as an alternate payment method.
 
 ## 4. Authentication
 
