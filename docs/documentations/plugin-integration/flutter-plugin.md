@@ -63,6 +63,7 @@ You’ll need the following to integrate the Halo Dot SDK:
 > - `compileSdkVersion`: **34** or higher
 > - `targetSdkVersion`: **34** or higher
 
+<hr />
 ## Developer Portal Registration
 
 You are required to register on our QA (UAT — User Acceptance Testing) environment before testing in production.
@@ -105,7 +106,7 @@ flutter create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo
 # Using FVM (recommended for pinning Flutter versions)
 fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo.test.plugin
 ```
-
+<hr />
 ### Environment
 
 1. **Java**: Tested with **Java 21** (later versions not yet confirmed).
