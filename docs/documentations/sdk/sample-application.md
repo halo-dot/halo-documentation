@@ -12,7 +12,6 @@ Download our test app from <a href="{{REPO_URL}}" target="_blank" rel="noopener 
 
 #### 2. Configure The Test App
 
-<hr/>
 Open `{{CONFIG_PATH}}` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 
 You will need the private key you used to generate your public key, your issuer name, and your username (you can use the email or phone number used to register).
 
@@ -41,6 +40,8 @@ aws.secretKey={{your_secret_key}}
 ```
 
 `sdk.dir` specifies the location of the Android SDK on your file system.
+
+<hr/>
 
 #### 3. Gradle Setup
 
