@@ -71,6 +71,8 @@ dependencies {
 Replace `0.0.1` with the latest version available.
 :::
 
+Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.
+
 ## 🛡️ Permissions
 
 The SDK's permissions are automatically merged into your app's manifest, and the required runtime permissions (camera, location, phone state, and Bluetooth on Android 12+) are requested automatically when `HaloSdkUi.init()` is called.
