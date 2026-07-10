@@ -55,38 +55,11 @@ fun openKeypad() {
     }
 }
 ```
-
----
-
-## Dynamic Currency Conversion (DCC)
-
-:::caution Under Active Development
-DCC is under active development — the flow currently runs on placeholder rates.
-:::
-
-With `showDCC = true` in `HDConfig`, the SDK offers the cardholder a choice of currency after their card is read:
-
-1. A **currency-selection screen** shows the amount in the local currency and in the card's currency, along with the exchange rate and conversion margin.
-2. The cardholder picks one and the transaction completes in that currency.
-3. The success screen then includes the DCC details: local total, exchange rate, margin, transaction currency, and the total transaction amount in the chosen currency.
-
-```kotlin
-val config = HDConfig(
-    // ... other props
-    showDCC = true,
-)
-```
-
 ---
 
 ## Handling Results
 
 The `launch` function returns a `HaloTransactionResult?` containing a `resultType`, transaction references, and (for completed transactions) a `receipt`.
-
-:::note
-If `showTransactionResult` is `false` in `HDConfig` (the default), the SDK returns the result as soon as the transaction completes, without showing its own success/failure screens. Set it to `true` to show the built-in result screens.
-:::
-
 ### Result Types
 
 Common result types:
