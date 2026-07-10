@@ -17,10 +17,12 @@ Initialize the SDK once, typically in your main activity's `onCreate`. Configura
 | `activity` | `ComponentActivity` | - | The activity that will host the SDK UI. |
 | `merchantDetails` | `HDMerchantDetails` | - | Your app and company details. |
 | `onTokenRequest` | `() -> String` | - | Callback that must return a valid Halo SDK token. |
-| `showTransactionResult`| `Boolean` | `true` | Whether to show the SDK's built-in success/failure screens. |
-| `theme` | `HaloTheme` | `HaloTheme()` | Colors, shapes, and logo configuration. |
+| `showTransactionResult`| `Boolean` | `false` | Whether to show the SDK's built-in success/failure screens. |
+| `theme` | `HDTheme` | `HDTheme()` | Colors, shapes, and logo configuration. |
 | `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow the system theme. |
 | `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Which card scheme logos are shown. |
+| `showDCC` | `Boolean` | `false` | Enable Dynamic Currency Conversion — see [DCC](./usage#dynamic-currency-conversion-dcc). |
+| `language` | `HDLanguage?` | `null` | Pins the SDK language — see [Languages](#languages). |
 
 ### HDMerchantDetails Parameters
 
@@ -48,7 +50,6 @@ val config = HDConfig(
         // Return your Halo SDK token here (e.g., fetch from your backend)
         "YOUR_SDK_TOKEN"
     },
-    showTransactionResult = true // Set to false if you want to handle the result UI yourself
 )
 
 val success = HaloSdkUi.init(config)
@@ -83,20 +84,20 @@ HaloSdkUi.setThemeMode(HaloThemeMode.SYSTEM)
 
 ### Custom Theme
 
-Define your brand's colors, shapes, and logo via `HaloTheme` and pass it to your `HDConfig`.
+Define your brand's colors, shapes, and logo via `HDTheme` and pass it to your `HDConfig`.
 
-#### HaloTheme Properties
+#### HDTheme Properties
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `light` | `HaloColorScheme` | `HaloColorScheme.default()` | Color scheme for light mode |
-| `dark` | `HaloColorScheme` | `HaloColorScheme.defaultDark()` | Color scheme for dark mode |
-| `shape` | `Dp` | `8.dp` | Corner radius for buttons and containers |
+| `light` | `HDColorScheme` | `HDColorScheme.default()` | Color scheme for light mode |
+| `dark` | `HDColorScheme` | `HDColorScheme.defaultDark()` | Color scheme for dark mode |
+| `shape` | `Dp` | `16.dp` | Corner radius for buttons and containers |
 | `paddingHorizontal` | `Dp` | `24.dp` | Horizontal padding inside containers |
 | `paddingVertical` | `Dp` | `12.dp` | Vertical padding inside containers |
 | `logo` | `HDCompanyLogo` | `HDCompanyLogo()` | Company logo configuration |
 
-#### HaloColorScheme Properties
+#### HDColorScheme Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -117,18 +118,18 @@ Define your brand's colors, shapes, and logo via `HaloTheme` and pass it to your
 | `aspectRatio` | `Float?` | `null` | Optional aspect ratio for the logo |
 
 ```kotlin
-import za.co.synthesis.halo.sdk_ui.models.HaloTheme
-import za.co.synthesis.halo.sdk_ui.models.HaloColorScheme
+import za.co.synthesis.halo.sdk_ui.models.HDTheme
+import za.co.synthesis.halo.sdk_ui.models.HDColorScheme
 import za.co.synthesis.halo.sdk_ui.models.HDCompanyLogo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-val myCustomTheme = HaloTheme(
-    light = HaloColorScheme.default().copy(
+val myCustomTheme = HDTheme(
+    light = HDColorScheme.default().copy(
         primary = Color(0xFF6200EE),
         onPrimary = Color.White,
     ),
-    dark = HaloColorScheme.defaultDark().copy(
+    dark = HDColorScheme.defaultDark().copy(
         primary = Color(0xFFBB86FC),
     ),
     shape = 12.dp,
@@ -138,6 +139,21 @@ val myCustomTheme = HaloTheme(
 val config = HDConfig(
     // ... other props
     theme = myCustomTheme
+)
+```
+
+---
+
+## Languages
+
+The SDK UI ships translations for English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`), and Portuguese (`pt`). By default it follows the device language, falling back to English for unsupported locales. To pin a specific language:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.core.HDLanguage
+
+val config = HDConfig(
+    // ... other props
+    language = HDLanguage.AFRIKAANS,
 )
 ```
 

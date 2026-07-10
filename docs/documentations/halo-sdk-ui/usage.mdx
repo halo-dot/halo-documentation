@@ -16,7 +16,7 @@ The Halo UI SDK uses Kotlin Coroutines to provide a clean, asynchronous way to l
 |-----------|------|-------------|
 | `amount` | `BigDecimal?` | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
 | `merchantRef` | `String?` | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
-| `currency` | `String?` | ISO currency code (e.g., `"ZAR"`, `"USD"`). Defaults to `"ZAR"` if `null`. Must be supported by Halo. |
+| `currency` | `HDCurrency?` | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
 
 ### 1. Direct Transaction Mode
 
@@ -24,6 +24,7 @@ If the amount is known, the SDK skips the keypad and goes directly to the "Tap C
 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDCurrency
 import java.math.BigDecimal
 
 fun startPayment(amount: BigDecimal) {
@@ -31,7 +32,7 @@ fun startPayment(amount: BigDecimal) {
         val result = HaloSdkUi.launch(
             amount = amount,
             merchantRef = "REF-9921",
-            currency = "ZAR",
+            currency = HDCurrency.ZAR,
         )
         handleResult(result)
     }
@@ -48,11 +49,32 @@ fun openKeypad() {
         val result = HaloSdkUi.launch(
             amount = null,
             merchantRef = null,
-            currency = "ZAR",
+            currency = HDCurrency.ZAR,
         )
         handleResult(result)
     }
 }
+```
+
+---
+
+## Dynamic Currency Conversion (DCC)
+
+:::caution Under Active Development
+DCC is under active development — the flow currently runs on placeholder rates.
+:::
+
+With `showDCC = true` in `HDConfig`, the SDK offers the cardholder a choice of currency after their card is read:
+
+1. A **currency-selection screen** shows the amount in the local currency and in the card's currency, along with the exchange rate and conversion margin.
+2. The cardholder picks one and the transaction completes in that currency.
+3. The success screen then includes the DCC details: local total, exchange rate, margin, transaction currency, and the total transaction amount in the chosen currency.
+
+```kotlin
+val config = HDConfig(
+    // ... other props
+    showDCC = true,
+)
 ```
 
 ---
@@ -62,7 +84,7 @@ fun openKeypad() {
 The `launch` function returns a `HaloTransactionResult?` containing a `resultType`, transaction references, and (for completed transactions) a `receipt`.
 
 :::note
-If `showTransactionResult` is `false` in `HDConfig`, the SDK returns the result as soon as the transaction completes, without showing its own success/failure screens.
+If `showTransactionResult` is `false` in `HDConfig` (the default), the SDK returns the result as soon as the transaction completes, without showing its own success/failure screens. Set it to `true` to show the built-in result screens.
 :::
 
 ### Result Types
