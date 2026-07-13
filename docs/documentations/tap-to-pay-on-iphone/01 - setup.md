@@ -158,7 +158,7 @@ This brings up Apple's card reader UI. The customer taps their card on the iPhon
 | `amountMinor` | `Int` | Yes | Amount in minor currency units (e.g. `1500` = 15.00) |
 | `currency` | `String` | Yes | ISO 4217 currency code (e.g. `"ZAR"`, `"USD"`) |
 | `merchantReference` | `String` | Yes | Your reference for this transaction (max 64 characters) |
-| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields](#passthrough-fields) |
+| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields] |
 | `type` | `HaloTransactionType` | No | `.purchase` (default) or `.refund` |
 
 
@@ -1119,6 +1119,56 @@ case .declined(let errorCode, let errorMessage):
 - The card must be physically present — this isn't a "card-not-present" refund
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
+
+- If your payment processor requires linking to the original Halo transaction, pass `originalTransactionId` in `passthroughFields` (see below)
+
+## Passthrough Fields
+
+Passthrough is an optional, merchant-defined JSON object that the SDK does **not** interpret. It is stored for the current transaction and attached to the online authorization request sent to the Halo backend. The server and payment processor decide which keys are valid (e.g. installments, refund linkage).
+
+```swift
+
+let passthrough = HaloPassthroughFields([
+    "installments": 3
+])
+
+let result = await HaloSDK.startContactlessPayment(
+    amountMinor: 1500,
+    currency: "ZAR",
+    merchantReference: "order_12345",
+    passthroughFields: passthrough
+)
+
+```
+
+For card-present refunds where the processor requires linkage to the original transaction:
+
+```swift
+
+let passthrough = HaloPassthroughFields([
+    "originalTransactionId": "<halo-transaction-uuid>"
+])
+
+let result = await HaloSDK.startContactlessPayment(
+    amountMinor: 500,
+    currency: "ZAR",
+    merchantReference: "refund_order_12345",
+    passthroughFields: passthrough,
+    type: .refund
+)
+
+```
+**Behavior:**
+
+- Passed as top-level `passthroughFields` on `POST /transactions/apple`
+- Re-sent on `POST /transactions/{originalTransactionID}/submitPinApple` for single-tap-and-PIN flows
+- Stored for one payment only — cleared when the transaction ends or a new payment starts
+- Omitted from the request body when not provided (not sent as an empty object)
+- Keys are not validated by the SDK — confirm supported keys with your processor integration
+
+**`HaloPassthroughFields`:** Created from any JSON-serializable `[String: Any]` dictionary (`String`, `Int`, `Double`, `Bool`, nested objects, arrays). Returns `nil` if the dictionary is not valid JSON.
+
+Passthrough is separate from receipt display metadata (`extraReceiptFields` / `transactionMetaData` on Android). The iOS SDK does not expose receipt metadata passthrough today.
 
 ## Security Validation
 
