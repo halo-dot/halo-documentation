@@ -158,7 +158,7 @@ This brings up Apple's card reader UI. The customer taps their card on the iPhon
 | `amountMinor` | `Int` | Yes | Amount in minor currency units (e.g. `1500` = 15.00) |
 | `currency` | `String` | Yes | ISO 4217 currency code (e.g. `"ZAR"`, `"USD"`) |
 | `merchantReference` | `String` | Yes | Your reference for this transaction (max 64 characters) |
-| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields] |
+| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields](#passthrough-fields) |
 | `type` | `HaloTransactionType` | No | `.purchase` (default) or `.refund` |
 
 
