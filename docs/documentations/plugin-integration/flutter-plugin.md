@@ -92,6 +92,8 @@ The developer portal enables you to obtain the following:
 
    <img src="https://static.dev.haloplus.io/static/mpos/readme/assets/access_key.png" alt="access key." width="450" />
 
+<hr />
+
 ## Getting Started
 
 ### Create/Prepare the Flutter App
@@ -106,7 +108,7 @@ flutter create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo
 # Using FVM (recommended for pinning Flutter versions)
 fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synthesis.halo.test.plugin
 ```
-<hr />
+
 ### Environment
 
 1. **Java**: Tested with **Java 21** (later versions not yet confirmed).
