@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.93")
+    .package(id: "synthesis.halosdk", from: "1.0.94")
 
 ]
 ```
@@ -139,6 +139,8 @@ let result = await HaloSDK.startContactlessPayment(
     currency: "ZAR",
 
     merchantReference: "order_12345"
+    
+    // passthroughFields: HaloPassthroughFields(["installments": 3])  // optional
 
     // type: .purchase (default) or .refund
 
@@ -147,6 +149,18 @@ let result = await HaloSDK.startContactlessPayment(
 ```
 
 This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
+
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `amountMinor` | `Int` | Yes | Amount in minor currency units (e.g. `1500` = 15.00) |
+| `currency` | `String` | Yes | ISO 4217 currency code (e.g. `"ZAR"`, `"USD"`) |
+| `merchantReference` | `String` | Yes | Your reference for this transaction (max 64 characters) |
+| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields](#passthrough-fields) |
+| `type` | `HaloTransactionType` | No | `.purchase` (default) or `.refund` |
+
 
 ### 3. Handle the Result
 
