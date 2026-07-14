@@ -146,15 +146,15 @@ let result = await HaloSDK.startContactlessPayment(
         "stateProvince": "GP",
         "countryCode": "ZA",
         "installments": 3
-    ]),  // optional — see Passthrough Fields
+    ]),  // optional
 
-    type: .purchase  // default; use .refund for card-present refunds
+    type: .purchase  // use .refund for card-present refunds
 
 )
 
 ```
 
-This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
+This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes. Optional `passthroughFields` are covered in [Passthrough Fields](#passthrough-fields).
 
 
 **Parameters:**
@@ -1128,9 +1128,9 @@ case .declined(let errorCode, let errorMessage):
 
 ## Passthrough Fields
 
-Passthrough lets you attach **optional, merchant-defined JSON** to an Apple Tap to Pay transaction. The SDK does not read or validate the keys — they are forwarded to the Halo kernel and your payment processor, which decide what is supported (for example installments or refund linkage).
+Passthrough lets you attach **optional JSON** to an Apple Tap to Pay transaction — for example address or installments. Use only keys your payment processor documents and supports (this can include fields such as tip or pre-auth flags when your processor adds them). The SDK does not read or validate the keys; it forwards them to the Halo kernel and your payment processor.
 
-This mirrors Android’s `passthroughFields` on `startTransaction`, but iOS uses the Apple-specific endpoint `POST /transactions/apple` instead of `POST /transactions`.
+Passthrough fields are sent with the transaction request. They are **not** returned on `HaloPaymentResult` — keep your own copy if you need them after the payment.
 
 ### API
 
@@ -1145,7 +1145,11 @@ public static func startContactlessPayment(
 ) async -> HaloPaymentResult
 ```
 
-Create passthrough values with `HaloPassthroughFields`. The initializer returns `nil` if the dictionary is not valid JSON.
+Create values with `HaloPassthroughFields`. The initializer returns `nil` when the dictionary cannot be encoded as JSON (for example if a value is not a JSON-compatible type).
+
+### Example
+
+Address and installments are sent together in one flat `passthroughFields` object:
 
 ```swift
 guard let passthrough = HaloPassthroughFields([
@@ -1155,7 +1159,7 @@ guard let passthrough = HaloPassthroughFields([
     "countryCode": "ZA",
     "installments": 3
 ]) else {
-    // Invalid JSON shape — fix the dictionary before starting payment
+    // Dictionary could not be encoded as JSON — fix values before starting payment
     return
 }
 
@@ -1167,9 +1171,7 @@ let result = await HaloSDK.startContactlessPayment(
 )
 ```
 
-### Passthrough payload example
-
-Address, installments, and refund linkage are all sent in the same flat `passthroughFields` object. The SDK forwards it unchanged.
+Equivalent JSON payload:
 
 ```json
 {
@@ -1177,23 +1179,11 @@ Address, installments, and refund linkage are all sent in the same flat `passthr
   "city": "Johannesburg",
   "stateProvince": "GP",
   "countryCode": "ZA",
-  "installments": 3,
+  "installments": 3
 }
 ```
 
-Swift equivalent:
-
-```swift
-let passthrough = HaloPassthroughFields([
-    "streetAddress": "34 Melrose Boulevard Floor 1",
-    "city": "Johannesburg",
-    "stateProvince": "GP",
-    "countryCode": "ZA",
-    "installments": 3,
-])
-```
-
-Include only the keys your processor expects — omit `installments` or `originalTransactionId` when not needed.
+Include only the keys your processor expects — omit unused keys such as `installments`.
 
 ### Example keys
 
@@ -1208,27 +1198,6 @@ Confirm supported keys with your processor integration. Common examples from Hal
 | `installments` | `3` | Installment purchase |
 
 The SDK does not enforce these — invalid or unknown keys are handled by the backend/processor.
-
-### Purchase with address and installments
-
-```swift
-
-let passthrough = HaloPassthroughFields([
-    "streetAddress": "34 Melrose Boulevard Floor 1",
-    "city": "Johannesburg",
-    "stateProvince": "GP",
-    "countryCode": "ZA",
-    "installments": 3
-])
-
-let result = await HaloSDK.startContactlessPayment(
-    amountMinor: 1500,
-    currency: "ZAR",
-    merchantReference: "order_12345",
-    passthroughFields: passthrough
-)
-
-```
 
 ## Security Validation
 
