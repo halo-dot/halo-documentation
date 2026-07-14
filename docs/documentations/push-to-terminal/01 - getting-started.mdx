@@ -23,7 +23,7 @@ The device receives the push notification, opens the Halo.Go app, and begins pro
 Push to Terminal has two parts:
 
 1. **Device Management** -- Merchant registers devices via `POST /devices` with the device installation ID, Firebase token, and a friendly name. Devices can be listed, updated, and removed.
-2. **Push Payment** -- When initiating a payment, the existing transaction API sends a push notification to the selected device. If push fails, the merchant can use the applink URL / QR code already returned in the transaction API response as an alternate payment method.
+2. **Push Payment** -- Merchant calls `POST /consumer/push` with the device ID, amount, currency, and reference. The backend sends a push notification to the device. If push fails, the merchant can use the applink URL / QR code already returned in the transaction API response as an alternate payment method.
 
 ## 4. Authentication
 
