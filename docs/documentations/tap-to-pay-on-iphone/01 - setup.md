@@ -1128,7 +1128,7 @@ case .declined(let errorCode, let errorMessage):
 
 ## Passthrough Fields
 
-Passthrough lets you attach **optional JSON** to an Apple Tap to Pay transaction — for example address or installments. Use only keys your payment processor documents and supports (this can include fields such as tip or pre-auth flags when your processor adds them). The SDK does not read or validate the keys; it forwards them to the Halo kernel and your payment processor.
+Passthrough lets you attach **optional JSON** to an Apple Tap to Pay transaction — for example address or installments. Use only keys your payment processor documents and supports (this can include fields such as tip or pre-auth flags when your processor adds them). The SDK does not read or validate the keys; it forwards them to the Halo Dot backend and your payment processor.
 
 Passthrough fields are sent with the transaction request. They are **not** returned on `HaloPaymentResult` — keep your own copy if you need them after the payment.
 
