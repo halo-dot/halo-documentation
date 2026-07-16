@@ -23,7 +23,6 @@ Open the *local.properties* file and insert _aws.accessKey_ and *aws.secretK
 These credentials are sensitive and should not be committed to source control. Your local.properties should look like this:
 
 ```properties
-sdk.dir=~/Library/Android/sdk
 aws.accessKey={{your_access_key}}
 aws.secretKey={{your_secret_key}}
 ```
