@@ -1,0 +1,88 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+Follow these steps to integrate the Halo UI SDK into your Android project.
+
+## 1. Configure Credentials
+
+To access the SDK, you will receive an AWS access key and secret key upon registration on the developer portal. These are sensitive credentials and should **not** be committed to source control.
+
+Add these to your `local.properties` file:
+
+```properties
+aws.accesskey=< PROVIDED IN EMAIL >
+aws.secretkey=< PROVIDED IN EMAIL >
+```
+
+## 2. Configure Repositories
+
+In your `settings.gradle.kts` (or `settings.gradle`), load the credentials and configure the S3-hosted Maven repository.
+
+<Tabs>
+<TabItem value="kotlin" label="Kotlin DSL">
+
+```kotlin
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootDir.resolve("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        // Repository where the Halo UI SDK is hosted
+        maven {
+            name = "releases"
+            url = uri("s3://synthesis-halo-artifacts/releases")
+            credentials(AwsCredentials::class) {
+                accessKey = localProperties.getProperty("aws.accesskey")
+                secretKey = localProperties.getProperty("aws.secretkey")
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## 3. Add Dependency
+
+Add the following to your module's `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.1")
+}
+```
+
+:::tip
+Replace `0.0.1` with the latest version available.
+:::
+
+Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.
+
+## 🛡️ Permissions
+
+The SDK's permissions are automatically merged into your app's manifest, and the required runtime permissions (camera, location, phone state, and Bluetooth on Android 12+) are requested automatically when `HaloSdkUi.init()` is called.
+
+| Permission | Purpose |
+|------------|---------|
+| `INTERNET` | Network communication with the Halo backend |
+| `NFC` | Reading payment cards |
+| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | Payment compliance (location verification) |
+| `CAMERA` | Device security verification |
+| `READ_PHONE_STATE` | Device identification |
+| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | External card reader support (Android 12+) |
+| `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | Feedback on card tap |

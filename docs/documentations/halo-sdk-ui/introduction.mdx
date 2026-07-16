@@ -1,0 +1,54 @@
+---
+sidebar_position: 1
+---
+
+# Introduction
+
+The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the transaction flow, card reading animations, and status reporting, so you can focus on your core business logic.
+
+## 🚀 Features
+
+- **Ready-to-use UI**: Fullscreen transaction flow including amount entry, card reading, and success/failure states.
+- **Theming**: Light mode, dark mode, custom colors, shapes, and company logo.
+- **Simple API**: Launch a transaction and receive the result via Kotlin Coroutines.
+- **Localization**: Built-in translations for English, Afrikaans, Zulu, French, German, Spanish, and Portuguese — follows the device language by default.
+
+## 📋 Prerequisites
+
+Before you begin, ensure your project meets the following requirements:
+
+- **Android 10.0 (API level 29)** or higher.
+- **Halo SDK Credentials**: A valid SDK token provided by Synthesis/Halo.
+- A `ComponentActivity` (or subclass such as `AppCompatActivity`) to host the SDK.
+
+:::info Activity Requirements
+The activity passed to `HDConfig` **must** be a `ComponentActivity` (or a subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
+:::
+
+### Example Activity Declaration
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDConfig
+import za.co.synthesis.halo.sdk_ui.models.HDMerchantDetails
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // Initialize SDK here
+        val config = HDConfig(
+            activity = this,
+            merchantDetails = HDMerchantDetails(
+                packageName = packageName,
+                packageVersion = BuildConfig.VERSION_NAME,
+                merchantName = "My App",
+            ),
+            onTokenRequest = { fetchTokenFromBackend() },
+        )
+        val success = HaloSdkUi.init(config)
+
+        // ... set your own content if needed
+    }
+}
+```

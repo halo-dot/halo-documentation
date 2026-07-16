@@ -1,0 +1,97 @@
+---
+sidebar_position: 4
+---
+
+# Usage
+
+The Halo UI SDK uses Kotlin Coroutines to provide a clean, asynchronous way to launch the UI and wait for a result.
+
+## Launching a Transaction
+
+`HaloSdkUi.launch` is a suspend function that opens the SDK UI and returns when the transaction completes.
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `amount` | `BigDecimal?` | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
+| `merchantRef` | `String?` | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
+| `currency` | `HDCurrency?` | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
+
+### 1. Direct Transaction Mode
+
+If the amount is known, the SDK skips the keypad and goes directly to the "Tap Card" screen.
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDCurrency
+import java.math.BigDecimal
+
+fun startPayment(amount: BigDecimal) {
+    lifecycleScope.launch {
+        val result = HaloSdkUi.launch(
+            amount = amount,
+            merchantRef = "REF-9921",
+            currency = HDCurrency.ZAR,
+        )
+        handleResult(result)
+    }
+}
+```
+
+### 2. Manual Amount Entry Mode
+
+If you pass `null` or zero for the amount, the SDK shows a keypad first where the user can enter the amount (and optionally a reference).
+
+```kotlin
+fun openKeypad() {
+    lifecycleScope.launch {
+        val result = HaloSdkUi.launch(
+            amount = null,
+            merchantRef = null,
+            currency = HDCurrency.ZAR,
+        )
+        handleResult(result)
+    }
+}
+```
+---
+
+## Handling Results
+
+The `launch` function returns a `HaloTransactionResult?` containing a `resultType`, transaction references, and (for completed transactions) a `receipt`.
+### Result Types
+
+Common result types:
+
+| Type | Description |
+|------|-------------|
+| `Approved` | Transaction was successful |
+| `Declined` | Payment was declined by the bank or issuer |
+| `Cancelled` | User closed the SDK before completion |
+| `CardTapTimeOutExpired` | Card was not tapped in time |
+| `NetworkError` / `ProcessingError` | A technical error occurred |
+
+### Implementation Example
+
+```kotlin
+import za.co.synthesis.halo.haloCommonInterface.HaloTransactionResult
+import za.co.synthesis.halo.haloCommonInterface.HaloTransactionResultType
+
+fun handleResult(result: HaloTransactionResult?) {
+    when (result?.resultType) {
+        HaloTransactionResultType.Approved -> {
+            println("Approved: ${result.merchantTransactionReference}")
+        }
+        HaloTransactionResultType.Declined -> {
+            println("Declined")
+        }
+        HaloTransactionResultType.Cancelled -> {
+            println("Cancelled by user")
+        }
+        else -> {
+            println("Transaction status: ${result?.resultType}")
+        }
+    }
+}
+```
