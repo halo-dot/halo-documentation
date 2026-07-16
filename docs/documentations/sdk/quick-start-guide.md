@@ -109,7 +109,7 @@ The details in the code snippet below will be used in the `IHaloCallbacks.onRequ
 ```kotlin
 # Config.kt
 object Config {
-  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}""".trimIndent()
+  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}"""
    // The iss claim that was provided when signing up on the developer portal
    const val ISSUER = "{{YOUR_ISSUER}}"
    const val MID = "{{MID}}"
