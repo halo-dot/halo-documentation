@@ -107,6 +107,7 @@ The public key pair is submitted when you register on the <a href="https://go.de
 The details in the code snippet below will be used in the `IHaloCallbacks.onRequestJWT` method (see below).
 
 ```kotlin
+# Config.kt
 object Config {
   const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}""".trimIndent()
    // The iss claim that was provided when signing up on the developer portal
@@ -117,7 +118,10 @@ object Config {
    const val AUD = "{{AUD}}"
    const val KSK = "{{KSK}}"
 }
+```
 
+```kotlin
+#JwtToken.kt
 class JwtToken {
   fun getJWT(callback: (String) -> Unit) {
     // Generate Private Key
