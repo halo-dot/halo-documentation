@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.93")
+    .package(id: "synthesis.halosdk", from: "1.0.94")
 
 ]
 ```
@@ -138,15 +138,35 @@ let result = await HaloSDK.startContactlessPayment(
 
     currency: "ZAR",
 
-    merchantReference: "order_12345"
+    merchantReference: "order_12345",
 
-    // type: .purchase (default) or .refund
+    passthroughFields: HaloPassthroughFields([
+        "streetAddress": "34 Melrose Boulevard Floor 1",
+        "city": "Johannesburg",
+        "stateProvince": "GP",
+        "countryCode": "ZA",
+        "installments": 3
+    ]),  // optional
+
+    type: .purchase  // use .refund for card-present refunds
 
 )
 
 ```
 
-This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
+This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes. Optional `passthroughFields` are covered in [Passthrough Fields](#passthrough-fields).
+
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `amountMinor` | `Int` | Yes | Amount in minor currency units (e.g. `1500` = 15.00) |
+| `currency` | `String` | Yes | ISO 4217 currency code (e.g. `"ZAR"`, `"USD"`) |
+| `merchantReference` | `String` | Yes | Your reference for this transaction (max 64 characters) |
+| `passthroughFields` | `HaloPassthroughFields?` | No | Opaque JSON forwarded to the backend — see [Passthrough Fields](#passthrough-fields) |
+| `type` | `HaloTransactionType` | No | `.purchase` (default) or `.refund` |
+
 
 ### 3. Handle the Result
 
@@ -1105,6 +1125,79 @@ case .declined(let errorCode, let errorMessage):
 - The card must be physically present — this isn't a "card-not-present" refund
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
+
+## Passthrough Fields
+
+Passthrough lets you attach **optional JSON** to an Apple Tap to Pay transaction — for example address or installments. Use only keys your payment processor documents and supports (this can include fields such as tip or pre-auth flags when your processor adds them). The SDK does not read or validate the keys; it forwards them to the Halo Dot backend and your payment processor.
+
+Passthrough fields are sent with the transaction request. They are **not** returned on `HaloPaymentResult` — keep your own copy if you need them after the payment.
+
+### API
+
+```swift
+@MainActor
+public static func startContactlessPayment(
+    amountMinor: Int,
+    currency: String,
+    merchantReference: String,
+    passthroughFields: HaloPassthroughFields? = nil,
+    type: HaloTransactionType = .purchase
+) async -> HaloPaymentResult
+```
+
+Create values with `HaloPassthroughFields`. The initializer returns `nil` when the dictionary cannot be encoded as JSON (for example if a value is not a JSON-compatible type).
+
+### Example
+
+Address and installments are sent together in one flat `passthroughFields` object:
+
+```swift
+guard let passthrough = HaloPassthroughFields([
+    "streetAddress": "34 Melrose Boulevard Floor 1",
+    "city": "Johannesburg",
+    "stateProvince": "GP",
+    "countryCode": "ZA",
+    "installments": 3
+]) else {
+    // Dictionary could not be encoded as JSON — fix values before starting payment
+    return
+}
+
+let result = await HaloSDK.startContactlessPayment(
+    amountMinor: 1500,
+    currency: "ZAR",
+    merchantReference: "order_12345",
+    passthroughFields: passthrough
+)
+```
+
+Equivalent JSON payload:
+
+```json
+{
+  "streetAddress": "34 Melrose Boulevard Floor 1",
+  "city": "Johannesburg",
+  "stateProvince": "GP",
+  "countryCode": "ZA",
+  "installments": 3
+}
+```
+
+Include only the keys your processor expects — omit unused keys such as `installments`.
+
+### Example keys
+
+Confirm supported keys with your processor integration. Common examples from Halo integrations:
+
+| Key | Example | Typical use |
+|-----|---------|-------------|
+| `streetAddress` | `"34 Melrose Boulevard Floor 1"` | Merchant / billing address line |
+| `city` | `"Johannesburg"` | City |
+| `stateProvince` | `"GP"` | State or province code |
+| `countryCode` | `"ZA"` | ISO country code |
+| `installments` | `3` | Installment purchase |
+
+The SDK does not enforce these — invalid or unknown keys are handled by the backend/processor.
 
 ## Security Validation
 
