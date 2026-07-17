@@ -23,7 +23,6 @@ Open the *local.properties* file and insert _aws.accessKey_ and *aws.secretK
 These credentials are sensitive and should not be committed to source control. Your local.properties should look like this:
 
 ```properties
-sdk.dir=~/Library/Android/sdk
 aws.accessKey={{your_access_key}}
 aws.secretKey={{your_secret_key}}
 ```
@@ -108,8 +107,9 @@ The public key pair is submitted when you register on the <a href="https://go.de
 The details in the code snippet below will be used in the `IHaloCallbacks.onRequestJWT` method (see below).
 
 ```kotlin
+# Config.kt
 object Config {
-  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}""".trimIndent()
+  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}"""
    // The iss claim that was provided when signing up on the developer portal
    const val ISSUER = "{{YOUR_ISSUER}}"
    const val MID = "{{MID}}"
@@ -118,7 +118,10 @@ object Config {
    const val AUD = "{{AUD}}"
    const val KSK = "{{KSK}}"
 }
+```
 
+```kotlin
+#JwtToken.kt
 class JwtToken {
   fun getJWT(callback: (String) -> Unit) {
     // Generate Private Key
