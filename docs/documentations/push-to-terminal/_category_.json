@@ -1,0 +1,8 @@
+{
+  "label": "Push to Terminal",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Send payment requests directly to a specific device via push notification instead of scanning QR codes."
+  }
+}
