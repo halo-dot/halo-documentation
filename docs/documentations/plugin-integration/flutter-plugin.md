@@ -398,6 +398,9 @@ class HaloCallbacks implements IHaloCallbacks {
   }
 }
 ```
+When `onRequestJWT` is invoked by the Halo Dot SDK, call the provided `callback` with your JWT, as shown above.
+
+The plugin allows up to 30 seconds for the callback to be invoked. If your JWT fetch (e.g. a network call to your backend) takes longer than that, or fails without calling the callback, the plugin will time out the request on your behalf so the SDK is not left waiting indefinitely.
 
 ### Initialize the SDK
 
@@ -432,6 +435,14 @@ Sdkflutterplugin.startTransaction(1.00, 'Some merchant reference', 'ZAR');
 ```
 
 From this point, UI messages and results will arrive via your callbacks. Use them to update your UI accordingly.
+
+ If your application also needs to use the camera (e.g. for QR/barcode scanning), you need to coordinate access with the SDK, since it uses the camera internally as part of its own monitoring. Call `requestCameraUsage()` before you open your own camera, and `returnCameraUsage()` once you're done with it:
+```dart
+await Sdkflutterplugin.requestCameraUsage();
+// ... open your camera, scan, etc ...
+await Sdkflutterplugin.returnCameraUsage();
+```
+If the SDK reclaims the camera while your app still has it in use, `onCameraControlLost` will be invoked on your `IHaloCallbacks` implementation.
 
 ## Documentation
 
