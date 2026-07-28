@@ -341,7 +341,7 @@ fun handleResult(result: HaloTransactionResult?) {
 
 ## Example Application
 
-See the [example app](example-app/) for a complete working integration.
+See the [#](example-app/) for a complete working integration.
 
 ## License
 
