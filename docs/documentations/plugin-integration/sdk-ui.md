@@ -339,10 +339,6 @@ fun handleResult(result: HaloTransactionResult?) {
 ```
 <hr/>
 
-## Example Application
-
-See the [#](example-app/) for a complete working integration.
-
 ## License
 
 Copyright © 2026 Halo Dot. All rights reserved.
