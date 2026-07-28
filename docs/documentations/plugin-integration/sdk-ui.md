@@ -8,7 +8,6 @@ sidebar_class_name: hidden
 [![Min SDK](https://img.shields.io/badge/minSDK-29-blue.svg)](https://android-arsenal.com/api?level=29)
 [![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-orange.svg)](https://developer.android.com/jetpack/compose)
 
-<hr/>
 The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the transaction flow, card reading animations, and status reporting, so you can focus on your core business logic.
 
 ## Features
@@ -93,6 +92,8 @@ The SDK's permissions are automatically merged into your app's manifest, and the
 | `READ_PHONE_STATE` | Device identification |
 | `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | External card reader support (Android 12+) |
 | `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | Feedback on card tap |
+
+<hr/>
 
 ## Configuration
 
