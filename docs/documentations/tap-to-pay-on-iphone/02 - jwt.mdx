@@ -130,7 +130,7 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "iss": "your company identifier",
   "sub": "Merchant ID",
   "usr": "user ID",
-  "aud": "JWT Audience", // prod or test DNS, eg  kernelserver.go.dev.haloplus.io"
+  "aud": "JWT Audience", // prod or test DNS, eg  HOST"
   "iat": 1707580800, // Created at
   "exp": 1707667200, // time of expiring in seconds
   "refresh_token": false,
@@ -269,17 +269,14 @@ app.post('/api/login', (req, res) => {
 
   // 2. Construct Payload
   const payload = {
-    iss: 'MyCompany',
-    sub: 'MCH-12345',
+    iss: 'YOUR_ISSUER',
+    sub: 'MERCHANT_ID',
     usr: username,
-    aud: 'kernelserver.go.dev.haloplus.io',
+    aud: 'HOST',
     iat: now,
     exp: now + 86400, // 24 hours
-    refresh_token: false,
-    'x-tid': 'TID-9999',
-    mcc: '5732',
-    mbn: 'My Store',
-    tpid: 'TPID-001'
+    aud_fingerprints: ['AUD'],
+    ksk_pin: 'KSK'
   };
 
   // 3. Sign JWT with RS256
@@ -321,17 +318,14 @@ def login(credentials: LoginRequest):
 
     # 2. Construct Payload
     payload = {
-        "iss": "MyCompany",
-        "sub": "MCH-12345",
+        "iss": "YOUR_ISSUER",
+        "sub": "MERCHANT_ID",
         "usr": credentials.username,
-        "aud": "kernelserver.go.dev.haloplus.io",
+        "aud": "HOST",
         "iat": now,
         "exp": now + 86400,
-        "refresh_token": False,
-        "x-tid": "TID-9999",
-        "mcc": "5732",
-        "mbn": "My Store",
-        "tpid": "TPID-001"
+        "tpid": "TPID-001","aud_fingerprints": ["AUD"],
+        "ksk_pin": "KSK"
     }
 
     # 3. Sign JWT using RS256
@@ -404,17 +398,14 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 2. Construct Claims
 	claims := jwt.MapClaims{
-		"iss":           "MyCompany",
-		"sub":           "MCH-12345",
+		"iss":           "YOUR_ISSUER",
+		"sub":           "MERCHANT_ID",
 		"usr":           req.Username,
-		"aud":           "kernelserver.go.dev.haloplus.io",
+		"aud":           "HOST",
 		"iat":           now.Unix(),
 		"exp":           now.Add(24 * time.Hour).Unix(),
-		"refresh_token": false,
-		"x-tid":         "TID-9999",
-		"mcc":           "5732",
-		"mbn":           "My Store",
-		"tpid":          "TPID-001",
+      "aud_fingerprints": []string{"AUD"},
+		"ksk_pin":          "KSK",
 	}
 
 	// 3. Sign Token with RS256
@@ -482,17 +473,14 @@ public class AuthController {
         Algorithm algorithm = Algorithm.RSA256(null, privateKey);
 
         String token = JWT.create()
-                .withIssuer("MyCompany")
-                .withSubject("MCH-12345")
+                .withIssuer("YOUR_ISSUER")
+                .withSubject("MERCHANT_ID")
                 .withClaim("usr", username)
-                .withAudience("kernelserver.go.dev.haloplus.io")
+                .withAudience("HOST")
                 .withIssuedAt(now)
                 .withExpiresAt(now.plusSeconds(86400))
-                .withClaim("refresh_token", false)
-                .withClaim("x-tid", "TID-9999")
-                .withClaim("mcc", "5732")
-                .withClaim("mbn", "My Store")
-                .withClaim("tpid", "TPID-001")
+                .withArrayClaim("aud_fingerprints", new String[]{"a1b2c3d4e5f67890"})
+                .withClaim("ksk_pin", "123456")
                 .sign(algorithm);
 
         return ResponseEntity.ok(Map.of("access_token", token, "token_type", "Bearer"));
@@ -554,17 +542,14 @@ fun main() {
 
                 val now = Instant.now()
                 val token = JWT.create()
-                    .withIssuer("MyCompany")
-                    .withSubject("MCH-12345")
+                    .withIssuer("YOUR_ISSUER")
+                    .withSubject("MERCHANT_ID")
                     .withClaim("usr", req.username)
-                    .withAudience("kernelserver.go.dev.haloplus.io")
+                    .withAudience("HOST")
                     .withIssuedAt(now)
                     .withExpiresAt(now.plusSeconds(86400))
-                    .withClaim("refresh_token", false)
-                    .withClaim("x-tid", "TID-9999")
-                    .withClaim("mcc", "5732")
-                    .withClaim("mbn", "My Store")
-                    .withClaim("tpid", "TPID-001")
+                    .withArrayClaim("aud_fingerprints", arrayOf("AUD"))
+                    .withClaim("ksk_pin", "KSK")
                     .sign(algorithm)
 
                 call.respond(TokenResponse(access_token = token, token_type = "Bearer"))
@@ -612,17 +597,14 @@ $now = time();
 
 // 2. Build Payload
 $payload = [
-    "iss" => "MyCompany",
-    "sub" => "MCH-12345",
+    "iss" => "YOUR_ISSUER",
+    "sub" => "MERCHANT_ID",
     "usr" => $username,
-    "aud" => "kernelserver.go.dev.haloplus.io",
+    "aud" => "HOST",
     "iat" => $now,
     "exp" => $now + 86400,
-    "refresh_token" => false,
-    "x-tid" => "TID-9999",
-    "mcc" => "5732",
-    "mbn" => "My Store",
-    "tpid" => "TPID-001"
+    "aud_fingerprints" => ["AUD"],
+    "ksk_pin" => "KSK"
 ];
 
 // 3. Sign JWT
@@ -663,17 +645,14 @@ app.MapPost("/api/login", (LoginRequest req) =>
     // 2. Build Claims
     var payload = new JwtPayload
     {
-        { "iss", "MyCompany" },
-        { "sub", "MCH-12345" },
+        { "iss", "YOUR_ISSUER" },
+        { "sub", "MERCHANT_ID" },
         { "usr", req.Username },
-        { "aud", "kernelserver.go.dev.haloplus.io" },
+        { "aud", "HOST" },
         { "iat", new DateTimeOffset(now).ToUnixTimeSeconds() },
         { "exp", new DateTimeOffset(now.AddDays(1)).ToUnixTimeSeconds() },
-        { "refresh_token", false },
-        { "x-tid", "TID-9999" },
-        { "mcc", "5732" },
-        { "mbn", "My Store" },
-        { "tpid", "TPID-001" }
+        { "aud_fingerprints", new[] { "AUD" } },
+        { "ksk_pin", "KSK" }
     };
 
     var header = new JwtHeader(credentials);
@@ -720,17 +699,14 @@ post '/api/login' do
 
   # 2. Build Payload
   payload = {
-    iss: 'MyCompany',
-    sub: 'MCH-12345',
+    iss: 'YOUR_ISSUER',
+    sub: 'MERCHANT_ID',
     usr: username,
-    aud: 'kernelserver.go.dev.haloplus.io',
+    aud: 'HOST',
     iat: now,
     exp: now + 86400,
-    refresh_token: false,
-    'x-tid' => 'TID-9999',
-    mcc: '5732',
-    mbn: 'My Store',
-    tpid: 'TPID-001'
+    aud_fingerprints: ['AUD'],
+    ksk_pin: 'KSK'
   }
 
   # 3. Sign Token using RS256
@@ -765,17 +741,14 @@ def login():
 
     # 2. Build Payload
     payload = {
-        "iss": "MyCompany",
-        "sub": "MCH-12345",
+        "iss": "YOUR_ISSUER",
+        "sub": "MERCHANT_ID",
         "usr": username,
-        "aud": "kernelserver.go.dev.haloplus.io",
+        "aud": "HOST",
         "iat": datetime.utcnow(),
         "exp": datetime.utcnow() + timedelta(days=1),
-        "refresh_token": False,
-        "x-tid": "TID-9999",
-        "mcc": "5732",
-        "mbn": "My Store",
-        "tpid": "TPID-001"
+        "aud_fingerprints": ["AUD"],
+        "ksk_pin": "KSK"
     }
 
     # 3. Sign JWT
