@@ -33,7 +33,7 @@ A production-focused guide to integrating the <a href="https://docs.halodot.io/d
   - [Testing](#testing)
   - [FAQ / Troubleshooting](#faq--troubleshooting)
 
-<hr />
+<hr/>
 
 ## Overview
 
@@ -63,7 +63,7 @@ You’ll need the following to integrate the Halo Dot SDK:
 > - `compileSdkVersion`: **34** or higher
 > - `targetSdkVersion`: **34** or higher
 
-<hr />
+<hr/>
 ## Developer Portal Registration
 
 You are required to register on our QA (UAT — User Acceptance Testing) environment before testing in production.
@@ -92,7 +92,7 @@ The developer portal enables you to obtain the following:
 
    <img src="https://static.dev.haloplus.io/static/mpos/readme/assets/access_key.png" alt="access key." width="450" />
 
-<hr />
+<hr/>
 
 ## Getting Started
 
