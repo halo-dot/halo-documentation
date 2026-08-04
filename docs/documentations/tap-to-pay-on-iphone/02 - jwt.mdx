@@ -23,8 +23,6 @@ Our authentication system uses **RS256 (RSA-SHA256)** algorithm for JWT token si
 
 This ensures that only you can create valid tokens, but our backend can verify their authenticity.
 
----
-
 ## Step 1: Generate RSA Key Pair
 
 You need to generate a 2048-bit RSA key pair. This can be done using OpenSSL, which is available on most systems.
@@ -61,8 +59,6 @@ openssl rsa -in jwt_private_key.pem -pubout -out jwt_public_key.pem
 -----END PUBLIC KEY-----
 ```
 
----
-
 ## Step 2: Share Public Key with Backend
 
 You must provide your **public key** to our backend team so we can verify your JWT tokens.
@@ -97,8 +93,6 @@ You must provide your **public key** to our backend team so we can verify your J
 - You will receive a confirmation email once your public key is registered
 - Different environments (dev/qa/production) require separate key pairs
 
----
-
 ## Step 3: JWT Libraries for Your Technology Stack
 
 You'll need a JWT library that supports RS256 (RSA-SHA256) signing. Most programming languages have well-maintained JWT libraries:
@@ -115,8 +109,6 @@ You'll need a JWT library that supports RS256 (RSA-SHA256) signing. Most program
 - **Rust**: `jsonwebtoken`
 
 Choose the library that's most commonly used in your technology stack and ensure it supports the RS256 algorithm.
-
----
 
 ## Step 4: JWT Payload Structure
 
@@ -192,8 +184,6 @@ curl --location --request POST 'https://kernelserver.qa.haloplus.io/tokens/check
 --data ''
 ```
 
----
-
 ## Step 5: Generate and Use Tokens
 
 ### Token Generation Process
@@ -224,8 +214,6 @@ do {
     // Handle other errors
 }
 ```
-
----
 
 ## Security Best Practices
 
@@ -276,6 +264,7 @@ do {
    - Expired tokens will be rejected
    - Malformed tokens will be rejected
 
+<hr/>
 
 ## Backend Server examples
 
@@ -322,7 +311,8 @@ app.post('/api/login', (req, res) => {
 });
 
 app.listen(3000, () => console.log('Node.js Auth Server running on port 3000'));
-  ```    
+  ```
+
   </TabItem>
   <TabItem value="python" label="Python" default>
 ```python
@@ -374,6 +364,7 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
   </TabItem>
+
   <TabItem value="Golang" label="Golang" default>
 ```go
 package main
@@ -467,6 +458,7 @@ func main() {
 
 ```
   </TabItem>
+
   <TabItem value="Java" label="Java" default>
 ```java
 package com.example.jwtserver;
@@ -535,8 +527,9 @@ public class AuthController {
 }
 ```
   </TabItem>
+
   <TabItem value="Kotlin" label="ktor" default>
-```go
+```kotlin
 package com.example
 
 import com.auth0.jwt.JWT
@@ -605,6 +598,7 @@ private fun loadPrivateKey(path: String): RSAPrivateKey {
 }
 ```
   </TabItem>
+
   <TabItem value="PHP" label="PHP" default>
 ```php
 <?php
@@ -652,6 +646,7 @@ echo json_encode([
 ]);
 ```
   </TabItem>
+
   <TabItem value=".Net" label="C#/.Net" default>
 ```csharp
 using System.IdentityModel.Tokens.Jwt;
@@ -706,8 +701,9 @@ app.Run();
 record LoginRequest(string Username, string Password);
 ```
   </TabItem>
+
   <TabItem value="Ruby" label="Ruby" default>
-```Ruby
+```ruby
 require 'sinatra'
 require 'jwt'
 require 'json'
