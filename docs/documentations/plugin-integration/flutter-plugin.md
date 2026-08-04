@@ -18,10 +18,7 @@ A production-focused guide to integrating the <a href="https://docs.halodot.io/d
     - [Environment](#environment)
     - [Plugin Installation](#plugin-installation)
   - [Mobile Backend Requirements](#mobile-backend-requirements)
-    - [JWT](#jwt)
-    - [JWT Lifetime](#jwt-lifetime)
-    - [JWT Signing Public Key Format](#jwt-signing-public-key-format)
-    - [JWT Claims](#jwt-claims)
+    - [JWT Generation.](#jwt-generation)
   - [Usage in Your Flutter App](#usage-in-your-flutter-app)
     - [Android Permissions](#android-permissions)
     - [Requesting Runtime Permissions](#requesting-runtime-permissions)
@@ -163,99 +160,13 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
 
 ## Mobile Backend Requirements
 
-### JWT
+### JWT Generation.
 
-All calls to the Halo SDK require a **valid JWT**. <br />
-The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). <br />
-We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
+All calls to the Halo SDK require a valid JWT. 
 
-Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation).
+To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-**`config.dart`**
-
-Add the following to the `config.dart`.
-
-> Note: The details below are obtained from the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">**Developer Portal**</a>.
-
-```dart
-class Config {
-  static const String privateKeyPem = String.fromEnvironment('PRIVATE_KEY', defaultValue: '');
-  static const String issuer = '{{YOUR_ISSUER}}';
-  static const String username = '{{YOUR_USERNAME}}';
-  static const String merchantId = '{{MID}}';
-  static const String host = '{{HOST}}';
-  static const String aud = '{{AUD}}';
-  static const String ksk = '{{KSK}}';
-}
-```
-
-**`jwt_token.dart`**
-
-Add the following to the `jwt_token.dart` file:
-
-```dart
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import './config.dart';
-
-class JwtToken {
-  static String getJwt() {
-    final jwt = JWT(
-      {
-        'aud_fingerprints': Config.aud,
-        'ksk_pin': Config.ksk,
-        'usr': Config.username,
-      },
-      audience: Audience([Config.host]),
-      issuer: Config.issuer,
-      subject: Config.merchantId,
-    );
-
-    final key = RSAPrivateKey(Config.privateKeyPem);
-    // IMPORTANT: Use the algorithm configured for your tenant in the Developer Portal.
-    // Example shows RS512; some environments may require RS256.
-    final token = jwt.sign(key, algorithm: JWTAlgorithm.RS512);
-    return token;
-  }
-}
-```
-
-> **Security**
->
-> - Do **not** commit the private key to your repo. Use secure configuration (env vars, secret managers).
-> - Provide the JWT via the SDK callback `onRequestJWT`.
-
-### JWT Lifetime
-
-Keep JWT lifetimes **short** to minimize risk. A lifetime of **15 minutes** is recommended.
-
-### JWT Signing Public Key Format
-
-Publish the JWT public key as a **certificate** in a text‑friendly format (e.g., **Base64‑encoded PEM** `.crt`/`.pem`).
-
-### JWT Claims
-
-The JWT must include the following (standard unless noted):
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `alg` | String | RSA algorithm used for signing (e.g., **RS256** or **RS512**). Follow the value configured for your environment to maintain non‑repudiation. |
-| `sub` | String | Payment Processor Merchant‑User ID or Application ID. |
-| `iss` | String | Unique identifier for the JWT issuer (as configured by Synthesis/Halo). Retrieve from the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">**Developer Portal**</a>. |
-| `aud` | String | URL of the Halo server TLS endpoint (environment‑specific, e.g. `kernelserver.qa.haloplus.io`). |
-| `usr` | String | Username of the user performing the transaction. |
-| `iat` | NumericDate | UTC issuance timestamp. |
-| `exp` | NumericDate | UTC expiration timestamp. |
-| `aud_fingerprints` | String | CSV of expected SHA‑256 fingerprints for the Kernel Server TLS endpoint (supports rotation). |
-
-To validate values, POST to:
-
-```curl
-curl --location --request POST 'https://kernelserver.qa.haloplus.io/tokens/checkjwt' \
---header 'Authorization: Bearer {{JWT_TOKEN}}' \
---data ''
-```
-
-with **Bearer** auth.
+Refer to the **[JWT Integration Guide](../sdk/04%20-%20jwt.mdx)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
 ## Usage in Your Flutter App
 

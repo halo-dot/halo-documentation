@@ -100,64 +100,12 @@ You will need to setup the following before using the SDK:
 
 ##### JWT Generation.
 
-All calls to the Halo SDK require a valid JWT.<br/>
-You will need to generate the JWT using your private key.<br/>
-The public key pair is submitted when you register on the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a> and we will validate the JWT with this public key.
+All calls to the Halo SDK require a valid JWT. 
 
-The details in the code snippet below will be used in the `IHaloCallbacks.onRequestJWT` method (see below).
+To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-```kotlin
-# Config.kt
-object Config {
-  const val PRIVATE_KEY_PEM = """{{YOUR_PRIVATE_KEY_PEM}}"""
-   // The iss claim that was provided when signing up on the developer portal
-   const val ISSUER = "{{YOUR_ISSUER}}"
-   const val MID = "{{MID}}"
-   const val USERNAME = "{{YOUR_USERNAME}}"
-   const val HOST = "{{HOST}}"
-   const val AUD = "{{AUD}}"
-   const val KSK = "{{KSK}}"
-}
-```
+Refer to the **[JWT Integration Guide](./04%20-%20jwt.mdx)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
-```kotlin
-#JwtToken.kt
-class JwtToken {
-  fun getJWT(callback: (String) -> Unit) {
-    // Generate Private Key
-    val privateKey = KeyFactory.getInstance("RSA").generatePrivate(
-        PKCS8EncodedKeySpec(Base64.decode(extractPrivateKey(Config.PRIVATE_KEY_PEM), Base64.DEFAULT))
-    )
-
-    // Create JWT token
-    val jwt = JWT
-      .create()
-      .withAudience(Config.HOST)
-      .withIssuer(Config.ISSUER)
-      .withSubject(Config.MID)
-      .withClaim("aud_fingerprints", Config.AUD)
-      .withClaim("ksk_pin", Config.KSK)
-      .withClaim("usr", Config.USERNAME)
-      .withIssuedAt(Date())
-      .withExpiresAt(Date(System.currentTimeMillis() + 15 * 60 * 1000))
-      .sign(Algorithm.RSA256(null, privateKey as RSAPrivateKey))
-    callback(jwt)
-  }
-
-  private fun extractPrivateKey(privateKey: String): String {
-    val beginMarker = "-----BEGIN PRIVATE KEY-----"
-    val endMarker = "-----END PRIVATE KEY-----"
-    val startIndex = privateKey.indexOf(beginMarker)
-    val endIndex = privateKey.indexOf(endMarker)
-
-    return if (startIndex != -1 && endIndex != -1) {
-        privateKey.substring(startIndex + beginMarker.length, endIndex).trim()
-    } else {
-        privateKey
-    }
-  }
-}
-```
 
 ##### Permission requirements.
 
@@ -301,8 +249,15 @@ class HaloCallbacks(private val activity: MainActivity) : IHaloCallbacks() {
     Log.d(TAG, "onInitializationResult - $result")
   }
 
+  // Fetch JWT from your backend server [see how to generate a JWT](./04%20-%20jwt.mdx)
   override fun onRequestJWT(callback: (String) -> Unit) {
-    JwtToken().getJWT(callback)
+      fetchJwtFromBackend { token ->
+          if (token != null) {
+              callback(token)
+          } else {
+              Log.e(TAG, "Failed to retrieve JWT from backend server")
+          }
+      }
   }
 
   override fun onSecurityError(errorCode: HaloErrorCode) {

@@ -10,7 +10,7 @@ tags:
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# JWT Integration Guide
+# JWT Integration Guide.
 
 This guide explains how clients can generate JWT tokens for authentication with our backend system using the **RS256 (RSA-SHA256)** algorithm for JWT signing.
 
@@ -77,6 +77,7 @@ You must provide your **public key** to our backend team so we can verify your J
 
 2. **Send via secure channel**:
    - Support ticket with subject: "JWT Public Key Submission - [Your Company Name]"
+   - Use the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** to submit your public key.
 
 3. **Include the following information**:
    ```
@@ -133,13 +134,38 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "aud": "JWT Audience", // prod or test DNS, eg  HOST"
   "iat": 1707580800, // Created at
   "exp": 1707667200, // time of expiring in seconds
-  "refresh_token": false,
-  "x-tid": "Terminal ID",
-  "mcc": "Merchant Category Code",
-  "mbn": "Your Business Name",
-  "tpid": "Transaction Provider ID"
+  "aud_fingerprints": "Public key hash", # android only
+  "ksk_pin": "ksk", # android only
+  "refresh_token": false, # ios only
+  "x-tid": "Terminal ID", # ios only
+  "mcc": "Merchant Category Code", # ios only
+  "mbn": "Your Business Name", # ios only
+  "tpid": "Transaction Provider ID" # ios only
 }
 ```
+
+#### JWT Claims
+
+The JWT must make a number of claims - all of them standard except for `aud_fingerprints` (Audience Fingerprints).
+
+| Field | Type        | Note                                                                                                                                                                                                                  |
+|-------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| alg   | String      | The signing algorithm is RSA signed SHA-256 hash, aliased as RS256. An asymmetric encryption (signing) scheme is required to allow the Kernel Server to be able to validate the token without being able to generate it. |
+| sub   | String      | The Payment Processor Merchant-User ID, or Application ID                                                                                                                                                             |
+| iss   | String      | This is a unique (from the perspective of Halo server) identifier for the JWT issuer, agreed upon by the JWT issuer and Synthesis, and configured in advance by Synthesis in the Halo server.                         |
+| aud   | String      | URL of Halo server TLS endpoint, e.g. 'kernelserver.qa.haloplus.io'. This value should be obtained from Synthesis (different per environment) e.g. for QA it would be 'kernelserver.qa.haloplus.io' and for DEV 'kernelserver.za.dev.haloplus.io' |
+| usr   | String      | The details of the user performing the transaction, typically the username used to sign into the Halo.Go Developer Portal.                                                                                            |
+| iat   | NumericDate | The UTC timestamp of when the JWT was generated.                                                                                                                                                                      |
+| exp   | NumericDate | The UTC timestamp of expiration of the JWT.                                                                                                                                                                           |
+| aud_fingerprints | String | Optional (ANDROID Only). A CSV list of expected SHA-256 fingerprints for the Kernel Server TLS endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writing this would be: "sha256/zc6c97JhKPZUa+rIrVqjknDE1lDcDK77G41sDo+1ay0=" |
+| ksk_pin | String | Optional (ANDROID Only). SHA-256 fingerprint of the KSK used to sign this JWT. |
+| refresh_token | boolean | Optional (IOS Only). Whether this JWT is a refresh token. |
+| x-tid | String      | Optional (IOS Only). The Terminal ID. |
+| mcc   | String      | Optional (IOS Only). The Merchant Category Code. |
+| mbn   | String      | Optional (IOS Only). The Merchant Business Name. |
+| tpid  | String      | Optional (IOS Only). The Transaction Provider ID. |
+| spCfg | String      | Optional. The name of a [SoftPOS Terminal Configuration profile](../api-docs/terminal-config) to be used for this user. If provided, the given profile will be combined with the terminal configuration returned by the server. |
+
 
 ### Implementation Requirements
 
@@ -155,6 +181,16 @@ Your JWT token must include the following claims in the payload. Use your JWT li
 - All timestamps (`iat`, `exp`) must be Unix timestamps (seconds, not milliseconds)
 - The `sub` and `usr` fields must always be available or have the same value
 - Remove any fields that are `null` or `undefined` before signing
+
+#### To validate JWT
+
+To validate values, POST to:
+
+```curl
+curl --location --request POST 'https://kernelserver.qa.haloplus.io/tokens/checkjwt' \
+--header 'Authorization: Bearer {{JWT_TOKEN}}' \
+--data ''
+```
 
 ---
 
@@ -617,7 +653,7 @@ echo json_encode([
 ```
   </TabItem>
   <TabItem value=".Net" label="C#/.Net" default>
-```C#
+```csharp
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
@@ -714,57 +750,6 @@ post '/api/login' do
 
   { access_token: token, token_type: 'Bearer' }.to_json
 end
-```
-  </TabItem>
-  <TabItem value="Python" label="Python" default>
-```python
-from flask import Flask, request, jsonify
-import jwt
-from datetime import datetime, timedelta
-import rsa
-
-app = Flask(__name__)
-
-# Load Private Key
-with open("jwt_private_key.pem", "rb") as f:
-    private_key = rsa.PrivateKey.load_pkcs8(f.read(), None)
-
-@app.post("/api/login")
-def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-
-    # 1. Authenticate
-    if username != "admin" or password != "secret123":
-        return jsonify({"error": "Invalid credentials"}), 401
-
-    # 2. Build Payload
-    payload = {
-        "iss": "YOUR_ISSUER",
-        "sub": "MERCHANT_ID",
-        "usr": username,
-        "aud": "HOST",
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(days=1),
-        "aud_fingerprints": ["AUD"],
-        "ksk_pin": "KSK"
-    }
-
-    # 3. Sign JWT
-    token = jwt.encode(
-        payload,
-        private_key,
-        algorithm="RS256"
-    )
-
-    return jsonify({
-        "access_token": token,
-        "token_type": "Bearer"
-    })
-
-if __name__ == "__main__":
-    app.run(port=5000)
 ```
   </TabItem>
 </Tabs>
