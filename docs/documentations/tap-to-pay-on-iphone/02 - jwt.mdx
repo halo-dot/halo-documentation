@@ -1,0 +1,770 @@
+---
+id: jwt
+title: JSON Web Token (JWT)
+tags:
+  - sdk
+  - guides
+  - tap to pay on iphone
+  - iphone
+---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# JWT Integration Guide
+
+This guide explains how clients can generate JWT tokens for authentication with our backend system using the **RS256 (RSA-SHA256)** algorithm for JWT signing.
+
+## Overview
+
+Our authentication system uses **RS256 (RSA-SHA256)** algorithm for JWT token signing. This is an asymmetric encryption method where:
+
+- **Private Key**: Kept secret by the client, used to sign JWT tokens
+- **Public Key**: Shared with our backend, used to verify JWT token signatures
+
+This ensures that only you can create valid tokens, but our backend can verify their authenticity.
+
+---
+
+## Step 1: Generate RSA Key Pair
+
+You need to generate a 2048-bit RSA key pair. This can be done using OpenSSL, which is available on most systems.
+
+### Using OpenSSL (Recommended)
+
+#### Option A: Generate Both Keys at Once
+
+```bash
+# Generate private key (2048-bit RSA)
+openssl genrsa -out jwt_private_key.pem 2048
+
+# Extract public key from private key
+openssl rsa -in jwt_private_key.pem -pubout -out jwt_public_key.pem
+```
+
+### Expected Output Format
+
+**Private Key** (`jwt_private_key.pem`):
+
+```
+-----BEGIN PRIVATE KEY-----
+**********
+...
+-----END PRIVATE KEY-----
+```
+
+**Public Key** (`jwt_public_key.pem`):
+
+```
+-----BEGIN PUBLIC KEY-----
+**********
+...
+-----END PUBLIC KEY-----
+```
+
+---
+
+## Step 2: Share Public Key with Backend
+
+You must provide your **public key** to our backend team so we can verify your JWT tokens.
+
+### How to Send the Public Key
+
+1. **Copy the entire public key** including the header and footer:
+
+   ```bash
+   cat jwt_public_key.pem
+   ```
+
+2. **Send via secure channel**:
+   - Support ticket with subject: "JWT Public Key Submission - [Your Company Name]"
+
+3. **Include the following information**:
+   ```
+   Company Name: [Your Company Name]
+   Environment:
+
+   Public Key:
+   -----BEGIN PUBLIC KEY-----
+   [Your public key content here]
+   -----END PUBLIC KEY-----
+   ```
+
+### Important Notes
+
+- **NEVER share your private key** with anyone, including our backend team
+- The public key is safe to share and will be stored in our system
+- You will receive a confirmation email once your public key is registered
+- Different environments (dev/qa/production) require separate key pairs
+
+---
+
+## Step 3: JWT Libraries for Your Technology Stack
+
+You'll need a JWT library that supports RS256 (RSA-SHA256) signing. Most programming languages have well-maintained JWT libraries:
+
+### Popular JWT Libraries
+
+- **Node.js**: `jsonwebtoken`, `jose`
+- **Python**: `PyJWT`, `python-jose`
+- **Java**: `jjwt`, `java-jwt`
+- **Go**: `golang-jwt/jwt`, `go-jose`
+- **PHP**: `firebase/php-jwt`, `lcobucci/jwt`
+- **.NET/C#**: `System.IdentityModel.Tokens.Jwt`, `jose-jwt`
+- **Ruby**: `ruby-jwt`
+- **Rust**: `jsonwebtoken`
+
+Choose the library that's most commonly used in your technology stack and ensure it supports the RS256 algorithm.
+
+---
+
+## Step 4: JWT Payload Structure
+
+Your JWT token must include the following claims in the payload. Use your JWT library to create and sign a token with this structure:
+
+> For generic API authentication header formats (API keys and bearer tokens), see the **[API Docs - Authentication](/docs/documentations/api-docs/authentication)** page.
+
+### Required Claims
+
+```jsonc
+{
+  "iss": "your company identifier",
+  "sub": "Merchant ID",
+  "usr": "user ID",
+  "aud": "JWT Audience", // prod or test DNS, eg  HOST"
+  "iat": 1707580800, // Created at
+  "exp": 1707667200, // time of expiring in seconds
+  "refresh_token": false,
+  "x-tid": "Terminal ID",
+  "mcc": "Merchant Category Code",
+  "mbn": "Your Business Name",
+  "tpid": "Transaction Provider ID"
+}
+```
+
+### Implementation Requirements
+
+1. **Load your private key** from the PEM file you generated in Step 1
+2. **Create the payload** with the required claims (see table in Appendix)
+3. **Sign the token** using the **RS256 algorithm** with your private key
+4. **Set expiration**: Use Unix timestamp format (seconds since epoch)
+
+### Critical Points
+
+- Algorithm MUST be **RS256** (RSA-SHA256)
+- Token header should be: `{"alg": "RS256", "typ": "JWT"}`
+- All timestamps (`iat`, `exp`) must be Unix timestamps (seconds, not milliseconds)
+- The `sub` and `usr` fields must always be available or have the same value
+- Remove any fields that are `null` or `undefined` before signing
+
+---
+
+## Step 5: Generate and Use Tokens
+
+### Token Generation Process
+
+1. **Load your private key** from the secure location where you stored it
+2. **Construct the payload** with all required claims
+3. **Use your JWT library** to sign the payload with RS256 algorithm
+4. **The library will automatically**:
+   - Create the JWT header
+   - Encode the payload
+   - Sign with your private key
+   - Return a complete JWT token in format: `header.payload.signature`
+
+### Use Token when calling the SDK
+
+Include the JWT token in the initialisation message to the SDK:
+
+```swift
+do {
+    let capabilities = try HaloSDK.initialize(
+        authToken: "your_auth_token",
+        environment: .sandbox
+    )
+    print("Device can accept payments: \(capabilities.canAcceptPayments)")
+} catch HaloError.deviceNotSupported(let reason) {
+    // Handle unsupported device
+} catch {
+    // Handle other errors
+}
+```
+
+---
+
+## Security Best Practices
+
+### Private Key Security
+
+1. **Never commit private keys to version control**
+
+   ```bash
+   # Add to .gitignore
+   echo "jwt_private_key.pem" >> .gitignore
+   echo "*.pem" >> .gitignore
+   echo "*.key" >> .gitignore
+   ```
+
+2. **Use environment variables** for production:
+
+   ```javascript
+   // Instead of reading from file in production
+   const privateKey = process.env.JWT_PRIVATE_KEY;
+   ```
+
+3. **Restrict file permissions**:
+
+   ```bash
+   chmod 600 jwt_private_key.pem
+   ```
+
+4. **Store securely**:
+   - Use secret management services (AWS Secrets Manager, HashiCorp Vault, etc.)
+   - Encrypt at rest
+   - Never share via email/Slack/unsecured channels
+
+### Token Security
+
+1. **Set appropriate expiration times**:
+   - Never use tokens that don't expire
+
+2. **Use HTTPS only**:
+   - Never send tokens over unencrypted HTTP
+   - Always use TLS/SSL for API communication
+
+3. **Implement token refresh**:
+   - Use refresh tokens for long-lived sessions
+   - Rotate tokens regularly
+
+4. **Validate on backend**:
+   - Our backend will verify the signature using your public key
+   - Expired tokens will be rejected
+   - Malformed tokens will be rejected
+
+
+## Backend Server examples
+
+<Tabs>
+  <TabItem value="node" label="Node.js" default>
+```javascript
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+
+// Load RS256 Private Key
+const PRIVATE_KEY = fs.readFileSync(path.join(__dirname, 'jwt_private_key.pem'), 'utf8');
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // 1. Authenticate user (replace with database lookup)
+  if (username !== 'admin' || password !== 'secret123') {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+
+  // 2. Construct Payload
+  const payload = {
+    iss: 'YOUR_ISSUER',
+    sub: 'MERCHANT_ID',
+    usr: username,
+    aud: 'HOST',
+    iat: now,
+    exp: now + 86400, // 24 hours
+    aud_fingerprints: ['AUD'],
+    ksk_pin: 'KSK'
+  };
+
+  // 3. Sign JWT with RS256
+  const token = jwt.sign(payload, PRIVATE_KEY, { algorithm: 'RS256' });
+
+  return res.json({ access_token: token, token_type: 'Bearer' });
+});
+
+app.listen(3000, () => console.log('Node.js Auth Server running on port 3000'));
+  ```    
+  </TabItem>
+  <TabItem value="python" label="Python" default>
+```python
+import time
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel
+import jwt
+
+app = FastAPI()
+
+# Load Private Key
+with open("jwt_private_key.pem", "rb") as key_file:
+    PRIVATE_KEY = key_file.read()
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/login")
+def login(credentials: LoginRequest):
+    # 1. Authenticate user
+    if credentials.username != "admin" or credentials.password != "secret123":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    now = int(time.time())
+
+    # 2. Construct Payload
+    payload = {
+        "iss": "YOUR_ISSUER",
+        "sub": "MERCHANT_ID",
+        "usr": credentials.username,
+        "aud": "HOST",
+        "iat": now,
+        "exp": now + 86400,
+        "tpid": "TPID-001","aud_fingerprints": ["AUD"],
+        "ksk_pin": "KSK"
+    }
+
+    # 3. Sign JWT using RS256
+    token = jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
+
+    return {"access_token": token, "token_type": "Bearer"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+  </TabItem>
+  <TabItem value="Golang" label="Golang" default>
+```go
+package main
+
+import (
+	"crypto/rsa"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var privateKey *rsa.PrivateKey
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type TokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+}
+
+func init() {
+	keyData, err := os.ReadFile("jwt_private_key.pem")
+	if err != nil {
+		panic("Failed to read private key file: " + err.Error())
+	}
+	privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(keyData)
+	if err != nil {
+		panic("Failed to parse RSA private key: " + err.Error())
+	}
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Authenticate user
+	if req.Username != "admin" || req.Password != "secret123" {
+		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		return
+	}
+
+	now := time.Now()
+
+	// 2. Construct Claims
+	claims := jwt.MapClaims{
+		"iss":           "YOUR_ISSUER",
+		"sub":           "MERCHANT_ID",
+		"usr":           req.Username,
+		"aud":           "HOST",
+		"iat":           now.Unix(),
+		"exp":           now.Add(24 * time.Hour).Unix(),
+      "aud_fingerprints": []string{"AUD"},
+		"ksk_pin":          "KSK",
+	}
+
+	// 3. Sign Token with RS256
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, err := token.SignedString(privateKey)
+	if err != nil {
+		http.Error(w, "Error generating token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(TokenResponse{
+		AccessToken: tokenString,
+		TokenType:   "Bearer",
+	})
+}
+
+func main() {
+	http.HandleFunc("/api/login", loginHandler)
+	fmt.Println("Go Auth Server running on port 8080...")
+	http.ListenAndServe(":8080", nil)
+}
+
+```
+  </TabItem>
+  <TabItem value="Java" label="Java" default>
+```java
+package com.example.jwtserver;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class AuthController {
+
+    private final RSAPrivateKey privateKey;
+
+    public AuthController() throws Exception {
+        this.privateKey = loadPrivateKey("jwt_private_key.pem");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String password = body.get("password");
+
+        if (!"admin".equals(username) || !"secret123".equals(password)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
+        Instant now = Instant.now();
+        Algorithm algorithm = Algorithm.RSA256(null, privateKey);
+
+        String token = JWT.create()
+                .withIssuer("YOUR_ISSUER")
+                .withSubject("MERCHANT_ID")
+                .withClaim("usr", username)
+                .withAudience("HOST")
+                .withIssuedAt(now)
+                .withExpiresAt(now.plusSeconds(86400))
+                .withArrayClaim("aud_fingerprints", new String[]{"AUD"})
+                .withClaim("ksk_pin", "KSK")
+                .sign(algorithm);
+
+        return ResponseEntity.ok(Map.of("access_token", token, "token_type", "Bearer"));
+    }
+
+    private RSAPrivateKey loadPrivateKey(String filename) throws Exception {
+        String key = new String(Files.readAllBytes(Paths.get(filename)))
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s+", "");
+        byte[] decode = Base64.getDecoder().decode(key);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decode);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return (RSAPrivateKey) kf.generatePrivate(keySpec);
+    }
+}
+```
+  </TabItem>
+  <TabItem value="Kotlin" label="ktor" default>
+```go
+package com.example
+
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
+import java.io.File
+import java.security.KeyFactory
+import java.security.interfaces.RSAPrivateKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.time.Instant
+import java.util.Base64
+
+@Serializable data class LoginRequest(val username: String, val password: String)
+@Serializable data class TokenResponse(val access_token: String, val token_type: String)
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) { json() }
+
+        val privateKey = loadPrivateKey("jwt_private_key.pem")
+        val algorithm = Algorithm.RSA256(null, privateKey)
+
+        routing {
+            post("/api/login") {
+                val req = call.receive<LoginRequest>()
+
+                if (req.username != "admin" || req.password != "secret123") {
+                    return@post call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
+                }
+
+                val now = Instant.now()
+                val token = JWT.create()
+                    .withIssuer("YOUR_ISSUER")
+                    .withSubject("MERCHANT_ID")
+                    .withClaim("usr", req.username)
+                    .withAudience("HOST")
+                    .withIssuedAt(now)
+                    .withExpiresAt(now.plusSeconds(86400))
+                    .withArrayClaim("aud_fingerprints", arrayOf("AUD"))
+                    .withClaim("ksk_pin", "KSK")
+                    .sign(algorithm)
+
+                call.respond(TokenResponse(access_token = token, token_type = "Bearer"))
+            }
+        }
+    }.start(wait = true)
+}
+
+private fun loadPrivateKey(path: String): RSAPrivateKey {
+    val pem = File(path).readText()
+        .replace("-----BEGIN PRIVATE KEY-----", "")
+        .replace("-----END PRIVATE KEY-----", "")
+        .replace("\\s".toRegex(), "")
+    val decoded = Base64.getDecoder().decode(pem)
+    val spec = PKCS8EncodedKeySpec(decoded)
+    return KeyFactory.getInstance("RSA").generatePrivate(spec) as RSAPrivateKey
+}
+```
+  </TabItem>
+  <TabItem value="PHP" label="PHP" default>
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use Firebase\JWT\JWT;
+
+header("Content-Type: application/json");
+
+// Parse request
+$input = json_decode(file_get_contents('php://input'), true);
+$username = $input['username'] ?? '';
+$password = $input['password'] ?? '';
+
+// 1. Authenticate user
+if ($username !== 'admin' || $password !== 'secret123') {
+    http_response_code(401);
+    echo json_encode(["error" => "Invalid credentials"]);
+    exit();
+}
+
+// Load RS256 Private Key
+$privateKeyPem = file_get_contents(__DIR__ . '/jwt_private_key.pem');
+
+$now = time();
+
+// 2. Build Payload
+$payload = [
+    "iss" => "YOUR_ISSUER",
+    "sub" => "MERCHANT_ID",
+    "usr" => $username,
+    "aud" => "HOST",
+    "iat" => $now,
+    "exp" => $now + 86400,
+    "aud_fingerprints" => ["AUD"],
+    "ksk_pin" => "KSK"
+];
+
+// 3. Sign JWT
+$jwt = JWT::encode($payload, $privateKeyPem, 'RS256');
+
+echo json_encode([
+    "access_token" => $jwt,
+    "token_type" => "Bearer"
+]);
+```
+  </TabItem>
+  <TabItem value=".Net" label="C#/.Net" default>
+```C#
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+// Load Private Key
+var pemContent = File.ReadAllText("jwt_private_key.pem");
+using var rsa = RSA.Create();
+rsa.ImportFromPem(pemContent);
+var securityKey = new RsaSecurityKey(rsa);
+var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+app.MapPost("/api/login", (LoginRequest req) =>
+{
+    // 1. Authenticate user
+    if (req.Username != "admin" || req.Password != "secret123")
+    {
+        return Results.Unauthorized();
+    }
+
+    var now = DateTime.UtcNow;
+
+    // 2. Build Claims
+    var payload = new JwtPayload
+    {
+        { "iss", "YOUR_ISSUER" },
+        { "sub", "MERCHANT_ID" },
+        { "usr", req.Username },
+        { "aud", "HOST" },
+        { "iat", new DateTimeOffset(now).ToUnixTimeSeconds() },
+        { "exp", new DateTimeOffset(now.AddDays(1)).ToUnixTimeSeconds() },
+        { "aud_fingerprints", new[] { "AUD" } },
+        { "ksk_pin", "KSK" }
+    };
+
+    var header = new JwtHeader(credentials);
+    var secToken = new JwtSecurityToken(header, payload);
+
+    // 3. Generate Token
+    var handler = new JwtSecurityTokenHandler();
+    var tokenString = handler.WriteToken(secToken);
+
+    return Results.Ok(new { access_token = tokenString, token_type = "Bearer" });
+});
+
+app.Run();
+
+record LoginRequest(string Username, string Password);
+```
+  </TabItem>
+  <TabItem value="Ruby" label="Ruby" default>
+```Ruby
+require 'sinatra'
+require 'jwt'
+require 'json'
+require 'openssl'
+
+set :port, 4567
+
+# Load Private Key
+PRIVATE_KEY = OpenSSL::PKey::RSA.new(File.read('jwt_private_key.pem'))
+
+post '/api/login' do
+  content_type :json
+  payload_data = JSON.parse(request.body.read) rescue {}
+
+  username = payload_data['username']
+  password = payload_data['password']
+
+  # 1. Authenticate user
+  if username != 'admin' || password != 'secret123'
+    status 401
+    return { error: 'Invalid credentials' }.to_json
+  end
+
+  now = Time.now.to_i
+
+  # 2. Build Payload
+  payload = {
+    iss: 'YOUR_ISSUER',
+    sub: 'MERCHANT_ID',
+    usr: username,
+    aud: 'HOST',
+    iat: now,
+    exp: now + 86400,
+    aud_fingerprints: ['AUD'],
+    ksk_pin: 'KSK'
+  }
+
+  # 3. Sign Token using RS256
+  token = JWT.encode(payload, PRIVATE_KEY, 'RS256')
+
+  { access_token: token, token_type: 'Bearer' }.to_json
+end
+```
+  </TabItem>
+  <TabItem value="Python" label="Python" default>
+```python
+from flask import Flask, request, jsonify
+import jwt
+from datetime import datetime, timedelta
+import rsa
+
+app = Flask(__name__)
+
+# Load Private Key
+with open("jwt_private_key.pem", "rb") as f:
+    private_key = rsa.PrivateKey.load_pkcs8(f.read(), None)
+
+@app.post("/api/login")
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    # 1. Authenticate
+    if username != "admin" or password != "secret123":
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    # 2. Build Payload
+    payload = {
+        "iss": "YOUR_ISSUER",
+        "sub": "MERCHANT_ID",
+        "usr": username,
+        "aud": "HOST",
+        "iat": datetime.utcnow(),
+        "exp": datetime.utcnow() + timedelta(days=1),
+        "aud_fingerprints": ["AUD"],
+        "ksk_pin": "KSK"
+    }
+
+    # 3. Sign JWT
+    token = jwt.encode(
+        payload,
+        private_key,
+        algorithm="RS256"
+    )
+
+    return jsonify({
+        "access_token": token,
+        "token_type": "Bearer"
+    })
+
+if __name__ == "__main__":
+    app.run(port=5000)
+```
+  </TabItem>
+</Tabs>

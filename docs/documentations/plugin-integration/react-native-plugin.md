@@ -105,7 +105,7 @@ You must register on the **QA/UAT** environment before testing in production. Th
 
    <img src="https://static.dev.haloplus.io/static/mpos/readme/assets/access_key.png" alt="access key." width="450" />
 
----
+<hr/>
 
 ## Getting Started {#getting-started}
 
