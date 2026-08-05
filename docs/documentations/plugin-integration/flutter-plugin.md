@@ -166,7 +166,7 @@ All calls to the Halo SDK require a valid JWT.
 
 To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-Refer to the **[JWT Integration Guide](../sdk/jwt)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
+Refer to the **[JWT Integration Guide](/docs/documentations/sdk/jwt)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
 ## Usage in Your Flutter App
 
