@@ -123,16 +123,16 @@ Your JWT token must include the following claims in the payload. Use your JWT li
   "iss": "your company identifier",
   "sub": "Merchant ID",
   "usr": "user ID",
-  "aud": "JWT Audience", // prod or test DNS, eg  HOST"
+  "aud": "JWT Audience", // prod or test DNS"
   "iat": 1707580800, // Created at
   "exp": 1707667200, // time of expiring in seconds
-  "aud_fingerprints": "Public key hash", # android only
-  "ksk_pin": "ksk", # android only
-  "refresh_token": false, # ios only
-  "x-tid": "Terminal ID", # ios only
-  "mcc": "Merchant Category Code", # ios only
-  "mbn": "Your Business Name", # ios only
-  "tpid": "Transaction Provider ID" # ios only
+  "aud_fingerprints": "Public key hash", // android only
+  "ksk_pin": "ksk", // android only
+  "refresh_token": false, // ios only
+  "x-tid": "Terminal ID", // ios only
+  "mcc": "Merchant Category Code", // ios only
+  "mbn": "Your Business Name", // ios only
+  "tpid": "Transaction Provider ID" // ios only
 }
 ```
 
@@ -314,7 +314,7 @@ app.listen(3000, () => console.log('Node.js Auth Server running on port 3000'));
   ```
 
   </TabItem>
-  <TabItem value="python" label="Python" default>
+  <TabItem value="python" label="Python" >
 ```python
 import time
 from fastapi import FastAPI, HTTPException, status
@@ -365,7 +365,7 @@ if __name__ == "__main__":
 ```
   </TabItem>
 
-  <TabItem value="Golang" label="Golang" default>
+  <TabItem value="Golang" label="Golang" >
 ```go
 package main
 
@@ -459,7 +459,7 @@ func main() {
 ```
   </TabItem>
 
-  <TabItem value="Java" label="Java" default>
+  <TabItem value="Java" label="Java" >
 ```java
 package com.example.jwtserver;
 
@@ -528,7 +528,7 @@ public class AuthController {
 ```
   </TabItem>
 
-  <TabItem value="Kotlin" label="ktor" default>
+  <TabItem value="Kotlin" label="ktor" >
 ```kotlin
 package com.example
 
@@ -599,7 +599,7 @@ private fun loadPrivateKey(path: String): RSAPrivateKey {
 ```
   </TabItem>
 
-  <TabItem value="PHP" label="PHP" default>
+  <TabItem value="PHP" label="PHP" >
 ```php
 <?php
 require_once 'vendor/autoload.php';
@@ -647,7 +647,7 @@ echo json_encode([
 ```
   </TabItem>
 
-  <TabItem value=".Net" label="C#/.Net" default>
+  <TabItem value=".Net" label="C#/.Net" >
 ```csharp
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
@@ -702,7 +702,7 @@ record LoginRequest(string Username, string Password);
 ```
   </TabItem>
 
-  <TabItem value="Ruby" label="Ruby" default>
+  <TabItem value="Ruby" label="Ruby" >
 ```ruby
 require 'sinatra'
 require 'jwt'
