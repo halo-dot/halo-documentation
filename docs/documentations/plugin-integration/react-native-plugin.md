@@ -16,39 +16,36 @@ A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sd
 
 ## Table of Contents {#table-of-contents}
 
-- [Integration Guide for React Native Plugin](#integration-guide-for-react-native-plugin)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Requirements](#requirements)
-  - [Developer Portal Registration](#developer-portal-registration)
-    - [Registration Steps](#registration-steps)
-  - [Getting Started](#getting-started)
-    - [Create a React Native App](#create-a-react-native-app)
-    - [Environment Setup](#environment-setup)
-    - [Plugin Installation](#plugin-installation)
-    - [Native Module Setup](#native-module-setup)
-    - [AndroidManifest Permissions](#androidmanifest-permissions)
-  - [Mobile Backend Requirements](#mobile-backend-requirements)
-    - [JWT](#jwt)
-    - [JWT Lifetime](#jwt-lifetime)
-    - [JWT Signing Public Key Format](#jwt-signing-public-key-format)
-    - [JWT Claims](#jwt-claims)
-  - [Usage in Your React Native App](#usage-in-your-react-native-app)
-    - [Request Permissions](#request-permissions)
-    - [Set Up Callbacks](#set-up-callbacks)
-    - [Initialize the SDK](#initialize-the-sdk)
-    - [Start a Transaction](#start-a-transaction)
-  - [Full Example](#full-example)
-  - [API Reference](#api-reference)
-    - [`HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)`](#halosdkinitializecallbacks-packagename-version-timeout-animations)
-    - [`HaloSdk.startTransaction(amount, reference, currency)`](#halosdkstarttransactionamount-reference-currency)
-    - [`HaloSdk.cardRefundTransaction(amount, reference, currency)`](#halosdkcardrefundtransactionamount-reference-currency)
-    - [`HaloSdk.cancelTransaction()`](#halosdkcanceltransaction)
-    - [Callbacks (`IHaloCallbacks`)](#callbacks-ihalocallbacks)
-    - [Result Types](#result-types)
-  - [Documentation](#documentation)
-  - [Testing](#testing)
-  - [FAQ / Troubleshooting](#faq--troubleshooting)
+- [Integration Guide for React Native Plugin {#integration-guide-for-react-native-plugin}](#integration-guide-for-react-native-plugin-integration-guide-for-react-native-plugin)
+  - [Table of Contents {#table-of-contents}](#table-of-contents-table-of-contents)
+  - [Overview {#overview}](#overview-overview)
+  - [Requirements {#requirements}](#requirements-requirements)
+  - [Developer Portal Registration {#developer-portal-registration}](#developer-portal-registration-developer-portal-registration)
+    - [Registration Steps {#registration-steps}](#registration-steps-registration-steps)
+  - [Getting Started {#getting-started}](#getting-started-getting-started)
+    - [Create a React Native App {#create-a-react-native-app}](#create-a-react-native-app-create-a-react-native-app)
+    - [Environment Setup {#environment-setup}](#environment-setup-environment-setup)
+    - [Plugin Installation {#plugin-installation}](#plugin-installation-plugin-installation)
+    - [Native Module Setup {#native-module-setup}](#native-module-setup-native-module-setup)
+    - [AndroidManifest Permissions {#androidmanifest-permissions}](#androidmanifest-permissions-androidmanifest-permissions)
+  - [Mobile Backend Requirements {#mobile-backend-requirements}](#mobile-backend-requirements-mobile-backend-requirements)
+    - [JWT Generation.](#jwt-generation)
+  - [Usage in Your React Native App {#usage-in-your-react-native-app}](#usage-in-your-react-native-app-usage-in-your-react-native-app)
+    - [Request Permissions {#request-permissions}](#request-permissions-request-permissions)
+    - [Set Up Callbacks {#set-up-callbacks}](#set-up-callbacks-set-up-callbacks)
+    - [Initialize the SDK {#initialize-the-sdk}](#initialize-the-sdk-initialize-the-sdk)
+    - [Start a Transaction {#start-a-transaction}](#start-a-transaction-start-a-transaction)
+  - [Full Example {#full-example}](#full-example-full-example)
+  - [API Reference {#api-reference}](#api-reference-api-reference)
+    - [`HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)` {#halosdkinitializecallbacks-packagename-version-timeout-animations}](#halosdkinitializecallbacks-packagename-version-timeout-animations-halosdkinitializecallbacks-packagename-version-timeout-animations)
+    - [`HaloSdk.startTransaction(amount, reference, currency)` {#halosdkstarttransactionamount-reference-currency}](#halosdkstarttransactionamount-reference-currency-halosdkstarttransactionamount-reference-currency)
+    - [`HaloSdk.cardRefundTransaction(amount, reference, currency)` {#halosdkcardrefundtransactionamount-reference-currency}](#halosdkcardrefundtransactionamount-reference-currency-halosdkcardrefundtransactionamount-reference-currency)
+    - [`HaloSdk.cancelTransaction()` {#halosdkcanceltransaction}](#halosdkcanceltransaction-halosdkcanceltransaction)
+    - [Callbacks (`IHaloCallbacks`) {#callbacks-ihalocallbacks}](#callbacks-ihalocallbacks-callbacks-ihalocallbacks)
+    - [Result Types {#result-types}](#result-types-result-types)
+  - [Documentation {#documentation}](#documentation-documentation)
+  - [Testing {#testing}](#testing-testing)
+  - [FAQ / Troubleshooting {#faq--troubleshooting}](#faq--troubleshooting-faq--troubleshooting)
 
 ---
 
@@ -268,7 +265,7 @@ All calls to the Halo SDK require a valid JWT.
 
 To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-Refer to the **[JWT Integration Guide](../sdk/04%20-%20jwt.mdx)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
+Refer to the **[JWT Integration Guide](../sdk/jwt)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
 ---
 
