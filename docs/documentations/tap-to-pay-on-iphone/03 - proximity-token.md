@@ -18,7 +18,7 @@ This guide describes the **Apple Proximity Token** backend API used by iOS SDK. 
 It focuses on the **request/response contract** for generating the token that the iOS SDK uses to
 communicate with the Apple payment card reader.
 
-All requests must be authenticated with a **JWT** as described in the **JWT Integration Guide** (see [JWT Integration Guide](/documentations/sdk/jwt)) and follow the header formats in **[API Docs - Authentication](/docs/documentations/api-docs/authentication)**.
+All requests must be authenticated with a **JWT** as described in the **JWT Integration Guide** (see [JWT Integration Guide](/docs/documentations/sdk/jwt)) and follow the header formats in **[API Docs - Authentication](/docs/documentations/api-docs/authentication)**.
 
 ---
 
