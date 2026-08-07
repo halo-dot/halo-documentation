@@ -32,7 +32,7 @@ You'll need the following before getting started:
 
 Before integrating the SDK into your app, you'll need to set up JWT authentication on your backend. This involves generating RSA keys and configuring token signing — the SDK uses these tokens for all API requests.
 
-Follow the [JWT Integration Guide](./jwt) to get that sorted first. Once your backend can generate valid JWT tokens, come back here and continue with installation.
+Follow the [JWT Integration Guide](/docs/documentations/sdk/jwt) to get that sorted first. Once your backend can generate valid JWT tokens, come back here and continue with installation.
 
 ## Installation
 

@@ -14,41 +14,38 @@ A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sd
 
 ---
 
-## Table of Contents {#table-of-contents}
+## Table of Contents 
 
-- [Integration Guide for React Native Plugin](#integration-guide-for-react-native-plugin)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Requirements](#requirements)
-  - [Developer Portal Registration](#developer-portal-registration)
-    - [Registration Steps](#registration-steps)
-  - [Getting Started](#getting-started)
-    - [Create a React Native App](#create-a-react-native-app)
-    - [Environment Setup](#environment-setup)
-    - [Plugin Installation](#plugin-installation)
-    - [Native Module Setup](#native-module-setup)
-    - [AndroidManifest Permissions](#androidmanifest-permissions)
-  - [Mobile Backend Requirements](#mobile-backend-requirements)
-    - [JWT](#jwt)
-    - [JWT Lifetime](#jwt-lifetime)
-    - [JWT Signing Public Key Format](#jwt-signing-public-key-format)
-    - [JWT Claims](#jwt-claims)
-  - [Usage in Your React Native App](#usage-in-your-react-native-app)
-    - [Request Permissions](#request-permissions)
-    - [Set Up Callbacks](#set-up-callbacks)
-    - [Initialize the SDK](#initialize-the-sdk)
-    - [Start a Transaction](#start-a-transaction)
-  - [Full Example](#full-example)
-  - [API Reference](#api-reference)
-    - [`HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)`](#halosdkinitializecallbacks-packagename-version-timeout-animations)
-    - [`HaloSdk.startTransaction(amount, reference, currency)`](#halosdkstarttransactionamount-reference-currency)
-    - [`HaloSdk.cardRefundTransaction(amount, reference, currency)`](#halosdkcardrefundtransactionamount-reference-currency)
-    - [`HaloSdk.cancelTransaction()`](#halosdkcanceltransaction)
-    - [Callbacks (`IHaloCallbacks`)](#callbacks-ihalocallbacks)
-    - [Result Types](#result-types)
-  - [Documentation](#documentation)
-  - [Testing](#testing)
-  - [FAQ / Troubleshooting](#faq--troubleshooting)
+- [Integration Guide for React Native Plugin](#integration-guide-for-react-native-plugin-integration-guide-for-react-native-plugin)
+  - [Table of Contents](#table-of-contents-table-of-contents)
+  - [Overview](#overview-overview)
+  - [Requirements](#requirements-requirements)
+  - [Developer Portal Registration](#developer-portal-registration-developer-portal-registration)
+    - [Registration Steps](#registration-steps-registration-steps)
+  - [Getting Started](#getting-started-getting-started)
+    - [Create a React Native App](#create-a-react-native-app-create-a-react-native-app)
+    - [Environment Setup](#environment-setup-environment-setup)
+    - [Plugin Installation](#plugin-installation-plugin-installation)
+    - [Native Module Setup](#native-module-setup-native-module-setup)
+    - [AndroidManifest Permissions](#androidmanifest-permissions-androidmanifest-permissions)
+  - [Mobile Backend Requirements](#mobile-backend-requirements-mobile-backend-requirements)
+    - [JWT Generation.](#jwt-generation)
+  - [Usage in Your React Native App](#usage-in-your-react-native-app-usage-in-your-react-native-app)
+    - [Request Permissions](#request-permissions-request-permissions)
+    - [Set Up Callbacks](#set-up-callbacks-set-up-callbacks)
+    - [Initialize the SDK](#initialize-the-sdk-initialize-the-sdk)
+    - [Start a Transaction](#start-a-transaction-start-a-transaction)
+  - [Full Example](#full-example-full-example)
+  - [API Reference](#api-reference-api-reference)
+    - [`HaloSdk.initialize(callbacks, packageName, version, timeout?, animations?)`](#halosdkinitializecallbacks-packagename-version-timeout-animations-halosdkinitializecallbacks-packagename-version-timeout-animations)
+    - [`HaloSdk.startTransaction(amount, reference, currency)`](#halosdkstarttransactionamount-reference-currency-halosdkstarttransactionamount-reference-currency)
+    - [`HaloSdk.cardRefundTransaction(amount, reference, currency)`](#halosdkcardrefundtransactionamount-reference-currency-halosdkcardrefundtransactionamount-reference-currency)
+    - [`HaloSdk.cancelTransaction()`](#halosdkcanceltransaction-halosdkcanceltransaction)
+    - [Callbacks (`IHaloCallbacks`)](#callbacks-ihalocallbacks-callbacks-ihalocallbacks)
+    - [Result Types](#result-types-result-types)
+  - [Documentation](#documentation-documentation)
+  - [Testing](#testing-testing)
+  - [FAQ / Troubleshooting](#faq--troubleshooting-faq--troubleshooting)
 
 ---
 
@@ -262,114 +259,13 @@ cd MyHaloApp
 
 ## Mobile Backend Requirements {#mobile-backend-requirements}
 
-### JWT {#jwt}
+### JWT Generation.
 
-All calls to the Halo SDK require a **valid JWT**. The SDK requests one via the `onRequestJWT` callback whenever it needs to authenticate. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://www.npmjs.com/package/jsrsasign" target="_blank">jsrsasign</a> to generate JWTs.
+All calls to the Halo SDK require a valid JWT. 
 
-Install the library:
+To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-```bash
-npm install jsrsasign
-npm install --save-dev @types/jsrsasign
-```
-
-Create two files: `src/config.ts` (credentials) and `src/jwt/JwtToken.ts` (JWT creation).
-
-**`src/config.ts`**
-
-```ts
-export const Config = {
-  privateKeyPem: '-----BEGIN RSA PRIVATE KEY-----\n...', // your RSA private key in PEM format
-  issuer: '',       // get from the Developer Portal
-  username: '',     // get from the Developer Portal
-  merchantId: '',   // get from the Developer Portal
-  host: 'kernelserver.qa.haloplus.io',
-  aud: '',          // aud_fingerprints value — get from the Developer Portal
-  ksk: '',          // ksk_pin value — get from the Developer Portal
-
-  // App settings
-  applicationPackageName: 'com.yourcompany.myapp',
-  applicationVersion: '1.0.0',
-  onStartTransactionTimeOut: 300000,
-  enableSchemeAnimations: true,
-} as const;
-```
-
-**`src/jwt/JwtToken.ts`**
-
-```ts
-import { KJUR } from 'jsrsasign';
-import { Config } from '../config';
-
-const TTL_MS = 15 * 60 * 1000;
-
-let cachedToken: string | null = null;
-let expiresAt = 0;
-
-export function getJwt(): string {
-  const now = Date.now();
-  if (cachedToken && now < expiresAt) {
-    return cachedToken;
-  }
-
-  const alg = 'RS512';
-  const nowSecs = Math.floor(now / 1000);
-  const expSecs = nowSecs + 15 * 60;
-
-  const header = JSON.stringify({ alg, typ: 'JWT' });
-  const payload = JSON.stringify({
-    aud_fingerprints: Config.aud,
-    ksk_pin: Config.ksk,
-    usr: Config.username,
-    aud: Config.host,
-    iss: Config.issuer,
-    sub: Config.merchantId,
-    iat: nowSecs,
-    exp: expSecs,
-  });
-
-  cachedToken = KJUR.jws.JWS.sign(alg, header, payload, Config.privateKeyPem);
-  expiresAt = now + TTL_MS;
-  return cachedToken;
-}
-```
-
-> **Security**
->
-> - Do **not** commit the private key to your repo. Use secure configuration (env vars, secret managers).
-> - Provide the JWT via the SDK callback `onRequestJWT`.
-> - Always use the algorithm (`RS256` or `RS512`) configured for your tenant in the Developer Portal. If mismatched, signature validation will fail.
-
-### JWT Lifetime {#jwt-lifetime}
-
-Keep JWT lifetimes **short** to minimize risk. A lifetime of **15 minutes** is recommended.
-
-### JWT Signing Public Key Format {#jwt-signing-public-key-format}
-
-Publish the JWT public key as a **certificate** in a text-friendly format (e.g., **Base64-encoded PEM** `.crt`/`.pem`).
-
-### JWT Claims {#jwt-claims}
-
-The JWT must include the following (standard unless noted):
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `alg` | String | RSA algorithm used for signing (e.g., **RS256** or **RS512**). Follow the value configured for your environment to maintain non-repudiation. |
-| `sub` | String | Payment Processor Merchant-User ID or Application ID. |
-| `iss` | String | Unique identifier for the JWT issuer (as configured by Synthesis/Halo). Retrieve from the **Developer Portal**. |
-| `aud` | String | URL of the Halo server TLS endpoint (environment-specific, e.g. `kernelserver.qa.haloplus.io`). |
-| `usr` | String | Username of the user performing the transaction. |
-| `iat` | NumericDate | UTC issuance timestamp. |
-| `exp` | NumericDate | UTC expiration timestamp. |
-| `aud_fingerprints` | String | CSV of expected SHA-256 fingerprints for the Kernel Server TLS endpoint (supports rotation). |
-
-To validate values, POST to:
-
-```
-https://kernelserver.qa.haloplus.io/<sdk-version>/tokens/checkjwt
-```
-
-with **Bearer** auth.
+Refer to the **[JWT Integration Guide](/docs/documentations/sdk/jwt)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
 ---
 

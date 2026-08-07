@@ -1,5 +1,6 @@
 ---
-id: jwt
+id: json-web-token
+sidebar_class_name: hidden
 title: JSON Web Token (JWT)
 tags:
   - sdk
