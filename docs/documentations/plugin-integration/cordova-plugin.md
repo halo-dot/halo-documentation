@@ -333,9 +333,9 @@ Call the `initialize` method on the Halo SDK plugin to initialize the SDK. You m
 ```js
 function initializeButtonPressed() {
   var options = {
-    cardTapTimeou: "20000",
+    cardTapTimeout: "20000",
     applicationName: "com.app.hf",
-    applicationVersion = "1.0.0"
+    applicationVersion: "1.0.0"
   }
   console.log("Initializing...")
   window.plugins.haloPlugin.initialize(onSuccessfulInitialization, onFailedInitialization, options);
