@@ -145,7 +145,7 @@ if (localPropertiesFile.exists()) {
 android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
 ```
 
-7. Your server will issue the JWT for you.
+8. Your server will issue the JWT for you.
 
 ## Mobile Backend Requirements
 
