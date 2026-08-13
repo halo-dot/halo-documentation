@@ -45,8 +45,6 @@ A production-focused guide to integrating the **Halo Dot SDK** via the <a href="
 - [1. Remove cached native build files and local plugin links](#1-remove-cached-native-build-files-and-local-plugin-links)
 - [2. Re-add the Android platform (re-links local plugins from config.xml)](#2-re-add-the-android-platform-re-links-local-plugins-from-configxml)
 
-<hr/>
-
 ## Overview
 
 The <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide" target="_blank">**Halo Dot SDK**</a> is an **isolating MPoC SDK** for payment processing with attestation and monitoring capabilities. The architecture diagram below illustrates the SDK boundary, integrator touchpoints, and interactions with third‑party payment gateways.
