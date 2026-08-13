@@ -220,7 +220,6 @@ cd MyHaloApp
        <!-- Location (required for Bluetooth LE scanning) -->
        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-       <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
        <!-- Other -->
        <uses-permission android:name="android.permission.INTERNET" />

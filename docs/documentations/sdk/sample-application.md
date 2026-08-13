@@ -10,6 +10,8 @@ tags:
 
 Download our test app from <a href="{{REPO_URL}}" target="_blank" rel="noopener noreferrer">GitHub</a>.
 
+<hr/>
+
 #### 2. Configure The Test App
 
 Open `{{CONFIG_PATH}}` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 

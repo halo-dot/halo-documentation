@@ -1,6 +1,7 @@
 ---
 id: cordova-plugin
 title: Integration Guide for Cordova Plugin
+sidebar_position: 3
 ---
 
 # Integration Guide for Cordova Plugin Release
@@ -9,6 +10,42 @@ A production-focused guide to integrating the **Halo Dot SDK** via the <a href="
 
 > **Scope**: Android-only at present. This guide covers requirements, environment setup, installation, native module configuration, JWT and backend integration, usage patterns, testing, and troubleshooting.
 ---
+
+## Table of Contents
+
+- [Integration Guide for Cordova Plugin Release](#integration-guide-for-cordova-plugin-release)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Requirements](#requirements)
+  - [Developer Portal Registration](#developer-portal-registration)
+    - [Registration Steps](#registration-steps)
+  - [Getting Started](#getting-started)
+    - [Plugin Installation](#plugin-installation)
+  - [Mobile Backend Requirements](#mobile-backend-requirements)
+    - [JWT Generation.](#jwt-generation)
+  - [Usage in Your Cordova App](#usage-in-your-cordova-app)
+    - [Android Permissions](#android-permissions)
+    - [Requesting Runtime Permissions](#requesting-runtime-permissions)
+  - [How to Initialize Halo SDK](#how-to-initialize-halo-sdk)
+    - [Initialize Callbacks](#initialize-callbacks)
+      - [onRequestJWT](#onrequestjwt)
+      - [onHaloUIMessage](#onhalouimessage)
+      - [onInitializationResult](#oninitializationresult)
+      - [onHaloTransactionResult](#onhalotransactionresult)
+      - [onAttestationError](#onattestationerror)
+      - [onSecurityError](#onsecurityerror)
+    - [Initialize Halo SDK](#initialize-halo-sdk)
+    - [Start a Transaction](#start-a-transaction)
+  - [Build the debug APK:](#build-the-debug-apk)
+      - [Install and run on a connected device](#install-and-run-on-a-connected-device)
+  - [Running from Android Studio](#running-from-android-studio)
+  - [Troubleshooting](#troubleshooting)
+    - [Updating Local Plugin Configurations (`HaloPlugin`)](#updating-local-plugin-configurations-haloplugin)
+      - [Recommended Fix: Fast Platform Rebuild](#recommended-fix-fast-platform-rebuild)
+- [1. Remove cached native build files and local plugin links](#1-remove-cached-native-build-files-and-local-plugin-links)
+- [2. Re-add the Android platform (re-links local plugins from config.xml)](#2-re-add-the-android-platform-re-links-local-plugins-from-configxml)
+
+<hr/>
 
 ## Overview
 
@@ -24,7 +61,6 @@ You’ll need the following to integrate the Halo Dot SDK:
 - Executed **Non‑Disclosure Agreement (NDA)** (available on the portal)
 - **Public/Private key pair** to generate JWTs (upload the **public** key on the portal)
 - **Access key** and **Secret key** (obtainable from the Developer Portal after NDA acceptance and public key upload)
-- **A Cordova project**
 - **Nodejs** `20.10.0` or higher
 - **npm:xml2ls**: `npm install xml2js`
 - **Java** `21`
@@ -76,7 +112,7 @@ npm install -g cordova
 ```
 
 2. Generate a new Cordova project
-Syntax: cordova create {{directory_name}} {{package_identifier}} {{app_title}}
+Syntax: cordova create "directory_name" "package_identifier" "app_title"
 
 ```node
 npx cordova create MyCordovaApp com.example.mycordovaapp "My Cordova App"
@@ -173,7 +209,6 @@ Declare required permissions in `AndroidManifest.xml`:
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
@@ -191,13 +226,86 @@ Declare required permissions in `AndroidManifest.xml`:
 </manifest>
 ```
 
+### Requesting Runtime Permissions
+
+The plugin will request for necessary permission but you can pre-emptively request for permissions using the `permission_handler` package.
+
+```bash
+cordova plugin add cordova-plugin-android-permissions
+```
+
+```javascript
+/**
+ * Requests required runtime permissions for Camera, Location, Bluetooth (Scan & Connect), and NFC.
+ * @returns {Promise<boolean>} Resolves to true if permissions were granted.
+ */
+function requestAppPermissions() {
+    return new Promise((resolve, reject) => {
+        // Ensure Cordova device is ready and plugin exists
+        if (!window.cordova || !cordova.plugins || !cordova.plugins.permissions) {
+            return reject(new Error("cordova-plugin-android-permissions is not available."));
+        }
+
+        const permissions = cordova.plugins.permissions;
+
+        // List of permission constants to request
+        const permissionsList = [
+            permissions.CAMERA,
+            permissions.ACCESS_FINE_LOCATION,
+            permissions.ACCESS_COARSE_LOCATION,
+            permissions.BLUETOOTH_SCAN,
+            permissions.BLUETOOTH_CONNECT,
+            permissions.NFC
+        ];
+
+        // Helper function to request the array of permissions
+        function requestPermissionsArray() {
+            permissions.requestPermissions(
+                permissionsList,
+                (status) => {
+                    if (status.hasPermission) {
+                        console.log("All requested permissions granted.");
+                        resolve(true);
+                    } else {
+                        console.warn("One or more permissions were denied by the user.");
+                        resolve(false);
+                    }
+                },
+                (err) => {
+                    console.error("Error requesting permissions:", err);
+                    reject(err);
+                }
+            );
+        }
+
+        // Check if permissions are already granted
+        permissions.hasPermission(
+            permissionsList,
+            (status) => {
+                if (status.hasPermission) {
+                    console.log("Permissions are already granted.");
+                    resolve(true);
+                } else {
+                    // If not granted, trigger request dialog
+                    requestPermissionsArray();
+                }
+            },
+            (err) => {
+                console.warn("Failed checking permission status, proceeding to request:", err);
+                requestPermissionsArray();
+            }
+        );
+    });
+}
+```
+
 Ensure `compileSdkVersion` and `targetSdkVersion` are **34** or higher. 
 
-### How to Initialize Halo SDK
+## How to Initialize Halo SDK
 
 Before using any Halo SDK features, you must initialize the SDK by providing the application name, version and card tap timeout.
 
-#### Initialize Callbacks
+### Initialize Callbacks
 
 The Halo Cordova plugin uses a callback-based approach to communicate with the native SDK. You must register callbacks to receive notifications about the SDK's status, events, and transaction results.
 
@@ -226,7 +334,7 @@ async function onDeviceReady() {
 }
 ```
 
-##### onRequestJWT
+#### onRequestJWT
 
 The `onRequestJWT` callback is invoked when the SDK requires a valid JWT to proceed with an operation (e.g., initialization, transaction, or card tap). Your app must request a fresh JWT from your backend server and return it to the SDK.
 
@@ -250,7 +358,7 @@ async function onRequestJWT(callback) {
 }
 ```
 
-##### onHaloUIMessage
+#### onHaloUIMessage
 
 The `onHaloUIMessage` callback These messages are used to update the UI of the app.
 
@@ -259,25 +367,11 @@ The `onHaloUIMessage` callback These messages are used to update the UI of the a
 
 function onHaloUIMessage(haloUIMessage) {
   const msgID = haloUIMessage?.msgID ?? JSON.stringify(haloUIMessage)
-
-  switch (msgID) {
-    case "PresentCard":
-      document.getElementById("status").innerHTML = "Tap card to reader"
-      break
-    case "AuthorisingWait":
-      document.getElementById("status").innerHTML = "Authorising - please wait..."
-      break
-    case "RemoveCard":
-      document.getElementById("status").innerHTML = "Remove card"
-      break
-    default:
-      document.getElementById("status").innerHTML = msgID
-      break
-  }
+  document.getElementById("status").innerHTML = msgID
 }
 ```
 
-##### onInitializationResult
+#### onInitializationResult
 
 The `onInitializationResult` callback is invoked when the SDK is initialized.
 
@@ -293,7 +387,7 @@ function onInitializationResult(haloInitialisationResult) {
 }
 ```
 
-##### onHaloTransactionResult
+#### onHaloTransactionResult
 
 This is called when a transaction is completed.
 
@@ -306,7 +400,7 @@ function onHaloTransactionResult(haloTransactionResult) {
 }
 ```
 
-##### onAttestationError
+#### onAttestationError
 
 This is called when there is an error in the SDK.
 
@@ -316,7 +410,7 @@ function onAttestationError(haloAttestationError) {
 }
 ```
 
-##### onSecurityError
+#### onSecurityError
 
 This is called when there is a security error in the SDK.
 
@@ -326,7 +420,7 @@ function onSecurityError(haloSecurityError) {
 }
 ```
 
-#### Initialize Halo SDK
+### Initialize Halo SDK
 
 Call the `initialize` method on the Halo SDK plugin to initialize the SDK. You must provide an options object that contains the application name, application version, and card tap timeout. You must also provide callback functions to receive notifications about the SDK's status, events, and transaction results.
 
@@ -360,7 +454,7 @@ function onFailedInitialization(error) {
 }
 ```
 
-#### Start a Transaction
+### Start a Transaction
 
 Call the `startTransaction` method on the Halo SDK plugin to start a transaction. You must provide an options object that contains the transaction amount, transaction reference, and transaction currency. You must also provide callback functions to receive notifications about the SDK's status, events, and transaction results.
 
@@ -368,7 +462,6 @@ Call the `startTransaction` method on the Halo SDK plugin to start a transaction
 function transactButtonPressed() {
   var transactionValue = document.getElementById("amountField").value;
   var merchantReference = document.getElementById("merchantReferenceField").value;
-  var currency = document.getElementById("currencyDropdown").value;
   //TODO: Add validation here
   window.plugins.haloPlugin.startTransaction(
     async function(result) {
@@ -391,7 +484,7 @@ function transactButtonPressed() {
     {
       transactionValue,
       merchantReference,
-      currency
+      currency: 'ZAR'
     }
   );
 }
