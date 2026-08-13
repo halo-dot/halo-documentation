@@ -6,7 +6,7 @@ exclude_from_broken_links_checking: true
 
 # Integration Guide for React Native Plugin {#integration-guide-for-react-native-plugin}
 
-A production-focused guide to integrating the **Halo Dot SDK** via the **halo-sdk-react-native** plugin in a React Native Android application.
+A production-focused guide to integrating the **Halo Dot SDK** via the <a href="https://www.npmjs.com/package/halo-sdk-react-native" target="_blank">**halo-sdk-react-native**</a> plugin in a React Native Android application.
 
 > **Scope**: Android-only at present. This guide covers requirements, environment setup, installation, native module configuration, JWT and backend integration, usage patterns, testing, and troubleshooting.
 
@@ -220,7 +220,6 @@ cd MyHaloApp
        <!-- Location (required for Bluetooth LE scanning) -->
        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-       <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
        <!-- Other -->
        <uses-permission android:name="android.permission.INTERNET" />
