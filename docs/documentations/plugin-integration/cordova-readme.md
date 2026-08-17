@@ -32,8 +32,8 @@ npx cordova platform add android
    (these will be provided to you by Synthesis):
 
 ```bash
-aws.accessKey={{your_access_key}}
-aws.secretKey={{your_secret_key}}
+aws.accesskey={{your_access_key}}
+aws.secretkey={{your_secret_key}}
 ```
 
 6. Ideally your server will issue the JWT for you. For testing purposes, copy
