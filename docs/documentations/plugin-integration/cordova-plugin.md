@@ -25,8 +25,8 @@ A production-focused guide to integrating the **Halo Dot SDK** via the <a href="
   - [Mobile Backend Requirements](#mobile-backend-requirements)
     - [JWT Generation.](#jwt-generation)
   - [Usage in Your Cordova App](#usage-in-your-cordova-app)
-    - [Android Permissions](#android-permissions)
-    - [Requesting Runtime Permissions](#requesting-runtime-permissions)
+    - [Android Permissions (Optional)](#android-permissions-optional)
+    - [Requesting Runtime Permissions (Optional)](#requesting-runtime-permissions-optional)
   - [How to Initialize Halo SDK](#how-to-initialize-halo-sdk)
     - [Initialize Callbacks](#initialize-callbacks)
       - [onRequestJWT](#onrequestjwt)
@@ -237,7 +237,7 @@ Refer to the **[JWT Integration Guide](/docs/documentations/sdk/jwt)** for step-
 
 ## Usage in Your Cordova App
 
-### Android Permissions
+### Android Permissions (Optional)
 
 Declare required permissions in `AndroidManifest.xml`:
 
@@ -268,7 +268,7 @@ Declare required permissions in `AndroidManifest.xml`:
 </manifest>
 ```
 
-### Requesting Runtime Permissions
+### Requesting Runtime Permissions (Optional)
 
 The plugin will request for necessary permission but you can pre-emptively request for permissions using the `permission_handler` package.
 
