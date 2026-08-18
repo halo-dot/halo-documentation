@@ -21,11 +21,12 @@ A production-focused guide to integrating the **Halo Dot SDK** via the <a href="
     - [Registration Steps](#registration-steps)
   - [Getting Started](#getting-started)
     - [Plugin Installation](#plugin-installation)
+    - [Setup the Project.](#setup-the-project)
   - [Mobile Backend Requirements](#mobile-backend-requirements)
     - [JWT Generation.](#jwt-generation)
   - [Usage in Your Cordova App](#usage-in-your-cordova-app)
-    - [Android Permissions](#android-permissions)
-    - [Requesting Runtime Permissions](#requesting-runtime-permissions)
+    - [Android Permissions (Optional)](#android-permissions-optional)
+    - [Requesting Runtime Permissions (Optional)](#requesting-runtime-permissions-optional)
   - [How to Initialize Halo SDK](#how-to-initialize-halo-sdk)
     - [Initialize Callbacks](#initialize-callbacks)
       - [onRequestJWT](#onrequestjwt)
@@ -150,36 +151,79 @@ npx cordova plugin add halo-cordova-plugin
 ```
 
 2. **Configure Halo Maven access** (SDK binaries are hosted on AWS S3). <br/>
-   Retrieve your `accesskey` and `secretkey` from the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and add them to `android/local.properties` (create the file if it doesn’t exist):
+   Retrieve your `accesskey` and `secretkey` from the **<a href="https://go.developerportal.qa.haloplus.io/" target="_blank">Developer Portal</a>** and add them to `android/local.properties` 
+   
+   (create the file if it doesn’t exist):
 
-```bash
-aws.accesskey=<accesskey>
-aws.secretkey=<secretkey>
+```properties
+aws.accesskey={{your_access_key}}
+aws.secretkey={{your_secret_key}}
 ```
 > **Note**: Keys are case‑sensitive. Keep them out of source control.
 
-3. Ensure your Gradle script loads `local.properties` (typically in `android/app/build.gradle`):
-
-```kotlin
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-  localPropertiesFile.withReader('UTF-8') { reader ->
-    localProperties.load(reader)
-  }
-}
-```
-
-4. Perform a gradle sync in Android Studio
-5. You should now have access to the 'za.co.synthesis.halo.sdk' namespace
-6. Be sure that your application has camera, microphone and location permissions before using the plugin.
-7. To ensure that the Pin Screen works, add the following tag to the Application Layer/Tag of your AndroidManifest.xml file: 
+3. Perform a gradle sync in Android Studio or `cordova prepare android`
+4. You should now have access to the 'za.co.synthesis.halo.sdk' namespace
+5. Be sure that your application has camera, microphone and location permissions before using the plugin.
+6. To ensure that the Pin Screen works, add the following tag to the Application Layer/Tag of your AndroidManifest.xml file: 
    
 ```bash
 android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
 ```
 
-8. Your server will issue the JWT for you.
+7. Your server will issue the JWT for you.
+
+### Setup the Project.
+
+The default project template created by Cordova includes a `config.xml` file.<br/>
+You will need to modify the following in the `config.xml` file:
+
+**Key Updates**
+
+1. Root `<widget>` Tag Update: Add xmlns:tools="[http://schemas.android.com/tools](http://schemas.android.com/tools)" so Cordova can apply Android Manifest merger rules.
+
+2. Android Platform Block: Add `<platform name="android">` to group all Android-specific configurations.
+
+3. Minimum SDK Setting: Add `<preference name="android-minSdkVersion" value="29" />` to satisfy the Halo SDK requirements.
+
+4. Manifest Modification: Add an `<edit-config>` block targeting app/src/main/AndroidManifest.xml to inject tools:replace="android:label". This ensures your app's name takes priority over the Halo SDK's SoftPos label during compilation.
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="io.halodot.app" 
+        version="1.0.0" 
+        xmlns="http://www.w3.org/ns/widgets" 
+        xmlns:cdv="http://cordova.apache.org/ns/1.0"
+        xmlns:tools="http://schemas.android.com/tools">
+    
+    <name>Test Halo SDK</name>
+    <description>
+        A sample Apache Cordova application that responds to the deviceready event.
+    </description>
+    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
+        Apache Cordova Team
+    </author>
+    <content src="index.html" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+
+    <!-- Android Platform Configuration -->
+    <platform name="android">
+        <!-- Force minimum Android SDK to API 29 (Android 10) for Halo SDK -->
+        <preference name="android-minSdkVersion" value="29" />
+
+        <!-- 1. Explicitly bind the tools namespace to the AndroidManifest.xml root tag -->
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest">
+            <manifest xmlns:tools="http://schemas.android.com/tools" />
+        </edit-config>
+
+        <!-- 2. Resolve Manifest Merger conflict for application label -->
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application tools:replace="android:label" />
+        </edit-config>
+    </platform>
+
+</widget>
+```
 
 ## Mobile Backend Requirements
 
@@ -193,7 +237,7 @@ Refer to the **[JWT Integration Guide](/docs/documentations/sdk/jwt)** for step-
 
 ## Usage in Your Cordova App
 
-### Android Permissions
+### Android Permissions (Optional)
 
 Declare required permissions in `AndroidManifest.xml`:
 
@@ -224,7 +268,7 @@ Declare required permissions in `AndroidManifest.xml`:
 </manifest>
 ```
 
-### Requesting Runtime Permissions
+### Requesting Runtime Permissions (Optional)
 
 The plugin will request for necessary permission but you can pre-emptively request for permissions using the `permission_handler` package.
 
@@ -457,7 +501,7 @@ function onFailedInitialization(error) {
 Call the `startTransaction` method on the Halo SDK plugin to start a transaction. You must provide an options object that contains the transaction amount, transaction reference, and transaction currency. You must also provide callback functions to receive notifications about the SDK's status, events, and transaction results.
 
 ```js
-function transactButtonPressed() {
+function startTransaction() {
   var transactionValue = document.getElementById("amountField").value;
   var merchantReference = document.getElementById("merchantReferenceField").value;
   //TODO: Add validation here

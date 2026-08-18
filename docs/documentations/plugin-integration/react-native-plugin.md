@@ -644,8 +644,8 @@ Define them in `android/local.properties` and read them from Gradle:
 
 ```properties
 sdk.dir=C\:\\Users\\yourname\\AppData\\Local\\Android\\Sdk
-aws.accesskey=YOUR_ACCESS_KEY
-aws.secretkey=YOUR_SECRET_KEY
+aws.accesskey={{your_access_key}}
+aws.secretkey={{your_secret_key}}
 compileSdkVersion=34
 minSdkVersion=29
 ```
