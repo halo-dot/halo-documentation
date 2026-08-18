@@ -170,20 +170,20 @@ aws.secretkey=<secretkey>
 android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
 ```
 
-8. Your server will issue the JWT for you.
+7. Your server will issue the JWT for you.
 
 ### Setup the Project.
 
-The default project template setup by cordova add a config.xml file.<br/>
-You will need to modify the following to the config.xml file:
+The default project template created by Cordova includes a `config.xml` file.<br/>
+You will need to modify the following in the `config.xml` file:
 
 **Key Updates**
 
-1. Root <widget> Tag Update: Add xmlns:tools="[http://schemas.android.com/tools](http://schemas.android.com/tools)" so Cordova can apply Android Manifest merger rules.
+1. Root `<widget>` tag update: Add `xmlns:tools="http://schemas.android.com/tools"` so Cordova can apply Android Manifest Merger rules.
 
-2. Android Platform Block: Add <platform name="android"> to group all Android-specific configurations.
+2. Android platform block: Add `<platform name="android">` to group all Android-specific configurations.
 
-3. Minimum SDK Setting: Add <preference name="android-minSdkVersion" value="29" /> to satisfy the Halo SDK requirements.
+3. Minimum SDK setting: Add `<preference name="android-minSdkVersion" value="29" />` to satisfy the Halo SDK requirements.
 
 4. Manifest Modification: Add an <edit-config> block targeting app/src/main/AndroidManifest.xml to inject tools:replace="android:label". This ensures your app's name takes priority over the Halo SDK's SoftPos label during compilation.
 
