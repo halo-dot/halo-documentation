@@ -8,12 +8,16 @@ tags:
 
 #### 1. Download the Test App
 
-Download our test app from <a href="https://github.com/halo-dot/test_app-android_sdk" target="_blank">GitHub</a> .
+Download our test app from <a href="{{REPO_URL}}" target="_blank" rel="noopener noreferrer">GitHub</a>.
+
+<hr/>
 
 #### 2. Configure The Test App
 
-Open `app/src/main/java/za/co/synthesis/halo/halotestapp/Config.kt` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 
+Open `{{CONFIG_PATH}}` and replace the placeholder values of `PRIVATE_KEY_PEM`, `ISSUER`, and `USERNAME` with your own values.<br/> 
 You will need the private key you used to generate your public key, your issuer name, and your username (you can use the email or phone number used to register).
+
+<hr/>
 
 ```kotlin
 object Config {
@@ -26,17 +30,19 @@ object Config {
     const val KSK = "{{KSK}}"
 }
 ```
+<hr/>
 
 Open the `local.properties` file and replace the placeholder values of `aws.accessKey` and `aws.secretKey`.<br/>
 These credentials are sensitive and should not be committed to source control. Add the credentials into a local.properties file:
 
 ```properties
-sdk.dir=~/Library/Android/sdk
 aws.accessKey={{your_access_key}}
 aws.secretKey={{your_secret_key}}
 ```
 
 `sdk.dir` specifies the location of the Android SDK on your file system.
+
+<hr/>
 
 #### 3. Gradle Setup
 

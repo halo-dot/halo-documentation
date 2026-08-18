@@ -32,7 +32,7 @@ You'll need the following before getting started:
 
 Before integrating the SDK into your app, you'll need to set up JWT authentication on your backend. This involves generating RSA keys and configuring token signing — the SDK uses these tokens for all API requests.
 
-Follow the [JWT Integration Guide](./jwt) to get that sorted first. Once your backend can generate valid JWT tokens, come back here and continue with installation.
+Follow the [JWT Integration Guide](/docs/documentations/sdk/jwt) to get that sorted first. Once your backend can generate valid JWT tokens, come back here and continue with installation.
 
 ## Installation
 
@@ -49,7 +49,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.93")
+    .package(id: "synthesis.halosdk", from: "1.0.95")
 
 ]
 ```
@@ -126,11 +126,21 @@ The SDK checks device capabilities and throws if the device doesn't support Tap 
 
 **Production base URL:** In production, the SDK automatically derives the API base URL from the JWT token's `aud` (audience) claim. For example, if the token's `aud` is `kernelserver.{xyz}.prod.haloplus.io`, the SDK uses `https://kernelserver.{xyz}.prod.haloplus.io` as the base URL. This means the production URL is never hardcoded — it comes from your backend's token configuration.
 
+
 ### 2. Start a Payment
 
 Starting a contactless payment must be initiated by a clear user action, such as tapping a button, in accordance with Apple’s Tap to Pay on iPhone user experience requirements.
 
 ```swift
+
+guard let passthroughFields = HaloPassthroughFields([
+    "streetAddress": "34 Melrose Boulevard Floor 1",
+    "city": "Johannesburg",
+    "stateProvince": "GP",
+    "countryCode": "ZA",
+]) else {
+    fatalError("Invalid passthrough fields")
+}
 
 let result = await HaloSDK.startContactlessPayment(
 
@@ -138,7 +148,9 @@ let result = await HaloSDK.startContactlessPayment(
 
     currency: "ZAR",
 
-    merchantReference: "order_12345"
+    merchantReference: "order_12345",
+
+    passthroughFields: passthroughFields
 
     // type: .purchase (default) or .refund
 
@@ -146,7 +158,20 @@ let result = await HaloSDK.startContactlessPayment(
 
 ```
 
-This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes.
+This brings up Apple's card reader UI. The customer taps their card on the iPhone, and a result is returned. `merchantReference` is an application-defined identifier used to correlate the payment with an internal order or transaction. It is returned unchanged in the payment receipt and can be used for reconciliation or support purposes. `passthroughFields` is **required** on every payment and must include merchant address details (`streetAddress`, `city`, `stateProvince`, `countryCode`) are covered in [Passthrough Fields](#passthrough-fields).
+
+
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `amountMinor` | `Int` | Yes | Amount in minor currency units (e.g. `1500` = 15.00) |
+| `currency` | `String` | Yes | ISO 4217 currency code (e.g. `"ZAR"`, `"USD"`) |
+| `merchantReference` | `String` | Yes | Your reference for this transaction (max 64 characters) |
+| `passthroughFields` | `HaloPassthroughFields?` | Yes | Opaque JSON forwarded to the backend — see [Passthrough Fields](#passthrough-fields) |
+| `type` | `HaloTransactionType` | No | `.purchase` (default) or `.refund` |
+
 
 ### 3. Handle the Result
 
@@ -232,6 +257,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `readerMemoryFull` | `readerMemoryFull` | Reader memory full | Show: "Reader memory is full. Please remove one or more cards from Apple Wallet and try again." |
 | `merchantBlocked` | `merchantBlocked` | Merchant blocked (exceeded device limit) | Show generic error alert |
 | `invalidMerchant` | `invalidMerchant` | Invalid merchant configuration | Contact support to verify merchant enrollment |
+| `invalidPassthroughFields` | — | Missing or empty required passthrough address fields | Include non-empty `streetAddress`, `city`, `stateProvince`, and `countryCode` |
 | `notAllowed` | `notAllowed` | Entitlement or configuration issue | Contact support to verify merchant enrollment |
 | `storeAndForwardNotAllowed` | `storeAndForwardNotAllowed` | Store and forward not allowed | Check offline payment configuration |
 | `storeAndForwardSessionExpired` | `storeAndForwardSessionExpired` | Store and forward session expired | Check offline payment configuration |
@@ -659,8 +685,15 @@ Here's a comprehensive example of how to handle payment errors in your consumer 
 let result = await HaloSDK.startContactlessPayment(
     amountMinor: 2500,
     currency: "USD",
-    merchantReference: "order_123"
+    merchantReference: "order_123",
+    passthroughFields: HaloPassthroughFields([
+        "streetAddress": "34 Melrose Boulevard Floor 1",
+        "city": "Johannesburg",
+        "stateProvince": "GP",
+        "countryCode": "ZA",
+    ])!
 )
+
 
 switch result {
 case .approved(let receipt):
@@ -1105,6 +1138,90 @@ case .declined(let errorCode, let errorMessage):
 - The card must be physically present — this isn't a "card-not-present" refund
 
 - Use your own reference linking (e.g., `refund_order_12345`) to tie refunds to original transactions
+
+## Passthrough Fields
+
+Passthrough lets you attach required JSON to an Apple Tap to Pay transaction — for example merchant address and, when supported, installments. Use only keys your payment processor documents and supports (this can include fields such as tip or pre-auth flags when your processor adds them).
+
+passthroughFields is required on every startContactlessPayment call. The SDK validates that these address keys are present as non-empty strings:
+
+- `streetAddress`
+- `city`
+- `stateProvince`
+- `countryCode`
+
+Additional keys are forwarded unchanged to the Halo Dot backend and your payment processor. They are **not** returned on `HaloPaymentResult` — keep your own copy if you need them after the payment.
+
+If any required address field is missing, empty, whitespace-only, or not a `String`, the payment is declined with `HaloErrorCode.invalidPassthroughFields` before the card reader UI appears.
+
+
+
+### API
+
+```swift
+@MainActor
+public static func startContactlessPayment(
+    amountMinor: Int,
+    currency: String,
+    merchantReference: String,
+    passthroughFields: HaloPassthroughFields,
+    type: HaloTransactionType = .purchase
+) async -> HaloPaymentResult
+```
+
+Create values with `HaloPassthroughFields`. The initializer returns `nil` when the dictionary cannot be encoded as JSON (for example if a value is not a JSON-compatible type).
+
+### Example
+
+Address fields are mandatory. Installments (and other processor keys) can be sent in the same flat `passthroughFields` object:
+
+```swift
+guard let passthrough = HaloPassthroughFields([
+    "streetAddress": "34 Melrose Boulevard Floor 1",
+    "city": "Johannesburg",
+    "stateProvince": "GP",
+    "countryCode": "ZA",
+    "installments": 3
+]) else {
+    // Dictionary could not be encoded as JSON — fix values before starting payment
+    return
+}
+
+let result = await HaloSDK.startContactlessPayment(
+    amountMinor: 1500,
+    currency: "ZAR",
+    merchantReference: "order_12345",
+    passthroughFields: passthrough
+)
+```
+
+Equivalent JSON payload:
+
+```json
+{
+  "streetAddress": "34 Melrose Boulevard Floor 1",
+  "city": "Johannesburg",
+  "stateProvince": "GP",
+  "countryCode": "ZA",
+  "installments": 3
+}
+```
+Always include the four address keys. Omit unused optional keys such as `installments` if your processor does not need them.
+
+### Example keys
+
+Confirm supported keys with your processor integration. Common examples from Halo integrations:
+
+| Key | Example | Required | Typical use |
+|-----|---------|----------|-------------|
+| `streetAddress` | `"34 Melrose Boulevard Floor 1"` | Yes | Merchant / billing address line |
+| `city` | `"Johannesburg"` | Yes | City |
+| `stateProvince` | `"GP"` | Yes | State or province code |
+| `countryCode` | `"ZA"` | Yes | ISO country code |
+| `installments` | `3` | No | Installment purchase |
+
+
+The SDK enforces the four address keys. Other keys are not validated by the SDK — invalid or unknown optional keys are handled by the backend/processor.
 
 ## Security Validation
 

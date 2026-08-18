@@ -1,46 +1,42 @@
 # Integration Guide for Flutter Plugin Release 2.0
 
-A production-focused guide to integrating the **Halo Dot SDK** via the **halo_sdk_flutter_plugin** in a Flutter Android application.
+A production-focused guide to integrating the <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide" target="_blank">**Halo Dot SDK**</a> via the <a href="https://pub.dev/packages/halo_sdk_flutter_plugin" target="_blank">**halo_sdk_flutter_plugin**</a> in a Flutter Android application.
 
 > **Scope**: Android-only at present. This guide consolidates requirements, environment setup, installation, JWT and backend integration, usage patterns, testing, and troubleshooting.
-
-![Halo Dot SDK Architecture](https://static.dev.haloplus.io/static/mpos/readme/assets/full_process_MIPS_1200.png)
-
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Requirements](#requirements)
-- [Developer Portal Registration](#developer-portal-registration)
-  - [Registration Steps](#registration-steps)
-- [Getting Started](#getting-started)
-  - [Create/Prepare the Flutter App](#createprepare-the-flutter-app)
-  - [Environment](#environment)
-  - [Plugin Installation](#plugin-installation)
-- [Mobile Backend Requirements](#mobile-backend-requirements)
-  - [JWT](#jwt)
-  - [JWT Lifetime](#jwt-lifetime)
-  - [JWT Signing Public Key Format](#jwt-signing-public-key-format)
-  - [JWT Claims](#jwt-claims)
-- [Usage in Your Flutter App](#usage-in-your-flutter-app)
-  - [Android Permissions](#android-permissions)
-  - [Requesting Runtime Permissions](#requesting-runtime-permissions)
-  - [Extend `HaloActivity` on Android](#extend-haloactivity-on-android)
-  - [Implement Halo Callbacks](#implement-halo-callbacks)
-  - [Initialize the SDK](#initialize-the-sdk)
-  - [Start a Transaction](#start-a-transaction)
-- [Documentation](#documentation)
-- [Testing](#testing)
-- [FAQ / Troubleshooting](#faq--troubleshooting)
+- [Integration Guide for Flutter Plugin Release 2.0](#integration-guide-for-flutter-plugin-release-20)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Requirements](#requirements)
+  - [Developer Portal Registration](#developer-portal-registration)
+    - [Registration Steps](#registration-steps)
+  - [Getting Started](#getting-started)
+    - [Create/Prepare the Flutter App](#createprepare-the-flutter-app)
+    - [Environment](#environment)
+    - [Plugin Installation](#plugin-installation)
+  - [Mobile Backend Requirements](#mobile-backend-requirements)
+    - [JWT Generation.](#jwt-generation)
+  - [Usage in Your Flutter App](#usage-in-your-flutter-app)
+    - [Android Permissions](#android-permissions)
+    - [Requesting Runtime Permissions](#requesting-runtime-permissions)
+    - [Extend `HaloActivity` on Android](#extend-haloactivity-on-android)
+    - [Implement Halo Callbacks](#implement-halo-callbacks)
+    - [Initialize the SDK](#initialize-the-sdk)
+    - [Start a Transaction](#start-a-transaction)
+  - [Documentation](#documentation)
+  - [Testing](#testing)
+  - [FAQ / Troubleshooting](#faq--troubleshooting)
 
----
+<hr/>
 
 ## Overview
 
-The **Halo Dot SDK** is an **isolating MPoC SDK** for payment processing with attestation and monitoring capabilities. The architecture diagram above illustrates the SDK boundary, integrator touchpoints, and interactions with third‑party payment gateways.
+The <a href="https://docs.halodot.io/docs/documentations/sdk/sdk-integration-guide" target="_blank">**Halo Dot SDK**</a> is an **isolating MPoC SDK** for payment processing with attestation and monitoring capabilities. The architecture diagram below illustrates the SDK boundary, integrator touchpoints, and interactions with third‑party payment gateways.
 
----
+![Halo Dot SDK Architecture](https://static.dev.haloplus.io/static/mpos/readme/assets/full_process_MIPS_1200.png)
 
 ## Requirements
 
@@ -64,13 +60,13 @@ You’ll need the following to integrate the Halo Dot SDK:
 > - `compileSdkVersion`: **34** or higher
 > - `targetSdkVersion`: **34** or higher
 
----
-
+<hr/>
 ## Developer Portal Registration
 
-You must register on the **QA/UAT** environment before testing in production. The developer portal allows you to:
+You are required to register on our QA (UAT — User Acceptance Testing) environment before testing in production.
+The developer portal enables you to obtain the following:
 
-1. Accept the Non Disclosure Agreement(NDA)
+1. Accept the Non-Disclosure Agreement (NDA)
 2. Access the SDK
 3. Submit your public key (for JWT verification)
 4. Obtain JWT configuration details (issuer, audience/host, etc.)
@@ -93,13 +89,14 @@ You must register on the **QA/UAT** environment before testing in production. Th
 
    <img src="https://static.dev.haloplus.io/static/mpos/readme/assets/access_key.png" alt="access key." width="450" />
 
----
+<hr/>
 
 ## Getting Started
 
 ### Create/Prepare the Flutter App
 
-Create a new Flutter app or integrate into an existing one. **Android** must be added (currently the only supported platform).
+Create a new Flutter app or integrate into an existing one. <br/>
+**Android** must be added (currently the only supported platform).
 
 ```bash
 # Using Flutter
@@ -139,11 +136,12 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    flutter pub add permission_handler
    ```
 
-3. **Configure Halo Maven access** (SDK binaries are hosted on AWS S3). Retrieve your `accesskey` and `secretkey` from the **Developer Portal** and add them to `android/local.properties` (create the file if it doesn’t exist):
+3. **Configure Halo Maven access** (SDK binaries are hosted on AWS S3). <br/>
+   Retrieve your `accesskey` and `secretkey` from the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">**Developer Portal**</a> and add them to `android/local.properties` (create the file if it doesn’t exist):
 
    ```properties
-   aws.accesskey=<accesskey>
-   aws.secretkey=<secretkey>
+   aws.accesskey={{your_access_key}}
+   aws.secretkey={{your_secret_key}}
    ```
 
    > **Note**: Keys are case‑sensitive. Keep them out of source control.
@@ -160,95 +158,15 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    }
    ```
 
----
-
 ## Mobile Backend Requirements
 
-### JWT
+### JWT Generation.
 
-All calls to the Halo SDK require a **valid JWT**. The values needed to build the JWT (issuer, audience/host, etc.) are available in the **Developer Portal** (see [Registration Steps](#registration-steps)). We recommend using <a href="https://pub.dev/packages/dart_jsonwebtoken" target="_blank">dart_jsonwebtoken</a> to generate JWTs.
+All calls to the Halo SDK require a valid JWT. 
 
-Create two files: `config.dart` (credentials) and `jwt_token.dart` (JWT creation).
+To keep your private key secure, JWTs **must not** be generated directly on the mobile device. Instead, your app should request a signed JWT from your backend server.
 
-**`config.dart`**
-
-```dart
-class Config {
-  static const String privateKeyPem = String.fromEnvironment('PRIVATE_KEY', defaultValue: '');
-  static const String issuer = '{get from the Developer Portal}';
-  static const String username = '{get from the Developer Portal}';
-  static const String merchantId = '{get from the Developer Portal}';
-  static const String host = '{get from the Developer Portal}';
-  static const String aud = '{get from the Developer Portal}';
-  static const String ksk = '{get from the Developer Portal}';
-}
-```
-
-**`jwt_token.dart`**
-
-```dart
-import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import './config.dart';
-
-class JwtToken {
-  static String getJwt() {
-    final jwt = JWT(
-      {
-        'aud_fingerprints': Config.aud,
-        'ksk_pin': Config.ksk,
-        'usr': Config.username,
-      },
-      audience: Audience([Config.host]),
-      issuer: Config.issuer,
-      subject: Config.merchantId,
-    );
-
-    final key = RSAPrivateKey(Config.privateKeyPem);
-    // IMPORTANT: Use the algorithm configured for your tenant in the Developer Portal.
-    // Example shows RS512; some environments may require RS256.
-    final token = jwt.sign(key, algorithm: JWTAlgorithm.RS512);
-    return token;
-  }
-}
-```
-
-> **Security**
->
-> - Do **not** commit the private key to your repo. Use secure configuration (env vars, secret managers).
-> - Provide the JWT via the SDK callback `onRequestJWT`.
-
-### JWT Lifetime
-
-Keep JWT lifetimes **short** to minimize risk. A lifetime of **15 minutes** is recommended.
-
-### JWT Signing Public Key Format
-
-Publish the JWT public key as a **certificate** in a text‑friendly format (e.g., **Base64‑encoded PEM** `.crt`/`.pem`).
-
-### JWT Claims
-
-The JWT must include the following (standard unless noted):
-
-| Field | Type | Notes |
-| --- | --- | --- |
-| `alg` | String | RSA algorithm used for signing (e.g., **RS256** or **RS512**). Follow the value configured for your environment to maintain non‑repudiation. |
-| `sub` | String | Payment Processor Merchant‑User ID or Application ID. |
-| `iss` | String | Unique identifier for the JWT issuer (as configured by Synthesis/Halo). Retrieve from the **Developer Portal**. |
-| `aud` | String | URL of the Halo server TLS endpoint (environment‑specific, e.g. `kernelserver.qa.haloplus.io`). |
-| `usr` | String | Username of the user performing the transaction. |
-| `iat` | NumericDate | UTC issuance timestamp. |
-| `exp` | NumericDate | UTC expiration timestamp. |
-| `aud_fingerprints` | String | CSV of expected SHA‑256 fingerprints for the Kernel Server TLS endpoint (supports rotation). |
-
-To validate values, POST to:
-
-```
-https://kernelserver.qa.haloplus.io/<sdk-version>/tokens/checkjwt
-```
-
-with **Bearer** auth.
-
----
+Refer to the **[JWT Integration Guide](/docs/documentations/sdk/jwt)** for step-by-step instructions on setting up your backend service, generating RSA key pairs, and implementing the server-side authentication endpoint in your preferred language.
 
 ## Usage in Your Flutter App
 
@@ -266,7 +184,6 @@ Declare required permissions in `AndroidManifest.xml`:
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
@@ -391,6 +308,9 @@ class HaloCallbacks implements IHaloCallbacks {
   }
 }
 ```
+When `onRequestJWT` is invoked by the Halo Dot SDK, call the provided `callback` with your JWT, as shown above.
+
+The plugin allows up to 30 seconds for the callback to be invoked. If your JWT fetch (e.g. a network call to your backend) takes longer than that, or fails without calling the callback, the plugin will time out the request on your behalf so the SDK is not left waiting indefinitely.
 
 ### Initialize the SDK
 
@@ -426,20 +346,22 @@ Sdkflutterplugin.startTransaction(1.00, 'Some merchant reference', 'ZAR');
 
 From this point, UI messages and results will arrive via your callbacks. Use them to update your UI accordingly.
 
----
+ If your application also needs to use the camera (e.g. for QR/barcode scanning), you need to coordinate access with the SDK, since it uses the camera internally as part of its own monitoring. Call `requestCameraUsage()` before you open your own camera, and `returnCameraUsage()` once you're done with it:
+```dart
+await Sdkflutterplugin.requestCameraUsage();
+// ... open your camera, scan, etc ...
+await Sdkflutterplugin.returnCameraUsage();
+```
+If the SDK reclaims the camera while your app still has it in use, `onCameraControlLost` will be invoked on your `IHaloCallbacks` implementation.
 
 ## Documentation
 
-- **<a href="/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
-
----
+- **<a href="https://docs.halodot.io/docs/documentations/sdk/getting-started-with-sdk" target="_blank">Halo Dot SDK Docs</a>**
 
 ## Testing
 
 - All transactions are **null and void** until the **NDA** is executed.
 - You can test with a virtual card, e.g., **<a href="https://apkpure.com/visa-mobile-cdet/com.visa.app.cdet" target="_blank">Visa Mobile CDET</a>**.
-
----
 
 ## FAQ / Troubleshooting
 
@@ -482,5 +404,3 @@ See the configuration above — define it in `local.properties` and read it from
 - Ensure `aws.accesskey` and `aws.secretkey` are correctly set in `local.properties`
 
 > **Algorithm note**: Some snippets show `RS512` while claim tables reference `RS256`. **Always use the algorithm specified for your tenant in the Developer Portal**. If mismatched, signature validation will fail.
-
----

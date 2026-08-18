@@ -1,0 +1,364 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Push to Terminal Integration Guide
+
+Integration with the Halo backend to manage devices for Push to Terminal.
+
+## 1. Overview
+
+Push to Terminal allows a merchant system to register devices and push payment requests to them via Firebase push notification. The device management API provides CRUD operations for managing devices. Push payment is initiated via `POST /consumer/push`.
+
+<span/>
+
+## 2. Device Management API
+
+### 2.1 List Devices
+
+Retrieve all devices registered by the authenticated user.
+
+<mark style={{color:'green'}}>`GET`</mark> `https://kernelserver.{env}.haloplus.io/devices`
+
+<span/>
+
+**Path Parameters**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+
+**Headers**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead) |
+
+<span/>
+
+<Tabs>
+  <TabItem value="ok" label="200: OK">
+```json
+[
+  {
+    "id": "07b6cbe3-c4c3-4214-b279-ccb516c26573",
+    "deviceInstallationId": "AA1A109DF2C4208F3ABBC062A343464C",
+    "friendlyName": "Front Counter",
+    "hasFirebaseToken": true,
+    "createdAt": "2026-07-02T12:41:59.344Z"
+  }
+]
+```
+  </TabItem>
+  <TabItem value="unauth" label="401: Unauthorized">
+```json
+{
+  "httpStatusCode": 401,
+  "errorCode": 100,
+  "message": "E100 (Unauthorised): Unauthorized"
+}
+```
+  </TabItem>
+</Tabs>
+
+<span/>
+
+### 2.2 Register Device
+
+Register a device with its Firebase token and friendly name. If the device already exists (same deviceInstallationId + user), it will be updated.
+
+<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/devices`
+
+<span/>
+
+**Path Parameters**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+
+**Headers**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| Content-Type<mark style={{color:'red'}}>\*</mark> | String | Content Type of the Request: application/json |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead) |
+
+**Request Body**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| deviceInstallationId<mark style={{color:'red'}}>\*</mark> | String | The device installation ID from the Halo.Go app |
+| firebaseToken<mark style={{color:'red'}}>\*</mark> | String | Firebase Cloud Messaging token for push notifications |
+| friendlyName<mark style={{color:'red'}}>\*</mark> | String | Human-readable name for the device (max 32 characters) |
+
+<span/>
+
+<Tabs>
+  <TabItem value="ok" label="201: Created">
+```json
+{
+  "id": "07b6cbe3-c4c3-4214-b279-ccb516c26573",
+  "deviceInstallationId": "AA1A109DF2C4208F3ABBC062A343464C",
+  "friendlyName": "Front Counter"
+}
+```
+  </TabItem>
+</Tabs>
+
+<span/>
+
+### 2.3 Update Device Friendly Name
+
+Update the friendly name of a registered device.
+
+<mark style={{color:'orange'}}>`PUT`</mark> `https://kernelserver.{env}.haloplus.io/devices/:deviceId`
+
+<span/>
+
+**Path Parameters**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+| deviceId<mark style={{color:'red'}}>\*</mark> | String | The device ID (UUID from `GET /devices`) |
+
+**Headers**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| Content-Type<mark style={{color:'red'}}>\*</mark> | String | Content Type of the Request: application/json |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead) |
+
+**Request Body**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| friendlyName<mark style={{color:'red'}}>\*</mark> | String | Name for the device (1-32 characters) |
+
+<span/>
+
+<Tabs>
+  <TabItem value="ok" label="200: OK">
+```json
+{
+  "id": "07b6cbe3-c4c3-4214-b279-ccb516c26573",
+  "friendlyName": "Back Office"
+}
+```
+  </TabItem>
+  <TabItem value="notfound" label="500: Not Found">
+```json
+{
+  "httpStatusCode": 500,
+  "errorCode": 134,
+  "message": "E134 (DataError): Device not found or not associated with this user"
+}
+```
+  </TabItem>
+</Tabs>
+
+<span/>
+
+### 2.4 Remove Device
+
+Remove a device from the user's list. This is a permanent deletion.
+
+<mark style={{color:'red'}}>`DELETE`</mark> `https://kernelserver.{env}.haloplus.io/devices/:deviceId`
+
+<span/>
+
+**Path Parameters**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+| deviceId<mark style={{color:'red'}}>\*</mark> | String | The device ID (UUID from `GET /devices`) |
+
+**Headers**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead) |
+
+<span/>
+
+<Tabs>
+  <TabItem value="ok" label="200: OK">
+```json
+{
+  "id": "07b6cbe3-c4c3-4214-b279-ccb516c26573"
+}
+```
+  </TabItem>
+  <TabItem value="notfound" label="500: Not Found">
+```json
+{
+  "httpStatusCode": 500,
+  "errorCode": 134,
+  "message": "E134 (DataError): Device not found or not associated with this user"
+}
+```
+  </TabItem>
+</Tabs>
+
+<span/>
+
+## 3. Push Payment API
+
+### 3.1 Push Payment to Device
+
+Push a payment request to a registered device via Firebase push notification.
+
+<mark style={{color:'blue'}}>`POST`</mark> `https://kernelserver.{env}.haloplus.io/consumer/push`
+
+<span/>
+
+**Path Parameters**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| env<mark style={{color:'red'}}>\*</mark> | String | The backend environment \[dev, qa, prod] |
+
+**Headers**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| Content-Type<mark style={{color:'red'}}>\*</mark> | String | Content Type of the Request: application/json |
+| x-api-key<mark style={{color:'red'}}>\*</mark> | String | The API Key retrieved from the Merchant Portal (JWT can be used instead) |
+| Authorization<mark style={{color:'red'}}>\*</mark> | String | The JWT retrieved from logging in. (API Key can be used instead) |
+
+**Request Body**
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| deviceId<mark style={{color:'red'}}>\*</mark> | String | The device ID (UUID from `GET /devices`) |
+| amount<mark style={{color:'red'}}>\*</mark> | Number | Payment amount (minimum 0.01) |
+| currency<mark style={{color:'red'}}>\*</mark> | String | 3-letter ISO currency code (e.g. ZAR, USD) |
+| merchantReference<mark style={{color:'red'}}>\*</mark> | String | Unique reference for this payment |
+
+<span/>
+
+<Tabs>
+  <TabItem value="sent" label="201: Push Sent">
+```json
+{
+  "reference": "cef48d2a-c634-4edc-b891-48cd1d52249f",
+  "status": "sent"
+}
+```
+  </TabItem>
+  <TabItem value="notfound" label="500: Device Not Found">
+```json
+{
+  "httpStatusCode": 500,
+  "errorCode": 134,
+  "message": "E134 (DataError): Device not found or not associated with this user"
+}
+```
+  </TabItem>
+  <TabItem value="validation" label="400: Validation Error">
+```json
+{
+  "httpStatusCode": 400,
+  "errorCode": 103,
+  "message": "E103 (InvalidJSON): should have required property 'amount'"
+}
+```
+  </TabItem>
+</Tabs>
+
+<span/>
+
+## 4. Integration Example
+
+<Tabs>
+  <TabItem value="node" label="Node.js">
+
+```javascript
+const axios = require('axios');
+
+const BASE_URL = 'https://kernelserver.prod.haloplus.io';
+const API_KEY = 'your-api-key';
+const headers = { 'x-api-key': API_KEY, 'Content-Type': 'application/json' };
+
+// Step 1: Register a device
+await axios.post(`${BASE_URL}/devices`, {
+  deviceInstallationId: 'AA1A109DF2C4208F3ABBC062A343464C',
+  firebaseToken: 'fcm-token-from-device',
+  friendlyName: 'Front Counter'
+}, { headers });
+
+// Step 2: List devices
+const devices = await axios.get(`${BASE_URL}/devices`, {
+  headers: { 'x-api-key': API_KEY }
+});
+
+// Step 3: Update device friendly name
+const device = devices.data[0];
+await axios.put(`${BASE_URL}/devices/${device.id}`, {
+  friendlyName: 'Back Office'
+}, { headers });
+
+// Step 4: Push payment to device
+const push = await axios.post(`${BASE_URL}/consumer/push`, {
+  deviceId: device.id,
+  amount: 25.00,
+  currency: 'ZAR',
+  merchantReference: 'ORDER-001'
+}, { headers });
+console.log('Push reference:', push.data.reference);
+
+// Step 5: Remove a device
+await axios.delete(`${BASE_URL}/devices/${device.id}`, {
+  headers: { 'x-api-key': API_KEY }
+});
+```
+
+  </TabItem>
+  <TabItem value="curl" label="cURL">
+
+```bash
+# Register a device
+curl -X POST https://kernelserver.prod.haloplus.io/devices \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceInstallationId": "AA1A109DF2C4208F3ABBC062A343464C",
+    "firebaseToken": "fcm-token-from-device",
+    "friendlyName": "Front Counter"
+  }'
+
+# List devices
+curl -X GET https://kernelserver.prod.haloplus.io/devices \
+  -H "x-api-key: YOUR_API_KEY"
+
+# Update device friendly name
+curl -X PUT https://kernelserver.prod.haloplus.io/devices/07b6cbe3-c4c3-4214-b279-ccb516c26573 \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "friendlyName": "Back Office"
+  }'
+
+# Push payment to device
+curl -X POST https://kernelserver.prod.haloplus.io/consumer/push \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceId": "07b6cbe3-c4c3-4214-b279-ccb516c26573",
+    "amount": 25.00,
+    "currency": "ZAR",
+    "merchantReference": "ORDER-001"
+  }'
+
+# Remove a device
+curl -X DELETE https://kernelserver.prod.haloplus.io/devices/07b6cbe3-c4c3-4214-b279-ccb516c26573 \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+  </TabItem>
+</Tabs>
