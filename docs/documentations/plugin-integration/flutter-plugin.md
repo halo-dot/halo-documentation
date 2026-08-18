@@ -140,8 +140,8 @@ fvm spawn 3.27.3 create . --project-name my_sdk_flutter_plugin --org za.co.synth
    Retrieve your `accesskey` and `secretkey` from the <a href="https://go.developerportal.qa.haloplus.io/" target="_blank">**Developer Portal**</a> and add them to `android/local.properties` (create the file if it doesn’t exist):
 
    ```properties
-   aws.accesskey=<accesskey>
-   aws.secretkey=<secretkey>
+   aws.accesskey={{your_access_key}}
+   aws.secretkey={{your_secret_key}}
    ```
 
    > **Note**: Keys are case‑sensitive. Keep them out of source control.

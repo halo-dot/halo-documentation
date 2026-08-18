@@ -155,9 +155,9 @@ npx cordova plugin add halo-cordova-plugin
    
    (create the file if it doesn’t exist):
 
-```bash
-aws.accesskey=<accesskey>
-aws.secretkey=<secretkey>
+```properties
+aws.accesskey={{your_access_key}}
+aws.secretkey={{your_secret_key}}
 ```
 > **Note**: Keys are case‑sensitive. Keep them out of source control.
 
@@ -179,13 +179,13 @@ You will need to modify the following in the `config.xml` file:
 
 **Key Updates**
 
-1. Root `<widget>` tag update: Add `xmlns:tools="http://schemas.android.com/tools"` so Cordova can apply Android Manifest Merger rules.
+1. Root `<widget>` Tag Update: Add xmlns:tools="[http://schemas.android.com/tools](http://schemas.android.com/tools)" so Cordova can apply Android Manifest merger rules.
 
-2. Android platform block: Add `<platform name="android">` to group all Android-specific configurations.
+2. Android Platform Block: Add `<platform name="android">` to group all Android-specific configurations.
 
-3. Minimum SDK setting: Add `<preference name="android-minSdkVersion" value="29" />` to satisfy the Halo SDK requirements.
+3. Minimum SDK Setting: Add `<preference name="android-minSdkVersion" value="29" />` to satisfy the Halo SDK requirements.
 
-4. Manifest Modification: Add an <edit-config> block targeting app/src/main/AndroidManifest.xml to inject tools:replace="android:label". This ensures your app's name takes priority over the Halo SDK's SoftPos label during compilation.
+4. Manifest Modification: Add an `<edit-config>` block targeting app/src/main/AndroidManifest.xml to inject tools:replace="android:label". This ensures your app's name takes priority over the Halo SDK's SoftPos label during compilation.
 
 ```xml
 <?xml version='1.0' encoding='utf-8'?>
