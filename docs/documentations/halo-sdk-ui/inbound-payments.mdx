@@ -1,0 +1,93 @@
+---
+sidebar_position: 5
+---
+
+# Inbound Payments
+
+Besides charges you start with `HaloSdkUi.launch`, the SDK can be opened **by a payment that arrives from outside your app** — another app handing over a transaction, a `halo://` link, an App Link, or a scanned QR code.
+
+These are handled entirely by the SDK. Its own activity owns the intent filters, restores the branding and language cached by `HaloSdkUi.prepare`, brings the SDK up, and drives the transaction. **No host code runs**, and on a Flutter host no Flutter engine is started.
+
+:::note
+Because an inbound payment can arrive on a cold start, the appearance it paints itself with is the one cached by `prepare`. A host that never calls `prepare` gets Halo defaults on that path.
+:::
+
+## The Three Doors
+
+| Door | Shape | What identifies it |
+|------|-------|--------------------|
+| App-to-app | `Intent` with `transaction_id` + `jwt` extras | Action `za.co.synthesis.halo.transaction` |
+| Custom scheme | `halo://pay?amount=…&currency=…&merchantReference=…` | Your `scheme` (see below) |
+| App Link | `https://<your-domain>/…` | Your App Link host (see below) |
+
+A URL comes in two shapes. The **long** form describes the payment outright — `…?id=…&amount=…&configJwt=eyJ…` — and the SDK has everything it needs from the URL alone. The **short** form is a pointer — `https://<domain>/<reference>` with nothing chargeable in the query — standing for a payment held server-side, which the SDK resolves against the Halo kernel before it brings itself up.
+
+## Setup
+
+### 1. Your URL scheme
+
+The SDK's intent filter reads the scheme from a string resource, so an app overrides it and two brands on one device never claim the same links. It defaults to `halo`.
+
+```kotlin
+// build.gradle.kts — android { defaultConfig { ... } }
+resValue("string", "halo_url_scheme", "yourbrand")
+```
+
+Tell the SDK the same value at runtime, so the parser knows which scheme is yours:
+
+```kotlin
+val config = HDConfig(
+    // ... other props
+    scheme = "yourbrand",
+)
+```
+
+:::caution
+The resource and `HDConfig.scheme` must match. The resource is what the intent filter is built from; `HDConfig.scheme` is the runtime half.
+:::
+
+### 2. Your App Link domain
+
+Only needed if your brand sends `https://` payment links. It defaults to empty — a filter that matches nothing.
+
+```kotlin
+// build.gradle.kts
+resValue("string", "halo_applink_host", "pay.yourbrand.com")
+```
+
+The filter is declared with `autoVerify`, so publish an `assetlinks.json` on that domain to have links open your app without a chooser.
+
+### 3. Your kernel, for short links
+
+A short App Link carries no `configJwt`, and resolving it is what *produces* the token — so there is no credential to take the kernel's address from, and the host has to name it. Every other call still reads its kernel off the credential it presents.
+
+```kotlin
+val config = HDConfig(
+    // ... other props
+    kernel = "kernelserver.qa.haloplus.io",
+    kernelPins = setOf("sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA="),
+)
+```
+
+`kernelPins` are SHA-256 SPKI fingerprints of that kernel's TLS certificate — the same values an `aud_fingerprints` claim carries. More than one is normal, so a certificate rotation cannot brick the SDK. Leaving it empty runs the link resolve unpinned, which is logged; anything authorised by a JWT is pinned by that JWT regardless.
+
+Leave `kernel` null if your links always carry their own JWT.
+
+### 4. Nothing in your manifest
+
+The SDK declares its own activity and filters, the translucent window used by `HDPresentation.SHEET`, and the payment kernel's PIN pad theme. There is nothing to add on your side.
+
+## Presentation
+
+An inbound payment arrives with no `launch` call to say how it wants to be presented, so it uses `HDConfig.presentation`. A brand that presents its own charges as a sheet should set it, so a payment looks the same however it arrived.
+
+## DebiCheck Mandates
+
+A DebiCheck mandate (the scheme's `TT3`) can arrive through the same doors — an app-to-app intent with `is_tap=false`, or a URL with `type=TT3`. The SDK recognises it and presents a mandate rather than a card payment:
+
+- the figure on screen is the **max collection amount** — the ceiling the debit order may collect up to, not a sum being taken now;
+- the tap screen shows the debit order day, the account it will be collected from, the creditor's description and the contract reference, so the payer can recognise what they are authorising;
+- the DebiCheck mark is shown alongside the accepted-scheme marks;
+- an approved mandate reports **Mandate Approved** with those same details, rather than a card receipt — nothing has been collected yet, so there is no card, scheme or authorisation code to show.
+
+Hosts need no code for this. The mandate's account and identity number are read back from the kernel's record before the charge, so the mandate is registered against what the backend holds rather than what the link claimed.

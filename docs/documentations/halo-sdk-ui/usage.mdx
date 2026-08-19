@@ -6,17 +6,50 @@ sidebar_position: 4
 
 The Halo UI SDK uses Kotlin Coroutines to provide a clean, asynchronous way to launch the UI and wait for a result.
 
+## Bringing the SDK Up
+
+Three calls bring the SDK up, and each should be made at the earliest moment it is possible to make it — see [The Four Calls](./introduction#the-four-calls).
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    HaloSdkUi.attach(this, savedInstanceState)  // first line — loads the payment kernel
+    val config = haloConfig()
+    HaloSdkUi.prepare(config)                   // at your splash — caches branding, warms artwork
+    lifecycleScope.launch {
+        HaloSdkUi.init(config)                  // once you have a session token
+    }
+}
+```
+
+| Call | Returns | Notes |
+|------|---------|-------|
+| `attach(activity, savedInstanceState)` | `Unit` | Also wires the Android lifecycle through to the SDK — do **not** forward `onStart`/`onResume`/`onPause`/`onStop` yourself. Cheap to call more than once. |
+| `prepare(config)` | `Unit` | Returns immediately; nothing it does can fail in a way you handle. |
+| `init(config)` | `HaloInitializationResult?` | Suspends until the SDK reports its real outcome (registration, attestation, kernel). `null` means a step failed before the SDK could report at all. Idempotent. |
+
+:::tip
+Skipping `attach` or `prepare` is legal and costs only speed — `init` does that work as well. The SDK logs a warning if `attach` runs late.
+:::
+
+### SDK Version
+
+`HaloSdkUi.sdkVersion` returns the Halo SDK's own version string, for a host that displays it. It is available before `init` — it is a property of the library, not of a running session.
+
+---
+
 ## Launching a Transaction
 
 `HaloSdkUi.launch` is a suspend function that opens the SDK UI and returns when the transaction completes.
 
 ### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `amount` | `BigDecimal?` | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
-| `merchantRef` | `String?` | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
-| `currency` | `HDCurrency?` | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `amount` | `BigDecimal?` | - | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
+| `merchantRef` | `String?` | - | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
+| `currency` | `HDCurrency?` | - | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
+| `presentation` | `HDPresentation` | `FULL_SCREEN` | Whether this charge takes over the screen or appears as a sheet over your app. |
 
 ### 1. Direct Transaction Mode
 
@@ -55,11 +88,39 @@ fun openKeypad() {
     }
 }
 ```
+
+### Presentation per charge
+
+`presentation` is chosen per launch, not per config, so a host can mix them freely: a quick tap as a sheet over the screen the merchant was on, the next one full-screen, and back again. Nothing is remembered between calls — each launch says what it wants and gets it.
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HDPresentation
+
+val result = HaloSdkUi.launch(
+    amount = BigDecimal("125.00"),
+    merchantRef = null,
+    currency = HDCurrency.ZAR,
+    presentation = HDPresentation.SHEET,
+)
+```
+
+Inbound payments have no `launch` call to say, so they use `HDConfig.presentation` instead — see [Presentation](./configuration#presentation).
+
+---
+
+## Runtime Changes
+
+| Call | Effect |
+|------|--------|
+| `HaloSdkUi.setThemeMode(HaloThemeMode.DARK)` | Switches light/dark/system at runtime |
+| `HaloSdkUi.setLanguage(HDLanguage.FRENCH)` | Switches the SDK's language at runtime |
+
 ---
 
 ## Handling Results
 
 The `launch` function returns a `HaloTransactionResult?` containing a `resultType`, transaction references, and (for completed transactions) a `receipt`.
+
 ### Result Types
 
 Common result types:
@@ -95,3 +156,9 @@ fun handleResult(result: HaloTransactionResult?) {
     }
 }
 ```
+
+### The Result Screen
+
+By default the SDK shows its own result and receipt screen before returning. Set `showTransactionResult = false` on your `HDConfig` to skip it and return to your app as soon as the transaction completes — the result is still returned from `launch` either way.
+
+A transaction the user cancelled never shows a result screen: a stop they asked for is not an outcome to report back to them.

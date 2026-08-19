@@ -9,9 +9,11 @@ The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for i
 ## 🚀 Features
 
 - **Ready-to-use UI**: Fullscreen transaction flow including amount entry, card reading, and success/failure states.
+- **Full screen or bottom sheet**: Present each charge as its own screen, or as a sheet over your app — chosen per transaction.
 - **Theming**: Light mode, dark mode, custom colors, shapes, and company logo.
 - **Simple API**: Launch a transaction and receive the result via Kotlin Coroutines.
 - **Localization**: Built-in translations for English, Afrikaans, Zulu, French, German, Spanish, and Portuguese — follows the device language by default.
+- **Inbound payments**: App-to-app intents, `halo://` links, App Links, and DebiCheck mandates are handled by the SDK natively, with no host code — see [Inbound Payments](./inbound-payments).
 
 ## 📋 Prerequisites
 
@@ -22,33 +24,61 @@ Before you begin, ensure your project meets the following requirements:
 - A `ComponentActivity` (or subclass such as `AppCompatActivity`) to host the SDK.
 
 :::info Activity Requirements
-The activity passed to `HDConfig` **must** be a `ComponentActivity` (or a subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
+The activity passed to `HDConfig` **must** be a `ComponentActivity` (or a subclass such as `AppCompatActivity` or `FlutterFragmentActivity`), since the SDK renders its UI with Jetpack Compose.
 :::
+
+## The Four Calls
+
+The host's entire view of the SDK is four calls, each made at the earliest moment it is possible to make it:
+
+| Call | When | Needs |
+|------|------|-------|
+| `HaloSdkUi.attach(activity, savedInstanceState)` | First line of `onCreate`, after `super.onCreate` | Nothing but the activity |
+| `HaloSdkUi.prepare(config)` | At your splash screen | Your `HDConfig` |
+| `HaloSdkUi.init(config)` | As soon as you have a session token | A session token |
+| `HaloSdkUi.launch(...)` | Per charge | — |
+
+The ordering is deliberate: each call needs strictly more than the one before it, so the bring-up cost spreads across your startup instead of piling up in front of a merchant holding a card. Skipping any of the first three is legal and costs only speed — the next call does that work as well.
+
+`attach` also wires the Android lifecycle through to the SDK, so you do **not** forward `onStart`, `onResume`, `onPause` or `onStop` yourself.
 
 ### Example Activity Declaration
 
 ```kotlin
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import za.co.synthesis.halo.sdk_ui.HaloSdkUi
 import za.co.synthesis.halo.sdk_ui.models.HDConfig
-import za.co.synthesis.halo.sdk_ui.models.HDMerchantDetails
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize SDK here
+        // 1. Hand the SDK its context — the most expensive step, so it goes first.
+        HaloSdkUi.attach(this, savedInstanceState)
+
+        // One config, used by both prepare and init.
         val config = HDConfig(
             activity = this,
-            merchantDetails = HDMerchantDetails(
-                packageName = packageName,
-                packageVersion = BuildConfig.VERSION_NAME,
-                merchantName = "My App",
-            ),
             onTokenRequest = { fetchTokenFromBackend() },
         )
-        val success = HaloSdkUi.init(config)
 
-        // ... set your own content if needed
+        // 2. Cache branding and warm the artwork. No token needed, returns at once.
+        HaloSdkUi.prepare(config)
+
+        // 3. Register the device and bring the SDK up.
+        lifecycleScope.launch {
+            val result = HaloSdkUi.init(config)
+            // result?.resultType / result?.errorCode carry why, if bring-up failed.
+        }
+
+        // ... set your own content
     }
 }
 ```
+
+:::note
+`prepare` and `init` must be given the **same** configuration. `prepare` caches the branding an inbound payment paints itself with, and `init` registers against it — different values mean a payment arriving cold looks like a different app.
+:::
