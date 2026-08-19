@@ -99,53 +99,58 @@ The SDK's permissions are automatically merged into your app's manifest, and the
 
 ### Initialization
 
-Initialize the SDK once, typically in your main activity's `onCreate`. The activity passed to `HDConfig` **must** be a `ComponentActivity` (or subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
+The host's view of the SDK is four calls, each made at the earliest moment it is possible to make it: `attach` (first line of `onCreate`), `prepare` (at your splash), `init` (once you have a session token) and `launch` (per charge). Each needs strictly more than the one before it, so bring-up cost spreads across your startup rather than piling up in front of a merchant holding a card. Skipping any of the first three is legal and costs only speed.
+
+`attach` also wires the Android lifecycle through to the SDK, so you do **not** forward `onStart`/`onResume`/`onPause`/`onStop` yourself.
+
+The activity passed to `HDConfig` **must** be a `ComponentActivity` (or subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
 
 **HDConfig parameters:**
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `activity` | `ComponentActivity` | - | The activity that will host the SDK UI. |
-| `merchantDetails` | `HDMerchantDetails` | - | Your app and company details. |
-| `onTokenRequest` | `() -> String` | - | Callback that must return a valid Halo SDK token. |
-| `showTransactionResult` | `Boolean` | `false` | Whether to show the SDK's built-in success/failure screens. |
+| `onTokenRequest` | `suspend () -> String` | - | Suspending callback that must return a valid Halo SDK token. |
+| `presentation` | `HDPresentation` | `FULL_SCREEN` | How inbound payments are presented — full screen, or a sheet over your app. |
+| `showTransactionResult` | `Boolean` | `true` | Whether to show the SDK's built-in success/failure screens. |
 | `theme` | `HDTheme` | `HDTheme()` | Colors, shapes, and logo configuration. |
 | `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow the system theme. |
 | `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Which card scheme logos are shown. |
 | `showDCC` | `Boolean` | `false` | Enable Dynamic Currency Conversion — see [DCC](#dynamic-currency-conversion-dcc). |
 | `language` | `HDLanguage?` | `null` | Pins the SDK language — see [Languages](#languages). |
+| `scheme` | `String` | `"halo"` | The custom URL scheme this brand's payment links arrive on. |
+| `kernel` | `String?` | `null` | The Halo kernel short App Links are resolved against. |
+| `kernelPins` | `Set<String>` | `emptySet()` | SHA-256 SPKI fingerprints for `kernel`'s TLS certificate. |
 
-#### HDMerchantDetails parameters:
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `packageName` | `String` | Your app's package name (e.g., `applicationContext.packageName`) |
-| `packageVersion` | `String` | Your app's version name (e.g., `"1.0.0"`) |
-| `merchantName` | `String` | Display name of your company shown in the SDK header |
+The merchant's name and details are not configured here — they come from the Halo backend record behind your token.
 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.HaloSdkUi
 import za.co.synthesis.halo.sdk_ui.models.HDConfig
-import za.co.synthesis.halo.sdk_ui.models.HDMerchantDetails
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 1. Hand the SDK its context — the most expensive step, so it goes first.
+        HaloSdkUi.attach(this, savedInstanceState)
+
         val config = HDConfig(
             activity = this,
-            merchantDetails = HDMerchantDetails(
-                packageName = packageName,
-                packageVersion = BuildConfig.VERSION_NAME,
-                merchantName = "My Awesome App",
-            ),
             onTokenRequest = {
                 // Return your Halo SDK token here (e.g., fetch from your backend)
                 "YOUR_SDK_TOKEN"
             },
         )
 
-        val success = HaloSdkUi.init(config)
+        // 2. Cache branding and warm the artwork. No token needed, returns at once.
+        HaloSdkUi.prepare(config)
+
+        // 3. Register the device and bring the SDK up.
+        lifecycleScope.launch {
+            val result = HaloSdkUi.init(config)
+            // result?.resultType / result?.errorCode carry why, if bring-up failed.
+        }
     }
 }
 ```
@@ -183,9 +188,9 @@ Define your brand's colors, shapes, and logo using `HDTheme` and pass it to `HDC
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `lightMode` | `String?` | `null` | URL or path to the logo for light mode |
-| `darkMode` | `String?` | `null` | URL or path to the logo for dark mode |
-| `aspectRatio` | `Float?` | `null` | Optional aspect ratio for the logo |
+| `asset` | `String?` | `null` | Your logo — a URL, or a path to an asset bundled in your app. `null` uses the bundled Halo logo. |
+
+One asset serves both light and dark mode: the SVG renderer fills the shared `{{...}}` colour placeholders per active theme, so you do not supply light/dark variants.
 
 ```kotlin
 import za.co.synthesis.halo.sdk_ui.models.HDTheme
@@ -203,7 +208,7 @@ val myCustomTheme = HDTheme(
         primary = Color(0xFFBB86FC),
     ),
     shape = 12.dp,
-    logo = HDCompanyLogo(lightMode = "https://example.com/logo.png"),
+    logo = HDCompanyLogo("my-brand-logo.svg"),
 )
 
 val config = HDConfig(
@@ -261,6 +266,7 @@ val config = HDConfig(
 | `amount` | `BigDecimal?` | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
 | `merchantRef` | `String?` | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
 | `currency` | `HDCurrency?` | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
+| `presentation` | `HDPresentation` | Whether this charge takes over the screen (`FULL_SCREEN`, the default) or appears as a sheet over your app (`SHEET`). Chosen per launch, so consecutive charges can differ. |
 
 If you already know the amount, the SDK skips the keypad and goes directly to the "Tap Card" screen:
 
