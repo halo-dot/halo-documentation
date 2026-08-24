@@ -32,9 +32,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 Skipping `attach` or `prepare` is legal and costs only speed — `init` does that work as well. The SDK logs a warning if `attach` runs late.
 :::
 
-### SDK Version
-
-`HaloSdkUi.sdkVersion` returns the Halo SDK's own version string, for a host that displays it. It is available before `init` — it is a property of the library, not of a running session.
+See [Configuration](./configuration#initialization) for what each call does, including `HaloSdkUi.sdkVersion` and `HaloSdkUi.deviceInstallationId`.
 
 ---
 
@@ -47,7 +45,7 @@ Skipping `attach` or `prepare` is legal and costs only speed — `init` does tha
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `amount` | `BigDecimal?` | - | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
-| `merchantRef` | `String?` | - | Optional merchant reference. If `null`, the user can enter one on the keypad screen; otherwise the SDK generates one. |
+| `merchantRef` | `String?` | - | Optional merchant reference. Supply one and it is used as-is (and shown read-only on the keypad screen); pass `null` and the merchant can type one on the keypad. |
 | `currency` | `HDCurrency?` | - | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
 | `presentation` | `HDPresentation` | `FULL_SCREEN` | Whether this charge takes over the screen or appears as a sheet over your app. |
 
@@ -159,6 +157,32 @@ fun handleResult(result: HaloTransactionResult?) {
 
 ### The Result Screen
 
-By default the SDK shows its own result and receipt screen before returning. Set `showTransactionResult = false` on your `HDConfig` to skip it and return to your app as soon as the transaction completes — the result is still returned from `launch` either way.
+By default (`showTransactionResult = true`) the SDK shows its own result screen before returning, and `launch` returns once the merchant dismisses it. Set `showTransactionResult = false` on your `HDConfig` to have `launch` return as soon as the transaction completes instead, leaving the outcome — and the receipt — to your own UI.
 
 A transaction the user cancelled never shows a result screen: a stop they asked for is not an outcome to report back to them.
+
+---
+
+## Receipts
+
+On an approved transaction, the SDK's result screen offers **Send receipt**. The merchant enters an email address, a mobile number, or both, and the Halo kernel sends the receipt against the transaction's own reference — one request per channel. The screen confirms once it has gone out.
+
+Delivery is the kernel's, not the device's: there is no Android share chooser in the flow, nothing is pasted into a third-party app, and the backend keeps a record that a receipt was issued. An approved charge can always be receipted, so the button never sits disabled waiting on a lookup.
+
+The result screen also shows a **receipt QR code** when the kernel returns one, which the cardholder can scan to take the receipt with them. It may never arrive; the screen shows everything else regardless.
+
+Nothing here needs host wiring — it is part of the SDK's own result screens, so it appears whenever `showTransactionResult` is left `true`.
+
+---
+
+## Dynamic Currency Conversion (DCC)
+
+:::caution Not yet exposed
+The DCC flow is implemented, but the `showDCC` option is commented out in `HDConfig`, so nothing can currently switch it on. This section describes the flow it will restore.
+:::
+
+When enabled, the SDK offers the cardholder a choice of currency after their card is read:
+
+1. A **currency-selection screen** shows the amount in the local currency and in the card's currency, along with the exchange rate and conversion margin.
+2. The cardholder picks one and the transaction completes in that currency.
+3. The success screen then includes the DCC details: local total, exchange rate, margin, transaction currency, and the total transaction amount in the chosen currency.

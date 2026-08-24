@@ -77,16 +77,52 @@ Both debug and release variants are published under this single coordinate. Grad
 
 Nothing to add. The SDK declares its own activity, the intent filters for [inbound payments](./inbound-payments), the translucent window used by `HDPresentation.SHEET`, and the payment kernel's PIN pad theme.
 
-## 🛡️ Permissions
+## 🛡️ Permissions {#permissions}
 
-The SDK's permissions are automatically merged into your app's manifest, and the required runtime permissions (camera, location, phone state, and Bluetooth on Android 12+) are requested automatically during `HaloSdkUi.init()`. The prompt does not block bring-up — it goes up beside it, at the user's own pace, and the SDK reports what it cannot do without a permission.
+The SDK's permissions are merged into your app's manifest automatically. The runtime permissions among them are requested for you during `HaloSdkUi.init()` — you don't prompt for anything yourself. The prompt runs *alongside* the SDK's bring-up rather than in front of it, so a merchant answering it isn't also holding up registration.
 
-| Permission | Purpose |
-|------------|---------|
-| `INTERNET` | Network communication with the Halo backend |
-| `NFC` | Reading payment cards |
-| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | Payment compliance (location verification) |
-| `CAMERA` | Device security verification |
-| `READ_PHONE_STATE` | Device identification |
-| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | External card reader support (Android 12+) |
-| `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | Feedback on card tap |
+| Permission | Runtime prompt | Purpose |
+|------------|-----------------|---------|
+| `INTERNET` | — | Network communication with the Halo backend |
+| `NFC` | — | Reading payment cards |
+| `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | — | Feedback on card tap |
+| `BLUETOOTH` / `BLUETOOTH_ADMIN` | — | External card reader support (pre-Android 12) |
+| `CAMERA` | ✓ | Device security verification |
+| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | ✓ | Payment compliance (location verification) |
+| `READ_PHONE_STATE` | ✓ | Device identification |
+| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | ✓ (Android 12+) | External card reader support |
+| `POST_NOTIFICATIONS` | ✓ (Android 13+, at first notification) | [Push to Terminal](./push-to-terminal)'s notification, backgrounded |
+
+A denial doesn't abort bring-up — `init` continues and logs which permissions were refused, and the SDK reports the consequences through its own initialization result.
+
+`POST_NOTIFICATIONS` is the one exception to "requested during `init()`": it plays no part in payment bring-up, so it isn't in that batch — Android prompts for it automatically, the first time a pushed payment actually tries to post a notification. Refused, that payment waits for the merchant to next open the app rather than failing; nothing else about Push to Terminal is affected.
+
+## 🏗️ Build Configuration {#build-configuration}
+
+Two things have to be settled in your app's **build** rather than in `HDConfig`, because both live in the manifest — read before any of your code runs, so no runtime call could set them.
+
+| Resource | Default | What it does |
+|----------|---------|---------------|
+| `halo_url_scheme` | `halo` | The custom scheme payment links arrive on — `halo://pay?…` |
+| `halo_applink_host` | *(empty)* | Your App Link domain, as an `autoVerify` filter for `http` and `https` |
+
+Both ship as string resources the SDK's payment activity points its filters at. Override them and the filters are yours; ignore them and you get `halo://` plus an App Link filter that matches nothing — exactly what a brand with no links of its own gets by default. Neither is mandatory.
+
+```kotlin
+// app/build.gradle.kts
+android {
+    buildFeatures { resValues = true }
+    defaultConfig {
+        resValue("string", "halo_url_scheme", "yourbrand")
+        resValue("string", "halo_applink_host", "pay.yourbrand.com")
+    }
+}
+```
+
+Or declare the same names in `res/values/strings.xml` — app resources win over a library's either way.
+
+:::caution One scheme per brand
+Two apps claiming `halo://` on the same device is a chooser the payer should never see. If you override `halo_url_scheme`, pass the same value as [`HDConfig.scheme`](./configuration#hdconfig-parameters) so the parser knows which scheme is yours — the resource is the manifest half, `HDConfig.scheme` the runtime half, and they have to agree.
+:::
+
+`autoVerify` on the App Link filter needs an `assetlinks.json` published on that domain; without it Android offers a chooser instead of opening your app directly. See [Inbound Payments](./inbound-payments) for how these links are handled once they arrive.
