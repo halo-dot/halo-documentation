@@ -1,0 +1,128 @@
+---
+sidebar_position: 2
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Installation
+
+Follow these steps to integrate the Halo UI SDK into your Android project.
+
+## 1. Configure Credentials
+
+To access the SDK, you will receive an AWS access key and secret key upon registration on the developer portal. These are sensitive credentials and should **not** be committed to source control.
+
+Add these to your `local.properties` file:
+
+```properties
+aws.accesskey=< PROVIDED IN EMAIL >
+aws.secretkey=< PROVIDED IN EMAIL >
+```
+
+## 2. Configure Repositories
+
+In your `settings.gradle.kts` (or `settings.gradle`), load the credentials and configure the S3-hosted Maven repository.
+
+<Tabs>
+<TabItem value="kotlin" label="Kotlin DSL">
+
+```kotlin
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootDir.resolve("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        // Repository where the Halo UI SDK is hosted
+        maven {
+            name = "releases"
+            url = uri("s3://synthesis-halo-artifacts/releases")
+            credentials(AwsCredentials::class) {
+                accessKey = localProperties.getProperty("aws.accesskey")
+                secretKey = localProperties.getProperty("aws.secretkey")
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
+## 3. Add Dependency
+
+Add the following to your module's `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.5")
+}
+```
+
+:::tip
+Replace `0.0.5` with the latest version available.
+:::
+
+Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.
+
+## 4. Manifest
+
+Nothing to add. The SDK declares its own activity, the intent filters for [inbound payments](./inbound-payments), the translucent window used by `HDPresentation.SHEET`, and the payment kernel's PIN pad theme.
+
+## 🛡️ Permissions {#permissions}
+
+The SDK's permissions are merged into your app's manifest automatically. The runtime permissions among them are requested for you during `HaloSdkUi.init()` — you don't prompt for anything yourself. The prompt runs *alongside* the SDK's bring-up rather than in front of it, so a merchant answering it isn't also holding up registration.
+
+| Permission | Runtime prompt | Purpose |
+|------------|-----------------|---------|
+| `INTERNET` | — | Network communication with the Halo backend |
+| `NFC` | — | Reading payment cards |
+| `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | — | Feedback on card tap |
+| `BLUETOOTH` / `BLUETOOTH_ADMIN` | — | External card reader support (pre-Android 12) |
+| `CAMERA` | ✓ | Device security verification |
+| `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | ✓ | Payment compliance (location verification) |
+| `READ_PHONE_STATE` | ✓ | Device identification |
+| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | ✓ (Android 12+) | External card reader support |
+| `POST_NOTIFICATIONS` | ✓ (Android 13+, at first notification) | [Push to Terminal](./push-to-terminal)'s notification, backgrounded |
+
+A denial doesn't abort bring-up — `init` continues and logs which permissions were refused, and the SDK reports the consequences through its own initialization result.
+
+`POST_NOTIFICATIONS` is the one exception to "requested during `init()`": it plays no part in payment bring-up, so it isn't in that batch — Android prompts for it automatically, the first time a pushed payment actually tries to post a notification. Refused, that payment waits for the merchant to next open the app rather than failing; nothing else about Push to Terminal is affected.
+
+## 🏗️ Build Configuration {#build-configuration}
+
+Two things have to be settled in your app's **build** rather than in `HDConfig`, because both live in the manifest — read before any of your code runs, so no runtime call could set them.
+
+| Resource | Default | What it does |
+|----------|---------|---------------|
+| `halo_url_scheme` | `halo` | The custom scheme payment links arrive on — `halo://pay?…` |
+| `halo_applink_host` | *(empty)* | Your App Link domain, as an `autoVerify` filter for `http` and `https` |
+
+Both ship as string resources the SDK's payment activity points its filters at. Override them and the filters are yours; ignore them and you get `halo://` plus an App Link filter that matches nothing — exactly what a brand with no links of its own gets by default. Neither is mandatory.
+
+```kotlin
+// app/build.gradle.kts
+android {
+    buildFeatures { resValues = true }
+    defaultConfig {
+        resValue("string", "halo_url_scheme", "yourbrand")
+        resValue("string", "halo_applink_host", "pay.yourbrand.com")
+    }
+}
+```
+
+Or declare the same names in `res/values/strings.xml` — app resources win over a library's either way.
+
+:::caution One scheme per brand
+Two apps claiming `halo://` on the same device is a chooser the payer should never see. If you override `halo_url_scheme`, pass the same value as [`HDConfig.scheme`](./configuration#hdconfig-parameters) so the parser knows which scheme is yours — the resource is the manifest half, `HDConfig.scheme` the runtime half, and they have to agree.
+:::
+
+`autoVerify` on the App Link filter needs an `assetlinks.json` published on that domain; without it Android offers a chooser instead of opening your app directly. See [Inbound Payments](./inbound-payments) for how these links are handled once they arrive.

@@ -1,0 +1,298 @@
+---
+sidebar_position: 3
+---
+
+# Configuration
+
+Tailor the Halo UI SDK to your application's needs through the `HDConfig` class and custom theming.
+
+## Initialization
+
+Build one `HDConfig` and hand it to both `HaloSdkUi.prepare` and `HaloSdkUi.init`. The activity passed to `HDConfig` **must** be a `ComponentActivity` (or subclass such as `AppCompatActivity`), since the SDK renders its UI with Jetpack Compose.
+
+### HDConfig Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `activity` | `ComponentActivity` | - | The activity that will host the SDK UI. |
+| `onTokenRequest` | `suspend () -> String` | - | Suspending callback that must return a valid Halo SDK token. |
+| `presentation` | `HDPresentation` | `FULL_SCREEN` | How **inbound** payments are presented — see [Presentation](#presentation). |
+| `theme` | `HDTheme` | `HDTheme()` | Colors, shapes, and logo configuration. |
+| `themeMode` | `HaloThemeMode` | `SYSTEM` | Force light, dark, or follow the system theme. |
+| `schemeLogos` | `HDSchemeLogos` | `HDSchemeLogos()` | Which card scheme logos are shown. |
+| `showTransactionResult` | `Boolean` | `true` | Show the SDK's own result/receipt screen after a charge. Set `false` to return to your app as soon as the transaction completes. |
+| `language` | `HDLanguage?` | `null` | Pins the SDK language — see [Languages](#languages). |
+| `scheme` | `String` | `"halo"` | The custom URL scheme this brand's payment links arrive on — see [Inbound Payments](./inbound-payments). |
+| `kernel` | `String?` | `null` | The Halo kernel short App Links are resolved against, e.g. `kernelserver.qa.haloplus.io`. |
+| `kernelPins` | `Set<String>` | `emptySet()` | SHA-256 SPKI fingerprints for `kernel`'s TLS certificate, as `sha256/<base64>`. |
+| `receivePush` | `Boolean` | `false` | Whether this device registers itself to receive Push to Terminal payments — see [Push to Terminal](./push-to-terminal). |
+
+:::note
+The merchant's name and details are **not** configured here — they come from the Halo backend record behind your token, and are displayed by the SDK from there.
+:::
+
+### Example
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.HaloSdkUi
+import za.co.synthesis.halo.sdk_ui.models.HDConfig
+
+val config = HDConfig(
+    activity = this,
+    onTokenRequest = {
+        // Return your Halo SDK token here (e.g., fetch from your backend)
+        "YOUR_SDK_TOKEN"
+    },
+)
+
+HaloSdkUi.prepare(config)          // at your splash
+val result = HaloSdkUi.init(config) // suspending, once you have a token
+```
+
+:::note
+`init` returns the SDK's `HaloInitializationResult` — its `resultType` and `errorCode` carry *why* when bring-up failed — or `null` when a step failed before the SDK could report at all. It is idempotent: a second `init` on a live SDK answers with what it already has.
+:::
+
+### What Each Call Does
+
+**`attach(activity, savedInstanceState)`** hands the SDK its Android context: the payment kernel, overlay protection, entropy. It is the single most expensive step of bringing the SDK up, and it needs nothing from you but the activity — so run it first, immediately after `super.onCreate`, and everything your app does afterwards runs against a payment stack that is already loading. Anywhere later and the cost lands on whoever is waiting next. It also wires the Android lifecycle through to the SDK — you do not forward `onStart`/`onResume`/`onPause`/`onStop` yourself. Pass `savedInstanceState` straight through so the SDK can restore its own state across a process death. Cheap to call more than once.
+
+**`prepare(config)`** is not a suspend function, returns immediately, and cannot fail in a way you have to handle. It caches the appearance half of your config — theme, language, scheme logos, scheme, kernel — which is what lets an inbound payment, which brings the SDK up natively with no host in the process, still show your branding and speak your language. It also loads the translations and warms the tap screen's artwork in the background.
+
+**`init(config)`** is a suspend function — call it from a coroutine. It registers the device (re-attesting only when the token's identity has changed since last time), brings the SDK up, and suspends until the SDK reports its *real* outcome: registered, attested, initialized, kernel settled. Runtime permissions ([Permissions](./installation#permissions)) are requested alongside it, not before it — a denial doesn't block bring-up. Call it the moment your login succeeds rather than from your payment screen: the merchant is almost certainly still navigating, which is free time this can run in.
+
+---
+
+## Presentation
+
+`HDPresentation` controls how the SDK puts its screens on top of your app.
+
+| Value | Description |
+|-------|-------------|
+| `HDPresentation.FULL_SCREEN` | The SDK as its own app: an opaque activity that replaces the host for the length of a charge. |
+| `HDPresentation.SHEET` | The charge as a bottom sheet with your app dimmed behind it — reads as *your app asking for a card* rather than another app taking over. |
+
+`HDConfig.presentation` is the answer for **inbound** payments only (an app-to-app intent or a payment link, which arrive with no `launch` call to say). A charge you start says it per call on `launch` — see [Usage](./usage#presentation-per-charge) — so consecutive charges can differ: a quick tap as a sheet over the screen the merchant was on, the next one full-screen, and back again.
+
+```kotlin
+HaloSdkUi.launch(amount, merchantRef, currency, presentation = HDPresentation.SHEET)
+```
+
+The SDK ships the translucent window `SHEET` needs — there is nothing to add to your manifest.
+
+### What a Sheet Covers
+
+A sheet applies to the charge itself — bring-up, tap, the card-scheme animation, the currency choice, the result and the error screen — so nothing switches surface mid-card-read. The keypad and the detailed transaction breakdown stay full-screen either way: one is a screen's worth of controls, the other a screen's worth of rows, and a sheet is a shape as well as a position.
+
+It is the same shell either way — every page declares a **heading**, a **body** and an optional **footer**, and the shell arranges them: stacked, or two panes side by side once the window is wider than it is tall. There is no separate sheet layout to fall out of sync with the full-screen one.
+
+Two things belong to the sheet alone:
+
+- **A bar of its own at the top** — your logo on the left, and the buttons the full-screen style puts at the foot of the page (Cancel, Share receipt, Charge) as small actions on the right, since two button heights out of a few hundred dp of sheet is a real cost. Your logo sits leading rather than centred here, because the bar is only a few hundred dp across and a centred mark would shift every time the actions change width.
+- **One sheet for the whole charge.** The pages change inside it rather than each raising a sheet of its own — bring-up handing over to tap is not a surface closing and another opening over your app.
+
+Swiping the sheet down, tapping the dimmed area, and pressing back all raise a cancel confirmation rather than closing outright — on bring-up as well as on tap — so an accidental swipe can't abort a live card read.
+
+"Powered by Halo Dot" sits at the foot of the sheet, not on every screen: inside your app, the payment surface has to say whose it is, and full-screen the top bar has already said so.
+
+:::caution What SHEET costs
+A translucent window is no longer *stopped* behind the payment surface — your app keeps rendering for the whole transaction, next to a card read — and your pixels are visible behind a card-present screen, which is the shape overlay protection exists to catch (the SDK reports `HaloErrorCode.OverlayDetected` if it sees one). Both are reasonable trade-offs for a brand that has decided a sheet is the right experience, but know it before choosing it.
+:::
+
+Inbound payment links follow `HDConfig.presentation`, since they arrive with no `launch` call to ask — a brand that presents its own charges as a sheet looks the same however the charge arrived.
+
+---
+
+## SDK Version & Device Installation ID
+
+`HaloSdkUi.sdkVersion` returns the underlying Halo SDK's own version string, for a host that displays it (e.g. beside a link to the PCI listing the SDK is certified under). It's a property of the library, so it's readable before `attach`.
+
+```kotlin
+val version = HaloSdkUi.sdkVersion
+```
+
+`HaloSdkUi.deviceInstallationId(context)` returns the Halo installation id for this app on this device — what the kernel knows the install by, and what you'd present to register the device for [Push to Terminal](./push-to-terminal). It is `null` until the device has registered at least once, since the SDK is only handed the id inside `init`'s own device registration; from then on it survives launches and process deaths.
+
+```kotlin
+val installation = HaloSdkUi.deviceInstallationId(context)
+```
+
+---
+
+## Theming
+
+Tailor the SDK's look and feel to match your app's brand.
+
+### Theme Mode
+
+Control whether the SDK follows the system theme or forces a specific mode. You can set this in `HDConfig` or update it at runtime.
+
+| Mode | Description |
+|------|-------------|
+| `HaloThemeMode.LIGHT` | Forces light theme |
+| `HaloThemeMode.DARK` | Forces dark theme |
+| `HaloThemeMode.SYSTEM` | Follows system theme (default) |
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HaloThemeMode
+
+// Update at runtime
+HaloSdkUi.setThemeMode(HaloThemeMode.SYSTEM)
+```
+
+### Custom Theme
+
+Define your brand's colors, shapes, and logo via `HDTheme` and pass it to your `HDConfig`.
+
+#### HDTheme Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `light` | `HDColorScheme` | `HDColorScheme.default()` | Color scheme for light mode |
+| `dark` | `HDColorScheme` | `HDColorScheme.defaultDark()` | Color scheme for dark mode |
+| `shape` | `Dp` | `16.dp` | Corner radius for buttons and containers |
+| `paddingHorizontal` | `Dp` | `24.dp` | Horizontal padding inside containers |
+| `paddingVertical` | `Dp` | `12.dp` | Vertical padding inside containers |
+| `logo` | `HDCompanyLogo` | `HDCompanyLogo()` | Company logo configuration |
+| `text` | `HDTextSizes` | `HDTextSizes()` | Type scale — see [Text Sizes](#text-sizes) |
+
+#### HDColorScheme Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `primary` | `Color` | Main brand color (buttons, highlights) |
+| `secondary` | `Color` | Secondary accent color |
+| `surface` | `Color` | Background color |
+| `onSurface` | `Color` | Text/icon color on surface |
+| `onPrimary` | `Color` | Text/icon color on primary background |
+| `outline` | `Color` | Border and divider color |
+| `error` | `Color` | Error/decline color |
+
+Start from `HDColorScheme.default()` / `HDColorScheme.defaultDark()` and `copy()` what you need — every property is required, so there is no partial constructor.
+
+#### HDCompanyLogo Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `asset` | `String?` | `null` | Your logo — a URL, or a path to an asset bundled in your app. `null` uses the bundled Halo logo. |
+| `icon` | `String?` | `null` | Your **square app mark** — the one on your launcher. Used where the SDK has one glyph's worth of room rather than a bar: today, the small icon on a [pushed payment's](./push-to-terminal) notification. `null` falls back to your launcher icon. |
+
+`asset` is a **self-theming template SVG**: one file serves both light and dark mode. The SDK substitutes the active colour scheme into shared placeholder tokens (`{{PRIMARY}}`, `{{SECONDARY}}`, `{{ERROR}}`, `{{SURFACE}}`, `{{ONSURFACE}}`, `{{OUTLINE}}`) before rendering, so you never ship separate light/dark variants; any token left unreplaced renders as an invisible fill.
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HDTheme
+import za.co.synthesis.halo.sdk_ui.models.HDColorScheme
+import za.co.synthesis.halo.sdk_ui.models.HDCompanyLogo
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+val myCustomTheme = HDTheme(
+    light = HDColorScheme.default().copy(
+        primary = Color(0xFF6200EE),
+        onPrimary = Color.White,
+    ),
+    dark = HDColorScheme.defaultDark().copy(
+        primary = Color(0xFFBB86FC),
+    ),
+    shape = 12.dp,
+    logo = HDCompanyLogo(asset = "my-brand-logo.svg", icon = "my-brand-icon.svg"),
+)
+
+val config = HDConfig(
+    // ... other props
+    theme = myCustomTheme
+)
+```
+
+### Text Sizes
+
+`HDTextSizes` is the SDK's whole type scale — one size per text role, in **sp**, honouring the device's font-size accessibility setting. The defaults are the Material 3 scale, so a host that says nothing gets what the SDK has always drawn. Raise them for an unattended terminal, or lower them to fit more receipt on a short screen; line spacing scales with the size.
+
+| Property | Default | Used for |
+|----------|---------|----------|
+| `display` | `45.sp` | The amount, and nothing else |
+| `titleLarge` | `22.sp` | A page's headline |
+| `title` | `16.sp` | Section headings and button labels |
+| `body` | `14.sp` | Running text |
+| `bold` | `16.sp` | Emphasis within running text |
+| `label` | `12.sp` | The left side of a detail row |
+| `value` | `14.sp` | The right side of a detail row |
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HDTextSizes
+
+// The one-knob version: the same UI, 20% bigger.
+val theme = HDTheme(text = HDTextSizes.scaled(1.2f))
+
+// Or set individual roles.
+val custom = HDTheme(text = HDTextSizes(display = 52.sp, label = 13.sp))
+```
+
+### Bridging from Flutter or React Native
+
+Hosts that build their theme outside Kotlin can avoid Compose types entirely: `HDTheme.build` takes raw dp floats and an asset path, and `HDColorScheme.fromArgb` takes `0xAARRGGBB` values. `HDTextSizes.fromSp` does the same for type — any size left null keeps its default.
+
+```kotlin
+val theme = HDTheme.build(
+    light = HDColorScheme.fromArgb(
+        primary = 0xFF6200EE, secondary = 0xFFF2B500, surface = 0xFFFFFFFF,
+        onSurface = 0xFF000000, onPrimary = 0xFFFFFFFF, outline = 0xFF666666,
+        error = 0xFFFF647C,
+    ),
+    shapeDp = 12f,
+    logo = "my-brand-logo.svg",
+    icon = "my-brand-icon.svg",
+    text = HDTextSizes.fromSp(display = 52f),
+)
+```
+
+---
+
+## Languages
+
+The SDK UI ships translations for English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`), and Portuguese (`pt`). By default it follows the device language, falling back to English for unsupported locales. To pin a specific language:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.core.HDLanguage
+
+val config = HDConfig(
+    // ... other props
+    language = HDLanguage.AFRIKAANS,
+)
+```
+```kotlin
+HaloSdkUi.setLanguage(HDLanguage.ENGLISH)
+```
+
+---
+
+## Scheme Logos
+
+Control which payment scheme logos are displayed in the SDK UI using `HDSchemeLogos`. By default, all supported logos are enabled.
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `nfc` | `Boolean` | `true` | Show the NFC/Contactless indicator |
+| `visa` | `Boolean` | `true` | Show the Visa logo |
+| `mastercard` | `Boolean` | `true` | Show the Mastercard logo |
+| `amex` | `Boolean` | `true` | Show the American Express logo |
+| `discover` | `Boolean` | `true` | Show the Discover logo |
+| `elo` | `Boolean` | `true` | Show the Elo logo |
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HDSchemeLogos
+
+val myLogos = HDSchemeLogos(
+    amex = false,
+    discover = false
+)
+
+val config = HDConfig(
+    // ... other props
+    schemeLogos = myLogos
+)
+```
+
+:::note
+The DebiCheck mark is not listed here. It is not a brand's choice of what it accepts — a mandate *is* a DebiCheck — so the SDK shows it on a mandate and only on a mandate.
+:::
