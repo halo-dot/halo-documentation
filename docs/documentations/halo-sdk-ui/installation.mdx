@@ -63,12 +63,12 @@ Add the following to your module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("za.co.synthesis.halo:sdk_ui:0.0.1")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.5")
 }
 ```
 
 :::tip
-Replace `0.0.1` with the latest version available.
+Replace `0.0.5` with the latest version available.
 :::
 
 Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.

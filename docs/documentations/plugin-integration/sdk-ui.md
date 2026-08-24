@@ -74,11 +74,11 @@ dependencyResolutionManagement {
 
 ### 3. Add Dependency
 
-Add the following to your module's `build.gradle.kts`, replacing `0.0.1` with the latest version:
+Add the following to your module's `build.gradle.kts`, replacing `0.0.5` with the latest version:
 
 ```kotlin
 dependencies {
-    implementation("za.co.synthesis.halo:sdk_ui:0.0.1")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.5")
 }
 ```
 
