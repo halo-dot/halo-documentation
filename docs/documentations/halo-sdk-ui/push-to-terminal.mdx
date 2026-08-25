@@ -12,6 +12,10 @@ The kernel API — registering devices, pushing a payment, managing the estate �
 
 Like the other three doors, this is handled entirely by the SDK. The message arrives at the SDK's own `FirebaseMessagingService`, becomes a payment URL, and goes to the same activity a payment link goes to — so a pushed payment is charged by exactly the code that charges the rest.
 
+<p align="center">
+  <img alt="Push to Terminal: how a device becomes pushable inside init(), and what happens when a push arrives." src="/img/halo-sdk-ui/push-to-terminal-light.svg" width="100%" />
+</p>
+
 **There is nothing to add to your manifest.** No service declaration, no provider, no intent filter. The reason matters: a pushed payment can *start the process*, so there may be no Activity and no host code alive when it lands — anything you would have had to contribute could not be relied on to exist. The one thing you bring is your own Firebase project.
 
 ## Your Firebase Project

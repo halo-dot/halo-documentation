@@ -8,6 +8,10 @@ Besides charges you start with `HaloSdkUi.launch`, the SDK can be opened **by a 
 
 These are handled entirely by the SDK. Its own activity owns the intent filters, restores the branding and language cached by `HaloSdkUi.prepare`, brings the SDK up, and drives the transaction. **No host code runs**, and on a Flutter host no Flutter engine is started.
 
+<p align="center">
+  <img alt="Four inbound doors — app-to-app, custom scheme, App Link and Push to Terminal — into HDActivity and the same tap flow." src="/img/halo-sdk-ui/inbound-payments-light.svg" width="100%" />
+</p>
+
 :::note
 Because an inbound payment can arrive on a cold start, the appearance it paints itself with is the one cached by `prepare`. A host that never calls `prepare` gets Halo defaults on that path.
 :::

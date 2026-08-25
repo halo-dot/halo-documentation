@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1030" width="1080" height="1030" role="img">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9198a1"/></marker></defs>
+<rect width="1080" height="1030" fill="#ffffff"/>
+<text x="32" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19" font-weight="600" fill="#1f2328" text-anchor="start">A payment that arrives from outside your app</text>
+<text x="32" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#59636e" text-anchor="start">Four doors, one native path. No host code runs — on a Flutter or React Native host, no Dart or JavaScript engine is even started.</text>
+<rect x="24.0" y="118" width="240" height="108" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="38.0" y="143.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">App-to-app</text>
+<text x="38.0" y="165.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">action</text>
+<text x="38.0" y="181.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">za.co.synthesis.halo.transaction</text>
+<text x="38.0" y="197.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">transaction_id · jwt · is_tap</text>
+<path d="M 144.0 229 V 248 H 540.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="288.0" y="118" width="240" height="108" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="302.0" y="143.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">Custom scheme</text>
+<text x="302.0" y="165.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">&lt;scheme&gt;://pay?amount=…</text>
+<text x="302.0" y="181.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the scheme is halo_url_scheme</text>
+<path d="M 408.0 229 V 248 H 540.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="552.0" y="118" width="240" height="108" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="566.0" y="143.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">App Link</text>
+<text x="566.0" y="165.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">https://&lt;your domain&gt;/…</text>
+<text x="566.0" y="181.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the domain is halo_applink_host</text>
+<path d="M 672.0 229 V 248 H 540.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="816.0" y="118" width="240" height="113.5" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="830.0" y="143.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">Push to Terminal</text>
+<text x="830.0" y="165.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">POST /consumer/push, at a named</text>
+<text x="830.0" y="181.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">device</text>
+<text x="830.0" y="197.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">→ the SDK’s</text>
+<text x="830.0" y="213.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">FirebaseMessagingService</text>
+<path d="M 936.0 229 V 248 H 540.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 540.0 248 L 540.0 268" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="240.0" y="272" width="600" height="65.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="254.0" y="297.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">HDActivity — the SDK’s own activity</text>
+<text x="254.0" y="319.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Declared out of the box. It parks the payment and takes it from here.</text>
+<path d="M 540.0 340.5 L 540.0 356.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 540.0 361.5 L 710.0 409.5 L 540.0 457.5 L 370.0 409.5 Z" fill="#fff8c5" stroke="#d4a72c" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="540.0" y="405.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#4d3800" text-anchor="middle">a bare reference, and no</text>
+<text x="540.0" y="421.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#4d3800" text-anchor="middle">configJwt?</text>
+<rect x="760.0" y="363.5" width="292.0" height="113.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="774.0" y="389.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">Resolved against the kernel</text>
+<text x="774.0" y="410.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">HDConfig.kernel and kernelPins produce the</text>
+<text x="774.0" y="426.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">token the short link stands for.</text>
+<text x="774.0" y="442.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Leave both unset if your links carry their</text>
+<text x="774.0" y="458.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">own.</text>
+<path d="M 710.0 409.5 L 754.0 409.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="718.8425" y="382.5" width="32.315" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="735.0" y="396.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">yes</text>
+<path d="M 906.0 480.0 V 510.0 H 540.0 V 532.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="426.1625" y="465.5" width="227.675" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="540.0" y="479.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">no — the link carries its own token</text>
+<rect x="240.0" y="532.0" width="600" height="65.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="254.0" y="557.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">Boots from the config your last prepare() cached</text>
+<text x="254.0" y="579.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Your theme, your logo, your language — a payment arriving cold still looks like your app.</text>
+<path d="M 540.0 600.5 L 540.0 616.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 540.0 621.5 L 710.0 669.5 L 540.0 717.5 L 370.0 669.5 Z" fill="#fff8c5" stroke="#d4a72c" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="540.0" y="673.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#4d3800" text-anchor="middle">type=TT3, or is_tap false?</text>
+<rect x="760.0" y="623.5" width="292.0" height="145.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="774.0" y="649.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">A DebiCheck mandate</text>
+<text x="774.0" y="670.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Read back from</text>
+<text x="774.0" y="686.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">/consumer/qrCodeDetails/{id} — the</text>
+<text x="774.0" y="702.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">kernel’s record wins, and its paymentJwt</text>
+<text x="774.0" y="718.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">is what the charge is presented with.</text>
+<text x="774.0" y="734.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The tap screen leads with the max</text>
+<text x="774.0" y="750.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">collection amount, over the order’s terms.</text>
+<path d="M 710.0 669.5 L 754.0 669.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="718.8425" y="642.5" width="32.315" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="735.0" y="656.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">yes</text>
+<path d="M 906.0 772.0 V 802.0 H 540.0 V 824.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="459.74" y="725.5" width="160.52" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="540.0" y="739.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">no — an ordinary payment</text>
+<rect x="240.0" y="824.0" width="600" height="65.5" rx="12" fill="#e9f7ee" stroke="#7ed492" stroke-width="1.5"/>
+<text x="254.0" y="849.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1a7f37" text-anchor="start">The same tap flow a launch() charge runs</text>
+<text x="254.0" y="871.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Same screens, same result screens, same receipts, same code.</text>
+<rect x="28" y="915.5" width="1024" height="81" rx="12" fill="#ffebe9" stroke="#ffa5a0" stroke-width="1.5"/>
+<text x="42" y="940.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#cf222e" text-anchor="start">If a payment link reaches your own activity instead, nothing here matched it.</text>
+<text x="42" y="961.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Check the host and the scheme against your resources — and don’t route it yourself: the query carries a live configJwt, and anything that renders an unmatched</text>
+<text x="42" y="977.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">URL renders that credential with it.</text>
+</svg>
