@@ -32,7 +32,7 @@ The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for i
 ## 📦 Installation
 
 <p align="center">
-  <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" width="100%" />
+  <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" style={{ width: "100%" }} />
 </p>
 
 ### 1. Configure Credentials
@@ -124,7 +124,7 @@ HaloSdkUi.launch(amount, reference, currency, presentation)   // per charge
 ```
 
 <p align="center">
-  <img alt="Bring-up: attach at onCreate, prepare at your splash, init once you hold a token, launch per charge." src="/img/halo-sdk-ui/bring-up-light.svg" width="100%" />
+  <img alt="Bring-up: attach at onCreate, prepare at your splash, init once you hold a token, launch per charge." src="/img/halo-sdk-ui/bring-up-light.svg" style={{ width: "100%" }} />
 </p>
 
 **The ordering is the point.** Each call needs strictly more than the one before it — `attach` needs nothing, `prepare` needs your config, `init` needs a session token — so each can run the moment that thing exists, and the work spreads across your startup instead of piling up in front of a merchant holding a card.
@@ -432,7 +432,7 @@ val config = HDConfig(
 | `presentation` | `HDPresentation` | Full-screen (the default), or this charge as a sheet over your app — see [Presentation](#presentation). Per charge, so consecutive charges can differ. |
 
 <p align="center">
-  <img alt="A charge from launch() through the keypad, tap, PIN and result screen to HaloTransactionResult." src="/img/halo-sdk-ui/transaction-flow-light.svg" width="100%" />
+  <img alt="A charge from launch() through the keypad, tap, PIN and result screen to HaloTransactionResult." src="/img/halo-sdk-ui/transaction-flow-light.svg" style={{ width: "100%" }} />
 </p>
 
 If you already know the amount, the SDK skips the keypad and goes directly to the "Tap Card" screen:
@@ -550,7 +550,7 @@ You still declare **no intent filters**. The domain lands on the SDK's own activ
 A payment can reach the SDK from outside your app — another app launching it, or a customer tapping a link. The SDK's own activity owns those entry points and handles them **natively**: it parks the payment, boots itself from the config your last `init` cached (so the flow carries your branding and language), and runs the transaction. No host code runs, and on a Flutter or React Native host no JavaScript or Dart engine is even started.
 
 <p align="center">
-  <img alt="Four inbound doors — app-to-app, custom scheme, App Link and Push to Terminal — into HDActivity and the same tap flow." src="/img/halo-sdk-ui/inbound-payments-light.svg" width="100%" />
+  <img alt="Four inbound doors — app-to-app, custom scheme, App Link and Push to Terminal — into HDActivity and the same tap flow." src="/img/halo-sdk-ui/inbound-payments-light.svg" style={{ width: "100%" }} />
 </p>
 
 Declared out of the box, nothing to add:
@@ -607,7 +607,7 @@ A **fourth door**, alongside the three above: a payment sent to a *named device*
 Like the other three, it is handled entirely by the SDK. The message arrives at the SDK's own `FirebaseMessagingService`, becomes a payment URL, and goes to the same activity a payment link goes to — so a pushed payment is charged by exactly the code that charges the rest.
 
 <p align="center">
-  <img alt="Push to Terminal: how a device becomes pushable inside init(), and what happens when a push arrives." src="/img/halo-sdk-ui/push-to-terminal-light.svg" width="100%" />
+  <img alt="Push to Terminal: how a device becomes pushable inside init(), and what happens when a push arrives." src="/img/halo-sdk-ui/push-to-terminal-light.svg" style={{ width: "100%" }} />
 </p>
 
 **There is nothing to add to your manifest.** No service declaration, no provider, no intent filter. The reason matters: a pushed payment can *start the process*, so there may be no Activity and no host code alive when it lands — anything you would have had to contribute could not be relied on to exist. The one thing you bring is your own Firebase project.
