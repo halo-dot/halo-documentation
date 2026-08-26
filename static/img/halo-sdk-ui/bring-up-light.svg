@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 679" width="1020" height="679" role="img">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9198a1"/></marker></defs>
+<rect width="1020" height="679" fill="#ffffff"/>
+<text x="32" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19" font-weight="600" fill="#1f2328" text-anchor="start">Bring-up — four calls, each at the earliest moment it can run</text>
+<text x="32" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#59636e" text-anchor="start">Each call needs strictly more than the one before it, so the work spreads across your startup instead of piling up in front of a merchant holding a card.</text>
+<rect x="298" y="126" width="694" height="82" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="312" y="152" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14" font-weight="400" fill="#f57500" text-anchor="start">attach(activity, savedInstanceState)</text>
+<text x="312" y="174" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The single most expensive step — the payment kernel, overlay protection, entropy.</text>
+<text x="312" y="190" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Also wires the Android lifecycle through, so you never forward onStart / onResume yourself.</text>
+<text x="236" y="150" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#1f2328" text-anchor="end">First line of onCreate</text>
+<text x="236" y="168" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">needs nothing</text>
+<path d="M 270 152 L 290 152" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="298" y="230" width="694" height="82" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="312" y="256" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14" font-weight="400" fill="#1f2328" text-anchor="start">prepare(config)</text>
+<text x="312" y="278" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Caches the appearance half of your config — theme, language, scheme logos, scheme, kernel.</text>
+<text x="312" y="294" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">That cache is what lets an inbound payment paint itself in your branding with no host running.</text>
+<text x="236" y="254" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#1f2328" text-anchor="end">At your splash</text>
+<text x="236" y="272" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">returns immediately</text>
+<path d="M 270 256 L 290 256" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="298" y="334" width="694" height="98" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="312" y="360" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14" font-weight="400" fill="#1f2328" text-anchor="start">init(config)</text>
+<text x="312" y="382" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Registers the device, requests the runtime permissions, brings the SDK up, registers for push.</text>
+<text x="312" y="398" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Returns HaloInitializationResult? — non-null carries resultType / errorCode, null means setup failed before</text>
+<text x="312" y="414" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the SDK could report.</text>
+<text x="236" y="358" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#1f2328" text-anchor="end">The moment login succeeds</text>
+<text x="236" y="376" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">suspend · waits for the real outcome</text>
+<path d="M 270 360 L 290 360" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="298" y="454" width="694" height="66" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="312" y="480" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14" font-weight="400" fill="#1f2328" text-anchor="start">launch(amount, ref, currency, presentation)</text>
+<text x="312" y="502" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Opens the SDK UI and returns a HaloTransactionResult? when the transaction is done.</text>
+<text x="236" y="478" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#1f2328" text-anchor="end">Per charge</text>
+<text x="236" y="496" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">suspend · returns the result</text>
+<path d="M 270 480 L 290 480" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 258 152 V 480" fill="none" stroke="#f0a259" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="258" cy="152" r="6.5" fill="#f57500" stroke="#f57500" stroke-width="2"/>
+<circle cx="258" cy="256" r="6.5" fill="#ffffff" stroke="#f57500" stroke-width="2"/>
+<circle cx="258" cy="360" r="6.5" fill="#ffffff" stroke="#f57500" stroke-width="2"/>
+<circle cx="258" cy="480" r="6.5" fill="#ffffff" stroke="#f57500" stroke-width="2"/>
+<rect x="28" y="548" width="964" height="97.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="42" y="573.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">Skipping any of the first three is legal, and costs only speed.</text>
+<text x="42" y="595.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The next call does that work as well — so a missing prepare() lands on init(), and a missing init() lands on the merchant waiting to charge. The SDK</text>
+<text x="42" y="611.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">logs a warning if attach ran late.</text>
+<text x="42" y="627.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Pass the same HDConfig to prepare() and init(): prepare caches the branding an inbound payment paints itself with, and init registers against it.</text>
+</svg>

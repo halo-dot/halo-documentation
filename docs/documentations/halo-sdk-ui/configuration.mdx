@@ -53,6 +53,10 @@ val result = HaloSdkUi.init(config) // suspending, once you have a token
 `init` returns the SDK's `HaloInitializationResult` — its `resultType` and `errorCode` carry *why* when bring-up failed — or `null` when a step failed before the SDK could report at all. It is idempotent: a second `init` on a live SDK answers with what it already has.
 :::
 
+<p align="center">
+  <img alt="Bring-up: attach at onCreate, prepare at your splash, init once you hold a token, launch per charge." src="/img/halo-sdk-ui/bring-up-light.svg" style={{ width: "100%" }} />
+</p>
+
 ### What Each Call Does
 
 **`attach(activity, savedInstanceState)`** hands the SDK its Android context: the payment kernel, overlay protection, entropy. It is the single most expensive step of bringing the SDK up, and it needs nothing from you but the activity — so run it first, immediately after `super.onCreate`, and everything your app does afterwards runs against a payment stack that is already loading. Anywhere later and the cost lands on whoever is waiting next. It also wires the Android lifecycle through to the SDK — you do not forward `onStart`/`onResume`/`onPause`/`onStop` yourself. Pass `savedInstanceState` straight through so the SDK can restore its own state across a process death. Cheap to call more than once.

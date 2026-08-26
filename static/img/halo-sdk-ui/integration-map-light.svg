@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 630" width="1000" height="630" role="img">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9198a1"/></marker></defs>
+<rect width="1000" height="630" fill="#ffffff"/>
+<text x="32" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19" font-weight="600" fill="#1f2328" text-anchor="start">Integrating the Halo UI SDK</text>
+<text x="32" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#59636e" text-anchor="start">Three things to settle — your build, your manifest resources, and four calls in your code.</text>
+<rect x="28.0" y="112" width="296.0" height="34" rx="10" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="42.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#f57500" text-anchor="start">1 · Build</text>
+<text x="310.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">once, per project</text>
+<rect x="28.0" y="164" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="42.0" y="188.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">local.properties</text>
+<text x="42.0" y="209.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">aws.accesskey / aws.secretkey from the</text>
+<text x="42.0" y="225.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">developer portal — never committed.</text>
+<path d="M 176.0 247.5 L 176.0 261.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="28.0" y="264.5" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="42.0" y="289.0" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">settings.gradle.kts</text>
+<text x="42.0" y="309.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The s3://synthesis-halo-artifacts/releases</text>
+<text x="42.0" y="325.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Maven repo, with those credentials.</text>
+<path d="M 176.0 348.0 L 176.0 362.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="28.0" y="365.0" width="296.0" height="112.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="42.0" y="389.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">build.gradle.kts</text>
+<text x="42.0" y="410.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The sdk_ui dependency. Your debug build</text>
+<text x="42.0" y="426.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">resolves the debug SDK and your release</text>
+<text x="42.0" y="442.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">build the production one, with nothing</text>
+<text x="42.0" y="458.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">variant-specific from you.</text>
+<path d="M 329.0 210 L 347.0 210" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="352.0" y="112" width="296.0" height="34" rx="10" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="366.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#f57500" text-anchor="start">2 · Resources</text>
+<text x="634.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">optional, per brand</text>
+<rect x="352.0" y="164" width="296.0" height="96.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="366.0" y="188.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">halo_url_scheme</text>
+<text x="366.0" y="209.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The scheme your payment links arrive on.</text>
+<text x="366.0" y="225.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Defaults to halo, and must equal</text>
+<text x="366.0" y="241.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">HDConfig.scheme.</text>
+<path d="M 500.0 263.5 L 500.0 277.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="352.0" y="280.5" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="366.0" y="305.0" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">halo_applink_host</text>
+<text x="366.0" y="325.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Your App Link domain, autoVerify-filtered.</text>
+<text x="366.0" y="341.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Empty by default — it matches nothing.</text>
+<path d="M 500.0 364.0 L 500.0 378.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="352.0" y="381.0" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="366.0" y="405.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">google-services.json</text>
+<text x="366.0" y="426.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Only for Push to Terminal. Your own</text>
+<text x="366.0" y="442.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Firebase project, your own plugin.</text>
+<path d="M 653.0 210 L 671.0 210" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="676.0" y="112" width="296.0" height="34" rx="10" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="690.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#f57500" text-anchor="start">3 · Code</text>
+<text x="958.0" y="134" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">per Activity</text>
+<rect x="676.0" y="164" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="690.0" y="188.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">HaloSdkUi.attach(…)</text>
+<text x="690.0" y="209.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">First line of onCreate. Loads the payment</text>
+<text x="690.0" y="225.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">kernel.</text>
+<path d="M 824.0 247.5 L 824.0 261.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="676.0" y="264.5" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="690.0" y="289.0" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">HaloSdkUi.prepare(config)</text>
+<text x="690.0" y="309.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">At your splash. Caches your branding, warms</text>
+<text x="690.0" y="325.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the tap screen.</text>
+<path d="M 824.0 348.0 L 824.0 362.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="676.0" y="365.0" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="690.0" y="389.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">HaloSdkUi.init(config)</text>
+<text x="690.0" y="410.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Once you hold a session token. Suspends</text>
+<text x="690.0" y="426.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">until the SDK is really up.</text>
+<path d="M 824.0 448.5 L 824.0 462.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="676.0" y="465.5" width="296.0" height="80.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="690.0" y="490.0" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12.5" font-weight="400" fill="#1f2328" text-anchor="start">HaloSdkUi.launch(…)</text>
+<text x="690.0" y="510.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Per charge. Suspends until the transaction</text>
+<text x="690.0" y="526.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">is done.</text>
+<text x="32" y="580.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Nothing else goes in your manifest: no intent filters, no Firebase service, and no permission prompts of your own. The SDK merges its own, and asks for</text>
+<text x="32" y="596.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the runtime ones inside init().</text>
+</svg>

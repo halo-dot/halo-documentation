@@ -49,6 +49,10 @@ See [Configuration](./configuration#initialization) for what each call does, inc
 | `currency` | `HDCurrency?` | - | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
 | `presentation` | `HDPresentation` | `FULL_SCREEN` | Whether this charge takes over the screen or appears as a sheet over your app. |
 
+<p align="center">
+  <img alt="A charge from launch() through the keypad, tap, PIN and result screen to HaloTransactionResult." src="/img/halo-sdk-ui/transaction-flow-light.svg" style={{ width: "100%" }} />
+</p>
+
 ### 1. Direct Transaction Mode
 
 If the amount is known, the SDK skips the keypad and goes directly to the "Tap Card" screen.
