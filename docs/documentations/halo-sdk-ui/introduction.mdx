@@ -4,53 +4,45 @@ sidebar_position: 1
 
 # Introduction
 
-The **Halo UI SDK** provides a ready-made, Jetpack Compose-based interface for integrating Halo payment services into your Android application. It handles the transaction flow, card reading animations, result screens and receipt delivery, so you can focus on your core business logic.
+Add a dependency, make four calls, and your app can take a card payment. The **Halo UI SDK** owns everything in between: amount entry, the card-reading screens, the PIN pad, the result screen and the receipt. It is built with Jetpack Compose and designed to be driven from a Flutter or React Native host just as easily as from Kotlin.
 
-## 🚀 Features
+## 🚀 What You Get
 
-- **Ready-to-use UI**: Fullscreen transaction flow including amount entry, card-reading animations, and success/failure screens.
-- **Full screen or bottom sheet**: Present each charge as its own screen, or as a sheet over your app — chosen per transaction. See [Presentation](./configuration#presentation).
-- **Theming**: Light mode, dark mode, custom colors, shapes, type sizes, and company logo.
-- **Simple API**: Initialize and launch a transaction with suspend functions — `init` waits for the SDK's real bring-up outcome, `launch` returns the transaction result.
-- **Digital receipts**: The cardholder's receipt is sent by the Halo kernel to an email address or mobile number the merchant enters — see [Receipts](./usage#receipts).
-- **Inbound payment links**: App-to-app intents, custom-scheme URLs and your own App Link domain are handled natively by the SDK, with no host code — see [Inbound Payments](./inbound-payments).
-- **DebiCheck mandates**: A TT3 debit-order mandate arrives through the same doors as a payment and runs the same tap flow, with the order's terms on the screen the payer taps against — see [DebiCheck Mandates](./inbound-payments#debicheck-mandates).
-- **Push to Terminal**: A payment sent straight to a named device — no QR to scan — with no manifest changes on your side. See [Push to Terminal](./push-to-terminal).
-- **Localization**: Built-in translations for English, Afrikaans, Zulu, French, German, Spanish, and Portuguese — follows the device language by default.
-- **Cross-runtime friendly**: Compose-free theme builders and a suspending token callback make the SDK straightforward to embed from a Flutter or React Native host.
+- **The whole payment UI.** Amount entry, card-reading animation, PIN, success and failure screens.
+- **Your branding.** Light and dark colour schemes, corner radius, type sizes and your own logo, stated once as a file in your build — see [Theming](./configuration#theming).
+- **Digital receipts.** The Halo kernel emails or texts the cardholder's receipt against the transaction's own reference — see [Receipts](./usage#receipts).
+- **Payments that arrive from outside.** App-to-app intents, payment links and pushed payments are handled natively by the SDK, with no host code involved — see [Inbound Payments](./inbound-payments).
+- **DebiCheck mandates.** A TT3 debit-order mandate arrives through the same doors and runs the same tap flow — see [DebiCheck Mandates](./inbound-payments#debicheck-mandates).
+- **Seven languages**, following the device by default, and every string overridable per brand — see [Languages](./configuration#languages).
+- **Cross-runtime friendly.** A brand stated as a file and a suspending token callback, so a Flutter or React Native host bridges four values, not a config object.
+- **Optional telemetry.** Off by default. Switched on, the SDK reports its own operations and crashes into *your* Firebase project and never anything about the payment — see [Telemetry](./telemetry).
 
 :::note
-Dynamic Currency Conversion (DCC) is implemented but not yet exposed — the `showDCC` option is commented out in `HDConfig` while the flow is reworked. See [DCC](./usage#dynamic-currency-conversion-dcc).
+Dynamic Currency Conversion is implemented but not yet switchable: `showDCC` is commented out in `HDConfig` while the flow is reworked. See [DCC](./usage#dynamic-currency-conversion-dcc).
 :::
 
-## 📋 Prerequisites
+## 📋 Requirements
 
-Before you begin, ensure your project meets the following requirements:
-
-- **Android 10.0 (API level 29)** or higher.
-- **Halo SDK Credentials**: A valid SDK token provided by Synthesis/Halo.
-- A `ComponentActivity` (or subclass such as `AppCompatActivity`) to host the SDK.
-
-:::info Activity Requirements
-The activity passed to `HDConfig` **must** be a `ComponentActivity` (or a subclass such as `AppCompatActivity` or `FlutterFragmentActivity`), since the SDK renders its UI with Jetpack Compose.
-:::
+- Android 10 (API 29) or higher
+- A Halo SDK token, issued by Synthesis/Halo
+- A `ComponentActivity` (or a subclass such as `AppCompatActivity`) to host the SDK
 
 ## The Four Calls
 
-The host's entire view of the SDK is four calls, each made at the earliest moment it is possible to make it:
+<p align="center">
+  <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" style={{ width: "100%" }} />
+</p>
 
-| Call | When | Needs |
-|------|------|-------|
-| `HaloSdkUi.attach(activity, savedInstanceState)` | First line of `onCreate`, after `super.onCreate` | Nothing but the activity |
-| `HaloSdkUi.prepare(config)` | At your splash screen | Your `HDConfig` |
-| `HaloSdkUi.init(config)` | As soon as you have a session token | A session token |
-| `HaloSdkUi.launch(...)` | Per charge | — |
+| Call | Where | Blocking? | What it does |
+|------|-------|-----------|--------------|
+| `attach(activity, savedInstanceState)` | First line of `onCreate` | No | Loads the payment kernel, overlay protection and entropy, and wires the Android lifecycle through. |
+| `prepare(config)` | Your splash screen | No | Reads your brand file, loads its language, and warms the tap screen's artwork. |
+| `init(config)` | As soon as you hold a session token | Suspends | Registers the device, requests runtime permissions, and brings the SDK up. Returns the real outcome. |
+| `launch(amount, ref, currency, presentation)` | Per charge | Suspends | Runs the transaction and returns the result. |
 
-The ordering is deliberate: each call needs strictly more than the one before it, so the bring-up cost spreads across your startup instead of piling up in front of a merchant holding a card. Skipping any of the first three is legal and costs only speed — the next call does that work as well. The SDK logs a warning if `attach` runs late.
+**The order is the point.** Each call needs strictly more than the one before it — an Activity, then your config, then a token — so each runs the moment that thing exists and the work spreads across your startup instead of piling up in front of a merchant holding a card. Skipping any of the first three is legal and costs only speed, because the next call does that work too.
 
-`attach` also wires the Android lifecycle through to the SDK, so you do **not** forward `onStart`, `onResume`, `onPause` or `onStop` yourself.
-
-`init` is where the device registers: it re-attests only when the token's identity has changed since last time, and the runtime permissions in [Permissions](./installation#permissions) are requested alongside it rather than before it — a denial doesn't block bring-up. See [Configuration](./configuration#initialization) for the full detail on each call.
+`attach` also wires the Android lifecycle through to the SDK, so you never forward `onStart`/`onResume`/`onPause`/`onStop` yourself. The SDK logs a warning if it ran late — it must be the first line of `onCreate`, not your splash, not after your own setup.
 
 ### Example Activity Declaration
 
@@ -66,19 +58,23 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Hand the SDK its context — the most expensive step, so it goes first.
+        // 1. First line. Loads the payment kernel. Needs nothing from you.
         HaloSdkUi.attach(this, savedInstanceState)
 
-        // One config, used by both prepare and init.
         val config = HDConfig(
             activity = this,
-            onTokenRequest = { fetchTokenFromBackend() },
+            onTokenRequest = {
+                // Return your Halo SDK token. This is a suspend context, so a
+                // network call to your backend needs no extra plumbing.
+                "YOUR_SDK_TOKEN"
+            },
         )
 
-        // 2. Cache branding and warm the artwork. No token needed, returns at once.
+        // 2. At your splash. Loads your brand file and warms the artwork.
+        //    Returns immediately.
         HaloSdkUi.prepare(config)
 
-        // 3. Register the device and bring the SDK up.
+        // 3. As soon as you have a session token, usually right after login.
         lifecycleScope.launch {
             val result = HaloSdkUi.init(config)
             // result?.resultType / result?.errorCode carry why, if bring-up failed.
@@ -89,6 +85,17 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+That is all the code. **The other half of an integration is one file**, `src/main/assets/halo/brand.json`, which is what makes those screens yours rather than Halo's:
+
+```json
+{
+  "light": { "primary": "#FF6200EE" },
+  "logo": "brand-logo.svg"
+}
+```
+
+Every key is optional and there is nothing to call — see [Theming](./configuration#theming). `HDConfig` itself carries only the two things a file genuinely cannot state: the live [activity] and your [onTokenRequest] bridge.
+
 :::note
-`prepare` and `init` must be given the **same** configuration. `prepare` caches the branding an inbound payment paints itself with, and `init` registers against it — different values mean a payment arriving cold looks like a different app.
+`prepare` and `init` must be given the **same** `HDConfig`. It only carries the live wiring now — the brand file supplies everything else, and it is read the same way whichever call needs it.
 :::

@@ -29,13 +29,10 @@ plugins {
 }
 ```
 
-Then say you want pushed payments:
+Then ask for pushed payments in your [brand file](./configuration#theming):
 
-```kotlin
-val config = HDConfig(
-    // ... other props
-    receivePush = true,
-)
+```json
+{ "receivePush": true }
 ```
 
 That is the whole of it. The plugin turns the file into `google_app_id`, `google_api_key` and `project_id` string resources; Firebase's own `FirebaseInitProvider` — which arrives with the `firebase-messaging` dependency this library already brings, so it is in your merged manifest whether you asked for it or not — reads them at process start, ahead of any service binding. The SDK never names a project: it uses the app's own, the same one your analytics or crash reporting would use.
@@ -49,6 +46,8 @@ A host that would rather not add the plugin can write the same three resources b
 | `project_id` | `project_info.project_id` | Firebase Installations, which FCM sits on, will not reach the backend without it |
 
 None of it is secret: every one of these ships in the clear inside any APK built the ordinary way.
+
+This is the same project [Telemetry](./telemetry) reports into, if you switch that on — the SDK never names a project of its own, in either case.
 
 Leave `receivePush` false and nothing changes: no token is ever issued, `POST /devices` is never called, the device is never pushed at, and the app is exactly itself minus the ability to receive. A build with no Firebase project at all reaches the same place with the flag set — there is simply no token to register.
 
@@ -87,7 +86,7 @@ Android draws a small icon as a **silhouette off its alpha channel** — only th
 
 1. `ic_notification`, if your app declares one — the escape hatch for a host that wants to draw its own.
 2. `ic_launcher_foreground` — the foreground layer of your adaptive launcher icon: your mark on a transparent canvas, already inset to the padding an adaptive icon needs. If your build generates one, this is what a pushed payment's notification uses, with no extra artwork.
-3. [`HDCompanyLogo.icon`](./configuration#hdcompanylogo-properties), rendered from your SVG on the spot — for a host with neither of the above.
+3. Your brand file's [`icon`](./configuration#brand-file-keys), rendered from your SVG on the spot — for a host with neither of the above.
 4. Your launcher icon — last, and only better than nothing: a launcher icon is opaque edge to edge by definition, so silhouetted it is a solid block.
 
 Looked up by resource name, since a library cannot reference your `R` — nothing to wire if you already generate `ic_launcher_foreground`.
@@ -96,7 +95,7 @@ One loose end is caught on a hook you already call: a message carrying a `notifi
 
 ### `POST_NOTIFICATIONS`
 
-Covered in [Permissions](./installation#permissions): it plays no part in payment bring-up, so Android prompts for it itself, the first time a pushed payment actually tries to post a notification. Refused, that payment waits for the merchant to next open the app rather than failing.
+Covered in [Permissions](./installation#permissions): it is asked for on Android 13+ **only when `receivePush` is set**, since a build that cannot be pushed to has nothing to notify anyone about. Refused, a pushed payment waits for the merchant to next open the app rather than failing.
 
 :::caution Message shape is not part of the published contract
 The shape of the Firebase message the kernel sends is not part of Halo's published Push to Terminal contract, which stops at the `POST /consumer/push` response. The SDK accepts either plausible shape — a payload carrying the payment link outright (`url` / `link` / `applink` / …), or one naming the payment field by field (`transactionId` / `reference`, `amount`, `currency`, `merchantReference`, `configJwt`) — and logs the keys of anything it cannot read. Watch it with:

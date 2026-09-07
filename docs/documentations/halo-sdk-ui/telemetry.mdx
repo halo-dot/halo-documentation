@@ -1,0 +1,70 @@
+---
+sidebar_position: 7
+---
+
+# Telemetry
+
+The SDK can report **what it did and what went wrong** into your own Firebase project. It is off by default, and it never carries a payment's details.
+
+```json
+{
+  "analytics": true,
+  "crashReports": true
+}
+```
+
+Two switches, because they are two different bargains. Crash reporting is diagnostics a merchant benefits from; analytics is behavioural data an acquirer may not be allowed to gather at all. `crashReports = true, analytics = false` is a perfectly ordinary brand, and so is the reverse.
+
+:::note Both are off by default deliberately
+This reports into *your* Firebase project, and an SDK that started writing into it uninvited would be making your privacy decision for you.
+:::
+
+It needs the same `google-services.json` that [Push to Terminal](./push-to-terminal#your-firebase-project) needs, and nothing else. With no project in your build, or with the flag off, no provider comes up and the SDK says so once in the log.
+
+Every signal goes through one interface, so which backends a brand reports to is a list in a single file (`HDTelemetry.kt`). Firebase Analytics and Crashlytics are the two that ship; a brand reporting to its acquirer's collector adds a provider and changes nothing else.
+
+## What It Reports
+
+**Nothing is instrumented screen by screen.** Every signal comes from a seam the SDK already had, which is why a new screen or a new failure is measured from the day it exists.
+
+| Where | Reports |
+|-------|---------|
+| `HaloSdkUi.attach` | `sdk_started` — the denominator everything else is read against. A crash before any config existed is queued and flushed when the providers come up. |
+| `HDBoot` | How long a bring-up took, which door the payment arrived by, and on failure the named phase it stopped in and the *type* of throwable. |
+| `HDBoot`'s uncaught guard | The crashes nothing handled, as the SDK's only fatals. |
+| `Cubit.async` / `background` | `sdk_action_finished` per operation: its label, whether it worked, and the milliseconds the cardholder waited. |
+| `Cubit.fail` | Every handled failure, as a non-fatal with the trail of what the cubit was doing. |
+| `Cubit.emit` | That trail: a line per change of *stage*, never the state itself. |
+| `HDApi` | Every kernel round-trip as a breadcrumb, and as an event by masked endpoint. |
+| `HDRoutes` | Screen views, from the navigation state rather than from the pages. |
+| The payment SDK's callbacks | The two verdicts only they hold: whether the payment stack came up, and whether the acquirer approved. |
+
+Six event names in total, all prefixed `sdk_`. The prefix earns its place: the project is yours, and if you run the same design in your own app, one unprefixed column would carry two apps' operations and answer neither's question.
+
+## What It Can Never Carry
+
+Decided in one place, not by a call site. `HDTelemetry.scrub` drops:
+
+- any parameter whose key names an **amount, tip, reference, token, card, address or credential**, however the call site labelled it;
+- any value that *looks* like a person — an `@`, or a run of seven digits or more.
+
+Request paths are masked, so `/transactions/9f2c…/receipt/pdf` reports as `/transactions/{id}/receipt/pdf`. The merchant is a salted hash of the JWT subject the device registered under, scoped to **your** package name, so two brands cannot join their users.
+
+The one deliberate exception is a crash report's throwable, handed over whole — which is what crash reporting is. The SDK's exceptions carry kernel messages rather than cardholder data.
+
+:::note It also cannot break a payment
+Every call is fire-and-forget, every provider call is guarded, and bring-up always succeeds: a backend that will not come up is dropped with a line in the log rather than waited on. Nothing here touches a network on a thread a card read is waiting on.
+:::
+
+Watch it on a debuggable build with:
+
+```bash
+adb logcat -s HDTelemetry
+```
+
+Every signal is logged as well as sent, so a signal in logcat but not in a dashboard is a Firebase problem rather than a wiring one.
+
+## Two Things to Know
+
+- **Both Firebase libraries are on your classpath because this library brings them**, the way `firebase-messaging` already is — so Firebase's own automatic collection becomes available to your project once its resources exist. The SDK never touches your collection flags in either direction. Its switches decide only whether **the SDK** reports.
+- **Minified release builds need your own Crashlytics Gradle plugin** for readable stacks. Mapping-file upload is an application-module job, and a library cannot do it.

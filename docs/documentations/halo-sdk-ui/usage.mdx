@@ -32,7 +32,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 Skipping `attach` or `prepare` is legal and costs only speed — `init` does that work as well. The SDK logs a warning if `attach` runs late.
 :::
 
-See [Configuration](./configuration#initialization) for what each call does, including `HaloSdkUi.sdkVersion` and `HaloSdkUi.deviceInstallationId`.
+See [Configuration](./configuration#hdconfig) for what each call does, and [SDK Version & Device Installation ID](./configuration#sdk-version--device-installation-id) for `HaloSdkUi.sdkVersion` and `HaloSdkUi.deviceInstallationId`.
 
 ---
 
@@ -106,16 +106,7 @@ val result = HaloSdkUi.launch(
 )
 ```
 
-Inbound payments have no `launch` call to say, so they use `HDConfig.presentation` instead — see [Presentation](./configuration#presentation).
-
----
-
-## Runtime Changes
-
-| Call | Effect |
-|------|--------|
-| `HaloSdkUi.setThemeMode(HaloThemeMode.DARK)` | Switches light/dark/system at runtime |
-| `HaloSdkUi.setLanguage(HDLanguage.FRENCH)` | Switches the SDK's language at runtime |
+Inbound payments have no `launch` call to say, so they use your [brand file](./configuration#theming)'s `presentation` key instead — see [Presentation](./configuration#presentation).
 
 ---
 
@@ -161,9 +152,21 @@ fun handleResult(result: HaloTransactionResult?) {
 
 ### The Result Screen
 
-By default (`showTransactionResult = true`) the SDK shows its own result screen before returning, and `launch` returns once the merchant dismisses it. Set `showTransactionResult = false` on your `HDConfig` to have `launch` return as soon as the transaction completes instead, leaving the outcome — and the receipt — to your own UI.
+By default (`showTransactionResult` true, or unset) the SDK shows its own result screen before returning, and `launch` returns once the merchant dismisses it. Set `"showTransactionResult": false` in your [brand file](./configuration#theming) to have `launch` return as soon as the transaction completes instead, leaving the outcome — and the receipt — to your own UI.
 
 A transaction the user cancelled never shows a result screen: a stop they asked for is not an outcome to report back to them.
+
+---
+
+## When Something Goes Wrong
+
+A **technical failure** — as opposed to a decline — ends on the SDK's error screen. It shows a plain sentence saying what happened, and under it an **Error details** line carrying the SDK's own names for the failure.
+
+Those codes are the part worth quoting to support. The payment SDK routinely names one failure twice, once as an error code and once as a result type, and the useful half is not always the same one: a refused charge answers `GeneralError` plus `UnknownError`, while a denied camera answers `CameraPermissionNotGranted` with no error code at all. So the screen leads with whichever name says something and lists all of them underneath — and when a name says a permission is missing, it also offers a route to your app's settings page.
+
+Failures that already carry a sentence for the payer, such as an unusable QR code, show that sentence alone with no codes under it.
+
+A decline is not this. It is an ordinary result, it comes back through `HaloTransactionResult`, and it keeps its **Retry** button.
 
 ---
 
@@ -177,12 +180,18 @@ The result screen also shows a **receipt QR code** when the kernel returns one, 
 
 Nothing here needs host wiring — it is part of the SDK's own result screens, so it appears whenever `showTransactionResult` is left `true`.
 
+### Turning It Off
+
+Set `"shareReceipt": false` in your [brand file](./configuration#theming) to remove all of it: the button, the sheet behind it, and the QR. This is for a brand that issues receipts somewhere else entirely — its own back office, a printer, the acquirer's portal — and doesn't want a second, unrecorded route out of the payment screen.
+
+It gates the *lookup* as well as the buttons: with sharing off, the SDK never asks the kernel for `receipt/pdf`, since nothing is fetched for a screen that would not show it. A decline keeps its retry either way — Retry and Send receipt share the primary slot, and only the receipt face of it goes away. It is in the file with the rest of your brand, so an [inbound payment](./inbound-payments) behaves the same way.
+
 ---
 
 ## Dynamic Currency Conversion (DCC)
 
 :::caution Not yet exposed
-The DCC flow is implemented, but the `showDCC` option is commented out in `HDConfig`, so nothing can currently switch it on. This section describes the flow it will restore.
+The flow is implemented, but `showDCC` is commented out in `HDConfig`, so nothing can currently switch it on. This section describes the flow it will restore.
 :::
 
 When enabled, the SDK offers the cardholder a choice of currency after their card is read:

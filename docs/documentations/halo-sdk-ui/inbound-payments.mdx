@@ -34,25 +34,24 @@ The old `halompos.page.link` filter is gone. FDL was shut down in August 2025, n
 
 ## Setup
 
-Your URL scheme and App Link domain are set at **build time**, since both live in the manifest — read before any of your code runs, so no `HDConfig` call could set them. See [Build Configuration](./installation#build-configuration) for `halo_url_scheme` and `halo_applink_host`.
+Your URL scheme and App Link domain are set at **build time**, since both live in the manifest — read before any of your code runs, so no config call could set them. See [Build Configuration](./installation#build-configuration) for `halo_url_scheme` and `halo_applink_host`.
 
-One more thing is set at runtime, in `HDConfig`:
+One more thing is set, in your [brand file](./configuration#theming):
 
-### Your kernel, for short links
+### Short App Links
 
-A short App Link carries no `configJwt`, and resolving it is what *produces* the token — so there is no credential to take the kernel's address from, and the host has to name it. Every other call still reads its kernel off the credential it presents.
+A short App Link carries no `configJwt`, and resolving it is what *produces* the token — so there is no credential to take the kernel's address from, and the brand file has to say which kernel to ask:
 
-```kotlin
-val config = HDConfig(
-    // ... other props
-    kernel = "kernelserver.qa.haloplus.io",
-    kernelPins = setOf("sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA="),
-)
+```json
+{
+  "kernel": "kernelserver.go.qa.haloplus.io",
+  "kernelPins": "sha256/CNOtjib4NAlSqDZDY5aknDcVbcfLEWBgnGl/dgec4aA="
+}
 ```
 
-`kernelPins` are SHA-256 SPKI fingerprints of that kernel's TLS certificate — the same values an `aud_fingerprints` claim carries. More than one is normal, so a certificate rotation cannot brick the SDK. Leaving it empty runs the link resolve unpinned, which is logged; anything authorised by a JWT is pinned by that JWT regardless.
+`kernel` is the address this client calls: `https://` is optional and a trailing slash is trimmed, and a path prefix is kept, so a deployment served under one (`qa.example.co.za/kernelserver`) states it. `kernelPins` are SHA-256 SPKI fingerprints as `sha256/<base64>`, the same values a token's `aud_fingerprints` claim carries; bare base64 is accepted too, and several are separated by `;` or `,`. More than one is normal, so a certificate rotation cannot brick the SDK, and naming none resolves the link unpinned, which is logged.
 
-Leave `kernel` null if your links always carry their own JWT.
+Leave both out if your links carry their own JWT. Every other call reads its kernel, and its pins, off the credential it presents.
 
 :::caution Don't route an unmatched link yourself
 If a payment link reaches your own app's activity instead of the SDK's, nothing here matched it — check the host and scheme against the table above rather than routing it by hand. The query carries a **live `configJwt`**, and anything that renders an unmatched URL renders that credential along with it.
@@ -60,24 +59,26 @@ If a payment link reaches your own app's activity instead of the SDK's, nothing 
 
 ## Presentation
 
-An inbound payment arrives with no `launch` call to say how it wants to be presented, so it uses `HDConfig.presentation`. A brand that presents its own charges as a sheet should set it, so a payment looks the same however it arrived.
+An inbound payment arrives with no `launch` call to say how it wants to be presented, so it uses your [brand file](./configuration#theming)'s `presentation` key. A brand that presents its own charges as a sheet should set it, so a payment looks the same however it arrived.
 
 ## DebiCheck Mandates
 
 A **DebiCheck mandate** — the scheme's `TT3` — is a debit order the payer authorises by tapping their card, rather than a payment. It arrives through the doors above and needs nothing extra from you: the SDK recognises it, runs the same tap flow, and charges it with the kernel's TT3 call.
 
-| Entry point | How it says it is a mandate |
-|-------------|-------------------------------|
-| App-to-app | `is_tap` extra set to `false` |
-| URL / App Link | `type=TT3` in the query |
+| Entry point | How it says it is a mandate | Fields |
+|-------------|-------------------------------|--------|
+| App-to-app | `is_tap` extra set to `false` | `accountNumber`, `pid`, `maxCollectionAmount`, `contractReference`, `collectionDay`, `creditorABSN` |
+| URL / App Link | `type=TT3` in the query | The same names, except the identity number is `id` and the transaction is `uuid` |
+
+`creditorABSN` is the creditor's **Abbreviated Short Name** — the trading name that appears on the payer's bank statement — and it renders as the "Description" row. `collectionDay` is the day of the month the order runs. Both fall back to `undefined` when omitted, as v1 does. `accountNumber` and the identity number are **required**: a mandate without them is rejected rather than charged blank.
 
 :::note The kernel's record wins
 Whatever the intent or link carries, a mandate with a transaction id is always read back from the kernel before it is charged: the account and identity number it is *registered* against are the kernel's, and the charge is presented with that record's `paymentJwt` rather than the link's own token.
 :::
 
-**What the payer sees.** The tap screen leads with the **max collection amount** — the ceiling the debit order may collect up to, not a sum being taken now, and also what the kernel authorises against and what the PIN pad shows. Under it sit the four things that identify the order: the debit order day, the account it will be collected from, the creditor's description and the contract reference — so the payer can recognise what they are agreeing to. The DebiCheck mark is shown alongside the accepted-scheme marks.
+**What the payer sees.** The tap screen leads with the **instalment amount** — the mandate's max collection amount: the ceiling the debit order may collect up to, not a sum being taken now, and also what the kernel authorises against and what the PIN pad shows. Under it sit the four things that identify the order: the collection day, the account it will be collected from, the creditor's description and the contract reference — so the payer can recognise what they are agreeing to. A mandate is a document being agreed to rather than a price being paid, so those sit in a card together; once the card has been read the terms collapse away and the amount stays. The DebiCheck mark is shown alongside the accepted-scheme marks.
 
-An approved mandate reports **Mandate Approved** with those same details, rather than a card receipt: nothing has been collected yet, so there is no card, scheme or authorisation code to show.
+An approved mandate reports **Mandate Approved** with those same terms in place of the card, scheme and authorisation rows: nothing has been collected yet, so there is no card receipt to show.
 
 ## The Fourth Door
 
