@@ -12,8 +12,8 @@
 <path d="M 270 152 L 290 152" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
 <rect x="298" y="230" width="694" height="82" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
 <text x="312" y="256" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14" font-weight="400" fill="#1f2328" text-anchor="start">prepare(config)</text>
-<text x="312" y="278" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Caches the appearance half of your config — theme, language, scheme logos, scheme, kernel.</text>
-<text x="312" y="294" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">That cache is what lets an inbound payment paint itself in your branding with no host running.</text>
+<text x="312" y="278" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Reads your brand file — theme, language, scheme logos, scheme, kernel — and loads the copy.</text>
+<text x="312" y="294" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The same file is what lets an inbound payment paint itself in your branding with no host running.</text>
 <text x="236" y="254" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#1f2328" text-anchor="end">At your splash</text>
 <text x="236" y="272" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="400" fill="#59636e" text-anchor="end">returns immediately</text>
 <path d="M 270 256 L 290 256" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>

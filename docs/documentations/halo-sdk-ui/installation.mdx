@@ -67,12 +67,12 @@ Add the following to your module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("za.co.synthesis.halo:sdk_ui:0.0.5")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.22")
 }
 ```
 
 :::tip
-Replace `0.0.5` with the latest version available.
+Replace `0.0.22` with the latest version available.
 :::
 
 Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.
@@ -93,17 +93,38 @@ The SDK's permissions are merged into your app's manifest automatically. The run
 | `BLUETOOTH` / `BLUETOOTH_ADMIN` | — | External card reader support (pre-Android 12) |
 | `CAMERA` | ✓ | Device security verification |
 | `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | ✓ | Payment compliance (location verification) |
-| `READ_PHONE_STATE` | ✓ | Device identification |
-| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | ✓ (Android 12+) | External card reader support |
-| `POST_NOTIFICATIONS` | ✓ (Android 13+, at first notification) | [Push to Terminal](./push-to-terminal)'s notification, backgrounded |
+| `READ_PHONE_STATE` | — | Declared by the payment SDK, never prompted for |
+| `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | — | External card reader support, never prompted for |
+| `POST_NOTIFICATIONS` | ✓ (Android 13+, if `receivePush`) | [Push to Terminal](./push-to-terminal)'s notification, backgrounded |
 
 A denial doesn't abort bring-up — `init` continues and logs which permissions were refused, and the SDK reports the consequences through its own initialization result.
 
-`POST_NOTIFICATIONS` is the one exception to "requested during `init()`": it plays no part in payment bring-up, so it isn't in that batch — Android prompts for it automatically, the first time a pushed payment actually tries to post a notification. Refused, that payment waits for the merchant to next open the app rather than failing; nothing else about Push to Terminal is affected.
+:::note Declaring is free, prompting is not
+The two columns are deliberately different. `READ_PHONE_STATE` cannot do what it is named for on any supported device — Android 10 stopped returning IMEI or serial to a normal app — and asking would cost every merchant a Phone-group prompt that reads as a payment app asking to make calls. Bluetooth is for an external card reader, and there is no reader path in this SDK. Both stay declared, because the payment SDK declares them, and neither is ever prompted for.
+:::
+
+`POST_NOTIFICATIONS` is asked for on Android 13+ **only when [`receivePush`](./push-to-terminal) is set** — a build that cannot be pushed to has nothing to notify anyone about. Refused, a pushed payment waits for the merchant to next open the app rather than failing; nothing else about Push to Terminal is affected.
+
+### Using the Camera in Your Own App
+
+The payment kernel watches the camera while it is up: it reads entropy off it, and treats another component opening it as tampering, which cancels a card read in progress. If your app uses the camera too — a QR scanner, say — tell the kernel:
+
+```kotlin
+HaloSDK.requestCameraUsage()   // before the camera is opened
+HaloSDK.returnCameraUsage()    // once it is closed
+```
+
+:::caution "Closed" is later than it looks
+`stop()` on a CameraX controller returns when the release *begins*. Closing the capture graph and then the device runs about two seconds on the hardware we have measured — hand the camera back before that and the kernel finds it still open and reports your own scanner as tampering. The SDK holds itself to the same rule: monitoring stands down for the length of a boot, where there is no card read to protect, and comes back up with the tap flow.
+:::
+
+### The PIN Pad Theme
+
+The SDK also declares a theme for the payment SDK's PIN pad activity (`PinScreenLauncherActivity`) on your behalf. Without it, a host whose application theme is not AppCompat — a Flutter host, typically — crashes the moment the kernel asks for a PIN, with the card already read. There is nothing to do; it is mentioned only so the extra `<activity>` in your merged manifest is not a mystery.
 
 ## 🏗️ Build Configuration {#build-configuration}
 
-Two things have to be settled in your app's **build** rather than in `HDConfig`, because both live in the manifest — read before any of your code runs, so no runtime call could set them.
+Two things have to be settled in your app's **build** rather than in your [brand file](./configuration#theming), because both live in the manifest — read before any of your code runs, so no runtime file could set them.
 
 | Resource | Default | What it does |
 |----------|---------|---------------|
@@ -126,7 +147,7 @@ android {
 Or declare the same names in `res/values/strings.xml` — app resources win over a library's either way.
 
 :::caution One scheme per brand
-Two apps claiming `halo://` on the same device is a chooser the payer should never see. If you override `halo_url_scheme`, pass the same value as [`HDConfig.scheme`](./configuration#hdconfig-parameters) so the parser knows which scheme is yours — the resource is the manifest half, `HDConfig.scheme` the runtime half, and they have to agree.
+Two apps claiming `halo://` on the same device is a chooser the payer should never see. If you override `halo_url_scheme`, put the same value in your [brand file](./configuration#theming)'s `scheme` key so the parser knows which scheme is yours — the resource is the manifest half and the file's is the parser's half, and they have to agree.
 :::
 
 `autoVerify` on the App Link filter needs an `assetlinks.json` published on that domain; without it Android offers a chooser instead of opening your app directly. See [Inbound Payments](./inbound-payments) for how these links are handled once they arrive.

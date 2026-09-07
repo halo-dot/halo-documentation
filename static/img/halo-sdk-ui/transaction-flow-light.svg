@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1281" width="1000" height="1281" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1408" width="1000" height="1408" role="img">
 <defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9198a1"/></marker></defs>
-<rect width="1000" height="1281" fill="#ffffff"/>
+<rect width="1000" height="1408" fill="#ffffff"/>
 <text x="32" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19" font-weight="600" fill="#1f2328" text-anchor="start">A charge you start — launch() to result</text>
 <text x="32" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#59636e" text-anchor="start">One suspend call. Everything between it and the result is the SDK’s.</text>
 <rect x="80.0" y="112" width="440" height="84.0" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
@@ -76,4 +76,9 @@
 <text x="94.0" y="1213.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">NetworkError · ProcessingError</text>
 <text x="94.0" y="1229.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">plus the transaction references and, for a completed charge, the receipt.</text>
 <path d="M 766.0 915.0 V 1128.0 H 460.0 V 1146.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="28" y="1277.5" width="944" height="97" rx="12" fill="#ffebe9" stroke="#ffa5a0" stroke-width="1.5"/>
+<text x="42" y="1302.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#cf222e" text-anchor="start">A technical failure anywhere above ends on the error screen instead.</text>
+<text x="42" y="1323.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">A sentence saying what happened, and under it an Error details line carrying every name the SDK gave the failure. That line is the part worth</text>
+<text x="42" y="1339.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">quoting to support.</text>
+<text x="42" y="1355.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">A decline is not this: it is an ordinary result, and it keeps its Retry button.</text>
 </svg>
