@@ -443,6 +443,7 @@ public interface IHaloCallbacks {
     void onAttestationError(HaloAttestationHealthResult result);
     void onSecurityError(HaloErrorCode code);
     void onCameraControlLost();
+    void onOtherTaskResults(HaloOtherTaskResult results);
 }
 ```
 
@@ -453,6 +454,7 @@ The `IHaloCallbacks` interface encapsulates the call-back methods that the HaloS
 3. Final outcome of a transaction (`onHaloTransactionResult`)
 4. Issues with intermittent attestation checks (`onAttestationError`)
 5. Security violation detected (rooting, debugging, integrity) (`onSecurityError`)
+6. Final outcome of start other-task flow (`onOtherTaskResults`)
 
 **HaloInitializationResult**
 
@@ -526,7 +528,8 @@ public final fun startTransaction(
     currencyCode: String? = null,
     extraReceiptFields: Map<String, String>? = null,
     passthroughFields: JSONObject? = null,
-    transactionType: TransactionType = TransactionType.Purchase
+    transactionType: TransactionType = TransactionType.Purchase,
+    otherTasks: List<HaloOtherTaskType>? = null,
 ): za.co.synthesis.halo.sdk.model.HaloStartTransactionResult
 ```
 
@@ -538,6 +541,7 @@ Let's take a closer look at `startTransaction` parameters:
 * `extraReceiptFields` - A map of additional fields that will be included in the EMV receipt. This is optional and can be used to include additional information on the receipt, such as customer details or order numbers.
 * `passthroughFields` - A JSON object containing additional fields that will be passed through to the payment processor. This is optional and can be used to include additional information that the payment processor may require.
 * `transactionType` - The type of transaction that will be done - which could either be a Purchase, Cash, PurchaseWithCashback or Refund.
+* `otherTasks` - Other tasks to be performed in conjunction with the transaction, e.g. `HaloOtherTaskType.PANTokenisation`, or a custom task via `HaloOtherTaskType.Custom`.
 
 The `merchantTransactionReference` is a unique-per-merchant transaction reference generated and supplied by the integrating app. Halo will generate and maintain its own internal ID for the transaction (`haloTransactionReference`), but from the perspective of the integrating app `merchantTransactionReference` together with the value `Payment Processor Merchant-User ID` specified in the JWT `sub` field can be used to uniquely identify a merchant transaction.
 
@@ -667,6 +671,7 @@ public class HaloTransactionResult {
     public List<String> errorDetails;
     public HaloTransactionReceipt? receipt;
     public Map<String, String>? customTags;
+    public List<HaloOtherTask>? otherTasks;
 }
 ```
 
@@ -735,7 +740,18 @@ And the parameters of `HaloTransactionResult`:
     | amountAuthorised         | Amount authorised                                                                    |
     | amountOther              | Additional amount                                                                    |
 
-4. Example HaloTransactionResult
+4.  Other Tasks
+
+    Populated when `otherTasks` was supplied to `HaloSDK.startTransaction`, this field carries the result of
+    each requested task, each entry is a `HaloOtherTask`:
+
+    | Field       | Description                                                                               |
+    | ----------- | ------------------------------------------------------------------------------------------ |
+    | type        | The `HaloOtherTaskType` that was requested (e.g. `PANTokenisation`, or a `Custom` value)    |
+    | result      | The result payload produced by the task                                                    |
+    | isErrored   | `true` if this specific task failed, `false` if it completed successfully                  |
+
+5. Example HaloTransactionResult
 
 ```json
  onHaloTransactionResult: {
@@ -794,11 +810,96 @@ And the parameters of `HaloTransactionResult`:
      currencyCode: 710, 
      effectiveDate: 240901
    }, 
-   errorDetails: []
+   errorDetails: [],
+   otherTasks: [
+    {type: PANTokenisation, result: 56f8323-65456a-22810c2, isErrored: false}
+    ]
  }
 ```
 
-## 8. SDK Async Behaviour after startTransaction Returns
+## 8. Starting Other Tasks (startOther)
+
+This feature is for starting non payment transaction tasks such as PAN Tokenisation.
+
+**HaloSDK.startOther**
+
+```kotlin
+public final fun startOther(
+    otherTasks: List<HaloOtherTaskType>,
+    currencyCode: String? = null,
+    passthroughFields: JSONObject? = null,
+    cardType: CardType? = null,
+): za.co.synthesis.halo.sdk.model.HaloStartOtherTaskResult
+```
+
+Parameters which can be passed are:
+
+* `otherTasks` - The list of tasks to perform.
+* `currencyCode` - The terminal currency code if different from the `terminalCurrency` returned in `HaloInitializationResult.terminalCurrency`. If not specified, the terminal currency will be used.
+* `passthroughFields` - A JSON object containing additional fields that will be passed through to the payment processor. This is optional and can be used to include additional information that the payment processor may require.
+* `cardType` - Restricts the flow to a specific card type, if applicable.
+
+```kotlin
+sealed interface HaloOtherTaskType {
+    val value: String
+    data object PANTokenisation : HaloOtherTaskType
+    data class Custom(override val value: String) : HaloOtherTaskType
+}
+```
+
+**HaloStartOtherTaskResult**
+
+The return type of `startOther` is `HaloStartOtherTaskResult`
+
+```kotlin
+public class HaloStartOtherTaskResult {
+    public HaloStartTransactionResultType resultType;
+    public HaloErrorCode errorCode;
+}
+```
+
+**IHaloCallbacks.onOtherTaskResults**
+
+Once other-task flow started via `startOther` has completed, the Halo SDK communicates the
+final outcome by invoking `IHaloCallbacks.onOtherTaskResults`, passing it a `HaloOtherTaskResult`:
+
+```kotlin
+data class HaloOtherTaskResult(
+    var errorCode: HaloErrorCode? = null,
+    var errorDetails: List<String>? = null,
+    var otherTasks: List<HaloOtherTask>? = null
+)
+```
+
+`otherTasks` contains one `HaloOtherTask` entry per requested task:
+
+```kotlin
+data class HaloOtherTask(
+    val type: HaloOtherTaskType,
+    val result: String,
+    val isErrored: Boolean
+)
+```
+
+| Field       | Description                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| type        | The `HaloOtherTaskType` that was requested (e.g. `PANTokenisation`, or a `Custom` value)   |
+| result      | The result payload produced by the task                                                   |
+| isErrored   | `true` if this specific task failed, `false` if it completed successfully                 |
+
+Example `onOtherTaskResults` payload:
+
+```json
+ onOtherTaskResults: {
+   errorCode: 0,
+   errorDetails: [],
+   otherTasks: [
+    {type: PANTokenisation, result: 56f8323-65456a-22810c2, isErrored: false}
+   ]
+ }
+```
+
+## 9. SDK Async Behaviour after startTransaction Returns
 
 Assuming that `startTransaction` returns a synchronous result type of `Started` , the SDK will continue with async transaction processing.
 
@@ -868,7 +969,7 @@ In some cases the SDK will determine that the transaction cannot be completed wi
 
 In some unusual cases, the SDK will require the user to present the same card/device again, in order to complete the transaction. In these cases, the SDK will retain control, but will require the mobile application to communicate instructions to the user via ui messages during the transaction. These instructions will either be to tap the same card/device again ( `TryAgain` ), or to first consult their device for instructions (if paying with a digital wallet or emulated card e.g. Samsung Pay), then tap the device again ( `SeePhoneForInstructions_ThenTapAgain` ). It is only when the transaction has been finally concluded that the SDK will communicate a final transaction result as per normal, then terminate.
 
-## 9. Integrating the Halo SDK in a Multi-Activity Kotlin Android App
+## 10. Integrating the Halo SDK in a Multi-Activity Kotlin Android App
 
 ### Overview
 
@@ -969,7 +1070,7 @@ Route to an activity to display a receipt for your user.
 
 For the full source code, visit: https://github.com/halo-dot/test_app-android_sdk
 
-## 10. Conclusion
+## 11. Conclusion
 
 That concludes the guide to integrating the Halo.SDK into your application. For any questions, please do not hesitate to reach out to the Halo Dot Team.
 
