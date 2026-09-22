@@ -524,11 +524,12 @@ Once the SDK has been successfully initialized, as indicated by a `HaloInitializ
 ```kotlin
 public final fun startTransaction(
     transactionAmount: BigDecimal,
-    merchantTransactionReference: String
+    merchantTransactionReference: String,
     currencyCode: String? = null,
     extraReceiptFields: Map<String, String>? = null,
     passthroughFields: JSONObject? = null,
     transactionType: TransactionType = TransactionType.Purchase,
+    cardType: CardType? = null,
     otherTasks: List<HaloOtherTaskType>? = null,
 ): za.co.synthesis.halo.sdk.model.HaloStartTransactionResult
 ```
@@ -541,7 +542,8 @@ Let's take a closer look at `startTransaction` parameters:
 * `extraReceiptFields` - A map of additional fields that will be included in the EMV receipt. This is optional and can be used to include additional information on the receipt, such as customer details or order numbers.
 * `passthroughFields` - A JSON object containing additional fields that will be passed through to the payment processor. This is optional and can be used to include additional information that the payment processor may require.
 * `transactionType` - The type of transaction that will be done - which could either be a Purchase, Cash, PurchaseWithCashback or Refund.
-* `otherTasks` - Other tasks to be performed in conjunction with the transaction, e.g. `HaloOtherTaskType.PANTokenisation`, or a custom task via `HaloOtherTaskType.Custom`.
+* `cardType` - Restricts the flow to a specific card type, if applicable.
+* `otherTasks` - Other tasks to be performed in conjunction with the transaction, e.g. `HaloOtherTaskType.PANTokenisation`.
 
 The `merchantTransactionReference` is a unique-per-merchant transaction reference generated and supplied by the integrating app. Halo will generate and maintain its own internal ID for the transaction (`haloTransactionReference`), but from the perspective of the integrating app `merchantTransactionReference` together with the value `Payment Processor Merchant-User ID` specified in the JWT `sub` field can be used to uniquely identify a merchant transaction.
 
@@ -742,14 +744,7 @@ And the parameters of `HaloTransactionResult`:
 
 4.  Other Tasks
 
-    Populated when `otherTasks` was supplied to `HaloSDK.startTransaction`, this field carries the result of
-    each requested task, each entry is a `HaloOtherTask`:
-
-    | Field       | Description                                                                               |
-    | ----------- | ------------------------------------------------------------------------------------------ |
-    | type        | The `HaloOtherTaskType` that was requested (e.g. `PANTokenisation`, or a `Custom` value)    |
-    | result      | The result payload produced by the task                                                    |
-    | isErrored   | `true` if this specific task failed, `false` if it completed successfully                  |
+    Refer to [HaloOtherTask](#haloothertask) in Section 8, Starting Other Tasks (startOther)  
 
 5. Example HaloTransactionResult
 
@@ -812,7 +807,8 @@ And the parameters of `HaloTransactionResult`:
    }, 
    errorDetails: [],
    otherTasks: [
-    {type: PANTokenisation, result: 56f8323-65456a-22810c2, isErrored: false}
+    "Success(taskType=PANTokenisation, result=23540D139D14C4C6D3983B7447DFB137B5F7E64FE31B526FB7AB2F144BBA4D79)",
+    "Error(taskType=Custom(value=TestingFail), errorCode=UnknownError, errorMessage=Unsupported task type: TestingFail)"
     ]
  }
 ```
@@ -871,21 +867,29 @@ data class HaloOtherTaskResult(
 )
 ```
 
-`otherTasks` contains one `HaloOtherTask` entry per requested task:
+<a id="haloothertask"></a>`otherTasks` contains one `HaloOtherTask` entry per requested task:
 
 ```kotlin
-data class HaloOtherTask(
-    val type: HaloOtherTaskType,
-    val result: String,
-    val isErrored: Boolean
-)
+sealed class HaloOtherTask(val type: HaloOtherTaskType) {
+    data class Success(
+        val taskType: HaloOtherTaskType,
+        val result: String
+    ) : HaloOtherTask(taskType)
+
+    data class Error(
+        val taskType: HaloOtherTaskType,
+        val errorCode: HaloErrorCode,
+        val errorMessage: String
+    ) : HaloOtherTask(taskType)
+}
 ```
 
 | Field       | Description                                                                             |
 | ----------- | ----------------------------------------------------------------------------------------- |
-| type        | The `HaloOtherTaskType` that was requested (e.g. `PANTokenisation`, or a `Custom` value)   |
-| result      | The result payload produced by the task                                                   |
-| isErrored   | `true` if this specific task failed, `false` if it completed successfully                 |
+| taskType        | The `HaloOtherTaskType` that was requested (e.g. `PANTokenisation`, or a `Custom` value)   |
+| result      | The result payload produced by the task (present on `Success`)                            |
+| errorCode   | The `HaloErrorCode` indicating why the task failed (present on `Error`)                   |
+| errorMessage | A human-readable description of the failure (present on `Error`)                         |
 
 Example `onOtherTaskResults` payload:
 
@@ -894,8 +898,9 @@ Example `onOtherTaskResults` payload:
    errorCode: 0,
    errorDetails: [],
    otherTasks: [
-    {type: PANTokenisation, result: 56f8323-65456a-22810c2, isErrored: false}
-   ]
+    "Success(taskType=PANTokenisation, result=23540D139D14C4C6D3983B7447DFB137B5F7E64FE31B526FB7AB2F144BBA4D79)",
+    "Error(taskType=Custom(value=TestingFail), errorCode=UnknownError, errorMessage=Unsupported task type: TestingFail)"
+    ]
  }
 ```
 
