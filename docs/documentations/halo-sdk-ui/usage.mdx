@@ -26,7 +26,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 |------|---------|-------|
 | `attach(activity, savedInstanceState)` | `Unit` | Also wires the Android lifecycle through to the SDK — do **not** forward `onStart`/`onResume`/`onPause`/`onStop` yourself. Cheap to call more than once. |
 | `prepare(config)` | `Unit` | Returns immediately; nothing it does can fail in a way you handle. |
-| `init(config)` | `HaloInitializationResult?` | Suspends until the SDK reports its real outcome (registration, attestation, kernel). `null` means a step failed before the SDK could report at all. Idempotent. |
+| `init(config)` | `HaloInitializationResult?` | Suspends until the SDK reports its real outcome (registration, attestation, kernel). `null` means a step failed before the SDK could report at all. Idempotent. Stops early if [NFC is switched off](#when-nfc-is-off). |
 
 :::tip
 Skipping `attach` or `prepare` is legal and costs only speed — `init` does that work as well. The SDK logs a warning if `attach` runs late.
@@ -46,7 +46,7 @@ See [Configuration](./configuration#hdconfig) for what each call does, and [SDK 
 |-----------|------|---------|-------------|
 | `amount` | `BigDecimal?` | - | The transaction amount. If `null` or zero, the SDK shows a keypad for the user to enter the amount. |
 | `merchantRef` | `String?` | - | Optional merchant reference. Supply one and it is used as-is (and shown read-only on the keypad screen); pass `null` and the merchant can type one on the keypad. |
-| `currency` | `HDCurrency?` | - | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Defaults to `ZAR` if `null`. |
+| `currency` | `HDCurrency?` | - | The transaction currency (`HDCurrency.ZAR`, `USD`, `EUR`, or `GBP`). Omit it and the amount is denominated in the head of your brand file's [`currencies`](./configuration#currencies), which is the rand unless you narrowed the list. |
 | `presentation` | `HDPresentation` | `FULL_SCREEN` | Whether this charge takes over the screen or appears as a sheet over your app. |
 
 <p align="center">
@@ -162,11 +162,32 @@ A transaction the user cancelled never shows a result screen: a stop they asked 
 
 A **technical failure** — as opposed to a decline — ends on the SDK's error screen. It shows a plain sentence saying what happened, and under it an **Error details** line carrying the SDK's own names for the failure.
 
-Those codes are the part worth quoting to support. The payment SDK routinely names one failure twice, once as an error code and once as a result type, and the useful half is not always the same one: a refused charge answers `GeneralError` plus `UnknownError`, while a denied camera answers `CameraPermissionNotGranted` with no error code at all. So the screen leads with whichever name says something and lists all of them underneath — and when a name says a permission is missing, it also offers a route to your app's settings page.
+Those codes are the part worth quoting to support. The payment SDK routinely names one failure twice, once as an error code and once as a result type, and the useful half is not always the same one: a refused charge answers `GeneralError` plus `UnknownError`, while a denied camera answers `CameraPermissionNotGranted` with no error code at all. So the screen leads with whichever name says something and lists all of them underneath — and where the failure is one the merchant can go and fix, it carries the button that fixes it: **Open settings** for a refused permission, **Turn on NFC** for the radio. Every other failure offers Close alone, because a button that leads somewhere unrelated to the problem is worse than no button.
 
 Failures that already carry a sentence for the payer, such as an unusable QR code, show that sentence alone with no codes under it.
 
 A decline is not this. It is an ordinary result, it comes back through `HaloTransactionResult`, and it keeps its **Retry** button.
+
+### When NFC Is Off
+
+Tap-on-phone reads the card over NFC, so the radio being switched off is the one bring-up failure a merchant can fix in two taps — and the one they were least likely to be told about. **You do not check for it.** The SDK asks the adapter itself, and it asks twice:
+
+| When | What happens |
+|------|--------------|
+| During `init` | The bring-up stops before the kernel is asked for anything, and the error screen goes up with **Turn on NFC** on it. `init` returns as a failed bring-up. |
+| At each `launch` | The transaction is refused before the tap screen is staged. `launch` answers `null`, exactly as it does for any flow that ended without a result. |
+
+Both, rather than one: a bring-up that passed proves nothing about the next sale, and the switch is in the merchant's notification shade.
+
+The check runs after your brand file and its language are loaded, so the screen is in your colours and the merchant's words, and after the config is cached — which matters because that cache is the only place the SDK learns which kernel a token-less [App Link](./inbound-payments#short-app-links) resolves against. A device that fell out of bring-up before that point would take the next payment link it was sent and fail it on "no kernel is configured", about the wrong problem entirely.
+
+**Turn on NFC** opens the system NFC page, or the general wireless page on the skins that ship no NFC screen. It starts as a new task, so settings does not become part of your payment flow's back stack: the merchant flips the switch, comes back, and the error screen is still there to close.
+
+Three things it deliberately does not do:
+
+- **It does not gate hardware.** A device with no NFC adapter at all is yours to gate, not ours — you decide whether your app has any business installing there, and your own "unsupported device" screen says it better than a button to a switch the device hasn't got. Only a radio that exists and is off stops anything here.
+- **It does not guess.** The payment SDK answers `NoTerminalContainer` when it cannot stand a contactless terminal up, which is what it answers *every time* with the radio off — and equally what it answers for a genuine container fault on a device whose NFC is on. So the adapter decides which of those you are looking at. A failure the SDK named `NFC…` itself is taken at its word.
+- **It does not need host wiring.** No callback, no result type to branch on, no permission to request. NFC is a declared permission ([see Permissions](./installation#permissions)) and being *switched on* is not a permission at all — it is the device owner's switch.
 
 ---
 
@@ -182,16 +203,22 @@ Nothing here needs host wiring — it is part of the SDK's own result screens, s
 
 ### Turning It Off
 
-Set `"shareReceipt": false` in your [brand file](./configuration#theming) to remove all of it: the button, the sheet behind it, and the QR. This is for a brand that issues receipts somewhere else entirely — its own back office, a printer, the acquirer's portal — and doesn't want a second, unrecorded route out of the payment screen.
+Set `"receipt": ["-share"]` in your [brand file](./configuration#theming) to remove all of it: the button, the sheet behind it, and the QR. This is for a brand that issues receipts somewhere else entirely — its own back office, a printer, the acquirer's portal — and doesn't want a second, unrecorded route out of the payment screen.
 
 It gates the *lookup* as well as the buttons: with sharing off, the SDK never asks the kernel for `receipt/pdf`, since nothing is fetched for a screen that would not show it. A decline keeps its retry either way — Retry and Send receipt share the primary slot, and only the receipt face of it goes away. It is in the file with the rest of your brand, so an [inbound payment](./inbound-payments) behaves the same way.
+
+`receipt` also takes `true` or `false` to turn every receipt action on or off at once, or an array naming the ones you want — `["share", "print"]` adds **Print**, which shows only where the device has a printer. The default is `["share"]`.
+
+### One Channel Only
+
+To send receipts on one channel only, set `"emailReceipt": false` or `"smsReceipt": false`. The sheet then asks for the other alone, and drops the hint that either will do.
 
 ---
 
 ## Dynamic Currency Conversion (DCC)
 
 :::caution Not yet exposed
-The flow is implemented, but `showDCC` is commented out in `HDConfig`, so nothing can currently switch it on. This section describes the flow it will restore.
+The flow is implemented, but nothing public switches it on today: the only setter is a commented-out demo toggle in `HaloSdkUi`. This section describes the flow it will restore.
 :::
 
 When enabled, the SDK offers the cardholder a choice of currency after their card is read:
