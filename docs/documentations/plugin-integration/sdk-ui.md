@@ -36,7 +36,7 @@ Add a dependency, make four calls, and your app can take a card payment. The SDK
 
 ## Installation
 
-> **Building in Flutter?** Use the [`halo_sdk_ui`](https://pub.dev/packages/halo_sdk_ui) plugin instead of the steps below. It declares this library for you, bridges every call to Dart, and its README covers the two lines of `MainActivity` code and the Gradle repository a Flutter host still needs. What follows is for a Kotlin host. The [brand file](#theming) and everything under [Inbound payments](#inbound-payments) apply to both.
+> **Building in Flutter?** Use the <a href="https://pub.dev/packages/halo_sdk_ui" target="_blank"><code>halo_sdk_ui</code></a> plugin instead of the steps below. It declares this library for you, bridges every call to Dart, and its README covers the two lines of `MainActivity` code and the Gradle repository a Flutter host still needs. What follows is for a Kotlin host. The [brand file](#theming) and everything under [Inbound payments](#inbound-payments) apply to both.
 
 <p align="center">
   <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" style={{ width: "100%" }} />
@@ -841,7 +841,7 @@ The SDK can report **what it did and what went wrong** into your own Firebase pr
 
 Two switches, because they are two different bargains, and `crashReports` without `analytics` is a perfectly ordinary brand, as is the reverse. Both are off by default deliberately: this reports into *your* project, and an SDK that started writing into it uninvited would be making your privacy decision for you. It needs the same `google-services.json` [Push to Terminal](#your-firebase-project) needs and nothing else. With no project, or the flag off, no provider comes up and the SDK says so once in the log.
 
-Every signal goes through one interface, so which backends a brand reports to is a list in one file, [`HDTelemetry.kt`](https://github.com/halo-dot/halo_sdk_ui/blob/main/lib/src/main/java/za/co/synthesis/halo/sdk_ui/core/HDTelemetry.kt). Firebase Analytics and Crashlytics are the two that ship; a brand reporting to its acquirer's collector adds a provider and changes nothing else.
+Every signal goes through one interface, so which backends a brand reports to is a list in one file, <a href="https://github.com/halo-dot/halo_sdk_ui/blob/main/lib/src/main/java/za/co/synthesis/halo/sdk_ui/core/HDTelemetry.kt" target="_blank"><code>HDTelemetry.kt</code></a>. Firebase Analytics and Crashlytics are the two that ship; a brand reporting to its acquirer's collector adds a provider and changes nothing else.
 
 ### What it reports
 
@@ -876,7 +876,7 @@ Watch it on a debuggable build with `adb logcat -s HDTelemetry`. Every signal is
 
 ## Example application
 
-See the [example app](https://github.com/halo-dot/halo_sdk_ui/tree/main/example-app) for a complete working integration.
+See the <a href="https://github.com/halo-dot/halo_sdk_ui/tree/main/example-app" target="_blank">example app</a> for a complete working integration.
 
 ## License
 
