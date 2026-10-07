@@ -7,26 +7,26 @@ sidebar_class_name: hidden
 [![Platform](https://img.shields.io/badge/platform-Android-green.svg)](https://developer.android.com)
 [![Min SDK](https://img.shields.io/badge/minSDK-29-blue.svg)](https://android-arsenal.com/api?level=29)
 [![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-orange.svg)](https://developer.android.com/jetpack/compose)
-[![Version](https://img.shields.io/badge/version-0.0.22-blue.svg)](#3-add-the-dependency)
+[![Version](https://img.shields.io/badge/version-0.0.37-blue.svg)](#3-add-the-dependency)
 
 Add a dependency, make four calls, and your app can take a card payment. The SDK owns everything in between: amount entry, the card-reading screens, the PIN pad, the result screen and the receipt. It is built with Jetpack Compose and designed to be driven from a Flutter or React Native host just as easily as from Kotlin.
 
 **Contents**
 
-[Installation](#installation) · [Quick start](#quick-start) · [HDConfig](#hdconfig) · [Taking a payment](#taking-a-payment) · [Presentation](#presentation) · [Theming](#theming) · [Languages](#languages) · [Permissions](#permissions) · [Build configuration](#build-configuration) · [Inbound payments](#inbound-payments) · [Push to Terminal](#push-to-terminal) · [Telemetry](#telemetry)
+[Installation](#installation) · [Quick start](#quick-start) · [HDConfig](#hdconfig) · [Taking a payment](#taking-a-payment) · [Presentation](#presentation) · [Theming](#theming) · [Languages](#languages) · [Currencies](#currencies) · [Permissions](#permissions) · [Build configuration](#build-configuration) · [Inbound payments](#inbound-payments) · [Push to Terminal](#push-to-terminal) · [Telemetry](#telemetry)
 
 ## What you get
 
 - **The whole payment UI.** Amount entry, card-reading animation, PIN, success and failure screens.
-- **Your branding.** Light and dark colour schemes, corner radius, type sizes and your own logo, stated once as a file in your build.
+- **Your branding.** Light and dark colour schemes, a ramp of up to four colours, corner radius, type sizes and your own logo, stated once as a file in your build. Tell the SDK which mode your app is showing and the payment screens match it.
 - **Digital receipts.** The Halo kernel emails or texts the cardholder's receipt against the transaction's own reference.
 - **Payments that arrive from outside.** App-to-app intents, payment links and pushed payments are handled natively by the SDK, with no host code involved.
 - **DebiCheck mandates.** A TT3 debit-order mandate arrives through the same doors and runs the same tap flow.
-- **Seven languages**, following the device by default, and every string overridable per brand.
+- **Seven languages**, following the device by default, narrowable to the ones your app speaks, and every string overridable per brand. Tell the SDK what your own language picker chose and the payment screens follow it.
 - **Cross-runtime friendly.** A brand stated as a file and a suspending token callback, so a Flutter or React Native host bridges four values, not a config object.
 - **Optional telemetry.** Off by default. Switched on, the SDK reports its own operations and crashes into *your* Firebase project and never anything about the payment.
 
-> Dynamic Currency Conversion is implemented but not yet switchable: `showDCC` is commented out in `HDConfig` while the flow is reworked. See [DCC](#dynamic-currency-conversion).
+> Dynamic Currency Conversion is implemented but not yet switchable: nothing public sets it while the flow is reworked. See [DCC](#dynamic-currency-conversion).
 
 ## Requirements
 
@@ -35,6 +35,8 @@ Add a dependency, make four calls, and your app can take a card payment. The SDK
 - A `ComponentActivity` (or a subclass such as `AppCompatActivity`) to host the SDK
 
 ## Installation
+
+> **Building in Flutter?** Use the <a href="https://pub.dev/packages/halo_sdk_ui" target="_blank"><code>halo_sdk_ui</code></a> plugin instead of the steps below. It declares this library for you, bridges every call to Dart, and its README covers the two lines of `MainActivity` code and the Gradle repository a Flutter host still needs. What follows is for a Kotlin host. The [brand file](#theming) and everything under [Inbound payments](#inbound-payments) apply to both.
 
 <p align="center">
   <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" style={{ width: "100%" }} />
@@ -48,6 +50,8 @@ Registering on the developer portal gets you an AWS access key and secret. They 
 aws.accesskey=< PROVIDED IN EMAIL >
 aws.secretkey=< PROVIDED IN EMAIL >
 ```
+
+Temporary credentials, such as an SSO session's, carry a third value as well. Add it as `aws.token`, and replace all three when the session expires; S3 answers an expired one with `ExpiredToken`. CI has no `local.properties` and exports the same three as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`, which the snippet below falls back to.
 
 ### 2. Add the repository
 
@@ -63,31 +67,81 @@ val localProperties = Properties().apply {
     }
 }
 
+fun haloCredential(property: String, environmentVariable: String): String? =
+    localProperties.getProperty(property)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(environmentVariable)?.takeIf { it.isNotBlank() }
+
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven {
-            name = "releases"
-            url = uri("s3://synthesis-halo-artifacts/releases")
-            credentials(AwsCredentials::class) {
-                accessKey = localProperties.getProperty("aws.accesskey")
-                secretKey = localProperties.getProperty("aws.secretkey")
+        listOf("releases", "snapshots").forEach { repository ->
+            maven {
+                name = repository
+                url = uri("s3://synthesis-halo-artifacts/$repository")
+                credentials(AwsCredentials::class) {
+                    accessKey = haloCredential("aws.accesskey", "AWS_ACCESS_KEY_ID")
+                    secretKey = haloCredential("aws.secretkey", "AWS_SECRET_ACCESS_KEY")
+                    sessionToken = haloCredential("aws.token", "AWS_SESSION_TOKEN")
+                }
             }
         }
     }
 }
 ```
 
+`releases` holds the published versions and `snapshots` the candidates. A build that pins a released version never reaches the second.
+
 ### 3. Add the dependency
 
 ```kotlin
 dependencies {
-    implementation("za.co.synthesis.halo:sdk_ui:0.0.22")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.37")
 }
 ```
 
 One coordinate covers both variants. Gradle picks the debug SDK for your debug build and the production SDK for your release build from the module metadata, so you declare nothing variant-specific.
+
+That pairing follows the **build type**, and the kernel you talk to is a separate choice. The debug SDK is the one that talks to the sandbox kernel. So a *release* build meant for sandbox, such as a signed QA build you hand to testers, resolves the production SDK and fails at its first transaction rather than at compile time. If you ship builds like that, force the debug artifact for them:
+
+```kotlin
+val sandbox = true  // however your build knows which kernel it is for
+
+if (sandbox) {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            val version = requested.version.orEmpty()
+            if (requested.group == "za.co.synthesis.halo" && requested.name == "sdk" &&
+                version.isNotBlank() && !version.endsWith("-debug")
+            ) {
+                useVersion("$version-debug")
+                because("a sandbox build needs the SDK's debug artifact")
+            }
+        }
+    }
+}
+```
+
+### Choosing the payment kernel
+
+The Halo SDK itself arrives transitively, at whatever version this release was built against, and for almost everybody that is the right answer.
+
+If your acquirer has certified a particular kernel and will not move on your schedule, pin it — a resolution rule rather than a dependency line, because this is usually a *downgrade* and Gradle resolves a conflict upwards:
+
+```kotlin
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "za.co.synthesis.halo" && requested.name == "sdk") {
+            // Keep the variant that resolved: a debug build asks for "-debug".
+            val debug = requested.version.orEmpty().endsWith("-debug")
+            useVersion(if (debug) "4.0.20-debug" else "4.0.20")
+            because("certified for 4.0.20")
+        }
+    }
+}
+```
+
+Stay within the same major line. The SDK surface this library names is a small one, and it holds still across a major, so an older kernel in the same line is the case this is built for; a different major is a different library and will not compile. Tell us which version you are pinned to — we will confirm this release works against it rather than leaving you to find out at your acquirer's lab.
 
 ## Quick start
 
@@ -147,14 +201,18 @@ Every key is optional and there is nothing to call — see [Theming](#theming).
   <img alt="Bring-up: attach at onCreate, prepare at your splash, init once you hold a token, launch per charge." src="/img/halo-sdk-ui/bring-up-light.svg" style={{ width: "100%" }} />
 </p>
 
-### The four calls
+### The four calls, and the two setters
 
 | Call | Where | Blocking? | What it does |
 |------|-------|-----------|--------------|
 | `attach(activity, savedInstanceState)` | First line of `onCreate` | No | Loads the payment kernel, overlay protection and entropy, and wires the Android lifecycle through. |
 | `prepare(config)` | Your splash screen | No | Reads your brand file, loads its language, and warms the tap screen's artwork. |
-| `init(config)` | As soon as you hold a session token | Suspends | Registers the device, requests runtime permissions and brings the SDK up. Returns the real outcome. |
-| `launch(amount, ref, currency, presentation)` | Per charge | Suspends | Runs the transaction and returns the result. |
+| `init(config)` | As soon as you hold a session token | Suspends | Registers the device, requests runtime permissions and brings the SDK up. Returns the real outcome. Stops early on [NFC switched off](#when-nfc-is-off). |
+| `launch(amount, ref, currency, presentation)` | Per charge | Suspends | Runs the transaction and returns the result. Refuses on [NFC switched off](#when-nfc-is-off). |
+| `setLanguage(context, language)` | Wherever your app resolves its own | No | Records the language your app is speaking, so the payment screens speak it too. Optional. See [Following your app](#following-your-app). |
+| `setThemeMode(context, mode)` | Wherever your app resolves its own | No | Records whether your app is light, dark or following the device, so the payment screens match it. Optional. See [Following your app's theme](#following-your-apps-theme). |
+
+The two setters are the odd rows out: no order, no pairing, and nothing breaks without them. The four above are the integration.
 
 **The order is the point.** Each call needs strictly more than the one before it — an Activity, then your config, then a token — so each runs the moment that thing exists and the work spreads across your startup instead of piling up in front of a merchant holding a card. Skipping any of the first three is legal and costs only speed, because the next call does that work too.
 
@@ -163,7 +221,7 @@ Two that are worth more than a table row:
 - **`attach` is the expensive one**, and it must be the first line of `onCreate` — not your splash, not after your own setup. Everything your app does afterwards then runs against a payment stack that is already loading. Pass `savedInstanceState` straight through so the SDK can restore itself across a process death. Cheap to call more than once, and you never forward `onStart` / `onResume` / `onPause` / `onStop` yourself. The SDK logs a warning if it ran late.
 - **`init` waits for the truth.** It suspends until the SDK reports its real outcome — registered, attested, initialised, kernel settled — and returns a `HaloInitializationResult?`, whose `resultType` and `errorCode` say why when it failed; `null` means setup broke before the SDK could report at all. So you never discover a dead SDK mid-transaction and there is nothing to poll. Idempotent, so calling it again later as a backstop costs nothing.
 
-### Two extra properties
+### Two lookups
 
 ```kotlin
 val version = HaloSdkUi.sdkVersion                          // readable before attach()
@@ -181,7 +239,7 @@ Two fields, and both are required.
 | `activity` | `ComponentActivity` | required | The activity hosting the SDK UI. Must be a `ComponentActivity`, since the UI is Compose. |
 | `onTokenRequest` | `suspend () -> String` | required | Returns a valid Halo SDK token. A suspend context, so fetching it from your backend needs no extra plumbing. A plain lambda still fits; Kotlin converts it. |
 
-**Everything else is your [brand file](#theming)** — colours, type, the marks, the language, the scheme logos, the link scheme, the kernel your short App Links resolve against, how an inbound payment is presented, and every switch the SDK offers. There are no runtime setters either. [Why](#why-it-is-a-file-not-a-config), in one line: an inbound payment runs none of your code, so anything only a call could say is a thing that flow cannot know.
+**Everything else is your [brand file](#theming)** — colours, type, the marks, the language, the scheme logos, the link scheme, the kernel your short App Links resolve against, how an inbound payment is presented, and every switch the SDK offers. There are two runtime setters, [`setLanguage`](#following-your-app) and [`setThemeMode`](#following-your-apps-theme), and only because a merchant's own choices are the one thing no build can state. [Why](#why-it-is-a-file-not-a-config) the rest are files, in one line: an inbound payment runs none of your code, so anything only a call could say is a thing that flow cannot know.
 
 What is left is what a file genuinely cannot state: `activity` and `onTokenRequest` exist only while you are running.
 
@@ -195,7 +253,7 @@ Your app's package name and version are read from the platform, so you do not su
 |-----------|------|-------------|
 | `amount` | `BigDecimal?` | The amount. `null` or zero shows a keypad for the merchant to enter one. |
 | `merchantRef` | `String?` | Optional reference. Supply one and it is used as-is and shown read-only on the keypad; pass `null` and the merchant can type one. |
-| `currency` | `HDCurrency?` | `ZAR`, `GBP`, `EUR` or `USD`. Defaults to `ZAR`. |
+| `currency` | `HDCurrency?` | `ZAR`, `GBP`, `EUR` or `USD`. Omit it and the amount is denominated in the head of your brand file's [`currencies`](#currencies), which is the rand unless you narrowed the list. |
 | `presentation` | `HDPresentation` | Full-screen (the default) or a sheet over your app, per charge. See [Presentation](#presentation). |
 
 <p align="center">
@@ -254,9 +312,30 @@ By default the SDK shows its own success and failure screens first, and `launch`
 
 A technical failure, as opposed to a decline, ends on the SDK's error screen. It shows a plain sentence saying what happened, and under it an **Error details** line carrying the SDK's own names for the failure.
 
-Those codes are the part worth quoting to support. The payment SDK routinely names one failure twice, once as an error code and once as a result type, and the useful half is not always the same one: a refused charge answers `GeneralError` plus `UnknownError`, while a denied camera answers `CameraPermissionNotGranted` with no error code at all. The screen leads with whichever name says something and lists all of them underneath, and when a name says a permission is missing it also offers a route to your app's settings page.
+Those codes are the part worth quoting to support. The payment SDK routinely names one failure twice, once as an error code and once as a result type, and the useful half is not always the same one: a refused charge answers `GeneralError` plus `UnknownError`, while a denied camera answers `CameraPermissionNotGranted` with no error code at all. The screen leads with whichever name says something and lists all of them underneath, and where the failure is one the merchant can go and fix it carries the button that fixes it — **Open settings** for a refused permission, **Turn on NFC** for the radio. Every other failure offers Close alone, because a button that leads somewhere unrelated to the problem is worse than no button.
 
 Failures that already carry a sentence for the payer, such as an unusable QR code, show that sentence alone with no codes under it.
+
+### When NFC is off
+
+Tap-on-phone reads the card over NFC, so the radio being switched off is the one bring-up failure a merchant can fix in two taps — and the one they were least likely to be told about. **You do not check for it.** The SDK asks the adapter itself, and it asks twice:
+
+| When | What happens |
+|------|--------------|
+| During `init` | The bring-up stops before the kernel is asked for anything, and the error screen goes up with **Turn on NFC** on it. `init` returns as a failed bring-up. |
+| At each `launch` | The transaction is refused before the tap screen is staged. `launch` answers `null`, exactly as it does for any flow that ended without a result. |
+
+Both, rather than one: a bring-up that passed proves nothing about the next sale, and the switch is in the merchant's notification shade.
+
+The check runs after your brand file and its language are loaded, so the screen is in your colours and the merchant's words, and after the config is cached — which matters because that cache is the only place the SDK learns which kernel a token-less [App Link](#short-app-links) resolves against. A device that fell out of bring-up before that point would take the next payment link it was sent and fail it on "no kernel is configured", about the wrong problem entirely.
+
+**Turn on NFC** opens the system NFC page, or the general wireless page on the skins that ship no NFC screen. `NEW_TASK`, so settings does not become part of your payment flow's back stack: the merchant flips the switch, comes back, and the error screen is still there to close.
+
+Three things it deliberately does not do:
+
+- **It does not gate hardware.** A device with no NFC adapter at all is yours to gate, not ours — you decide whether your app has any business installing there, and your own "unsupported device" screen says it better than a button to a switch the device hasn't got. Only a radio that exists and is off stops anything here.
+- **It does not guess.** The payment SDK answers `NoTerminalContainer` when it cannot stand a contactless terminal up, which is what it answers *every time* with the radio off — and equally what it answers for a genuine container fault on a device whose NFC is on. So the adapter decides which of those you are looking at. A failure the SDK named `NFC…` itself is taken at its word.
+- **It does not need host wiring.** No callback, no result type to branch on, no permission to request. NFC is a declared permission ([see below](#permissions)) and being *switched on* is not a permission at all — it is the device owner's switch.
 
 ### Receipts
 
@@ -264,11 +343,13 @@ On an approved transaction the result screen offers **Send receipt**. The mercha
 
 Delivery is the kernel's, not the device's: there is no Android share chooser, nothing is pasted into a third-party app, and the backend keeps a record that a receipt was issued. The screen also shows a **receipt QR code** when the kernel returns one, which the cardholder can scan to take the receipt with them. It may never arrive, and the screen shows everything else regardless.
 
-None of this needs host wiring. Set `"shareReceipt": false` in your [brand file](#theming) to remove all of it: the Share button, the sheet behind it and the QR. The `receipt/pdf` lookup is then never made either, since nothing is fetched for a screen that would not show it. On a decline the primary button is Retry, so a decline keeps its retry either way. It is in the file with the rest of your brand, so an inbound payment behaves the same way.
+None of this needs host wiring. Set `"receipt": ["-share"]` in your [brand file](#theming) to remove all of it: the Share button, the sheet behind it and the QR. The `receipt/pdf` lookup is then never made either, since nothing is fetched for a screen that would not show it. On a decline the primary button is Retry, so a decline keeps its retry either way. It is in the file with the rest of your brand, so an inbound payment behaves the same way.
+
+To send receipts on one channel only, set `"emailReceipt": false` or `"smsReceipt": false`. The sheet then asks for the other alone, and drops the hint that either will do.
 
 ### Dynamic Currency Conversion
 
-> **Not yet exposed.** The flow is implemented, but `showDCC` is commented out in `HDConfig`, so nothing can switch it on today. This describes what it will restore.
+> **Not yet exposed.** The flow is implemented, but nothing public switches it on today: the only setter is a commented-out demo toggle in `HaloSdkUi`. This describes what it will restore.
 
 After the card is read, the cardholder is shown the amount in the local currency and in the card's currency, with the exchange rate and conversion margin. They pick one, the transaction completes in that currency, and the success screen carries the DCC details.
 
@@ -286,7 +367,7 @@ Nothing goes in your manifest. `launch` takes its own `presentation`, so consecu
 
 **A sheet is the same screen, smaller.** Same parts, same order, same type hierarchy, laid out for a shorter surface rather than redrawn for it — every page declares a heading, a body and an optional footer, and one shell arranges them, so portrait, landscape and sheet all fall out of the same declaration. The whole charge lives in one sheet with pages changing inside it, so bring-up handing over to tap is not one surface closing and another opening. The keypad and the detailed breakdown stay full-screen either way.
 
-Two things are the sheet's own. It carries a **top bar**: your logo on the left (leading rather than centred, so it does not shift as the actions change width) and, on the right, the buttons a full-screen page puts at its foot (Cancel, Share receipt, Charge). And "Powered by Halo Dot" sits at its foot, because inside your app the payment surface has to say whose it is.
+One thing is the sheet's own: a **top bar** carrying your logo on the left (leading rather than centred, so it does not shift as the actions change width) and, on the right, the buttons a full-screen page puts at its foot (Cancel, Share receipt, Charge).
 
 Swiping the sheet down, tapping the dimmed area and pressing back all raise a cancel confirmation, on the bring-up screen as well as on tap. The sheet never simply closes, because an accidental swipe would otherwise abort a live card read.
 
@@ -313,6 +394,8 @@ The extra outranks the brand file's `presentation` for that one flow, and leavin
   "light": {
     "primary": "#FF6200EE",
     "secondary": "#FF3700B3",
+    "tertiary": "#FF7C4DFF",
+    "accent": "#FF03DAC6",
     "surface": "#FFFFFFFF",
     "onSurface": "#FF000000",
     "onPrimary": "#FFFFFFFF",
@@ -321,13 +404,16 @@ The extra outranks the brand file's `presentation` for that one flow, and leavin
   },
   "dark": { "primary": "#FFBB86FC", "surface": "#FF121212", "onSurface": "#FFFFFFFF" },
   "shape": 12,
+  "style": "HORIZONTAL",
+  "gradient": ["secondary", "tertiary", "primary"],
   "logo": "brand-logo.svg",
   "icon": "brand-icon.svg",
   "schemeLogos": { "amex": false, "discover": false },
+  "font": "Helvetica",
   "text": { "label": 14, "value": 16 },
   "scheme": "yourscheme",
   "presentation": "SHEET",
-  "shareReceipt": false
+  "receipt": ["share", "print"]
 }
 ```
 
@@ -338,24 +424,67 @@ There is no call to make and nothing to pass at `init`. Every key is optional, a
 | `light` | object | Halo's light scheme | Light-mode colours |
 | `dark` | object | Halo's dark scheme | Dark-mode colours |
 | `shape` | number | `16` | Corner radius, in dp, for buttons and containers |
+| `style` | string | `"HORIZONTAL"` | How the surfaces carrying your accent are filled: `"SOLID"` for flat `primary`; `"HORIZONTAL"`, `"VERTICAL"`, `"DIAGONAL_LEFT"` or `"DIAGONAL_RIGHT"` for your ramp. See [Fill](#fill) |
+| `gradient` | array | `["secondary", "primary"]` | The colours your ramp runs through, in order: two to four of `primary`, `secondary`, `tertiary` and `accent`. See [Fill](#fill) |
 | `logo` | string | the Halo logo | Your logo, serving both light and dark modes |
 | `icon` | string | your launcher icon | Your **square app mark**, used where the SDK has one glyph's worth of room. Today that is the small icon on a pushed payment's notification |
+| `font` | string or object | the platform's own | The typeface the screens are set in: a family name, or the family plus the files you ship it as. See [Type](#type) |
 | `text` | object | the Material 3 scale | Type sizes in sp. See [Text sizes](#text-sizes) |
 | `schemeLogos` | object | all on | Which card scheme logos are shown: `nfc`, `visa`, `mastercard`, `amex`, `discover`, `elo`, each a boolean |
-| `themeMode` | string | `"SYSTEM"` | `"LIGHT"`, `"DARK"` or follow the device |
-| `language` | string | the device's | `"en"`, `"af"`, `"zu"`, `"fr"`, `"de"`, `"es"`, `"pt"`. See [Languages](#languages) |
+| `themeMode` | string | `"SYSTEM"` | `"LIGHT"`, `"DARK"` or follow the device. A merchant's own pick, where you have passed one to [`setThemeMode`](#following-your-apps-theme), comes ahead of it |
+| `language` | string | the device's | `"en"`, `"af"`, `"zu"`, `"fr"`, `"de"`, `"es"`, `"pt"`. A merchant's own pick, where you have passed one to [`setLanguage`](#following-your-app), comes ahead of it. See [Languages](#languages) |
+| `languages` | array | all seven | The languages your app offers, e.g. `["en", "af"]`. Every candidate is held to it — the pin and the merchant's own pick included. See [Languages](#languages) |
+| `currencies` | array | all four | The currencies your app charges in, e.g. `["ZAR", "USD"]`. Its head is what the keypad opens on, and what an amount with no currency of its own is denominated in. See [Currencies](#currencies) |
 | `presentation` | string | `"FULL_SCREEN"` | `"SHEET"` puts inbound payments over the app that sent them. See [Presentation](#presentation) |
 | `scheme` | string | `"halo"` | The custom scheme your payment links arrive on. Must match the `halo_url_scheme` resource |
 | `kernel` | string | none | The kernel that short App Links resolve against. See [Short App Links](#short-app-links) |
 | `kernelPins` | string | none | SHA-256 SPKI fingerprints for `kernel`'s TLS certificate, semicolon- or comma-separated |
 | `showTransactionResult` | boolean | `true` | Whether the SDK shows its own result screens |
-| `shareReceipt` | boolean | `true` | Whether the result screen offers **Share receipt**. See [Receipts](#receipts) |
+| `receipt` | boolean or array | `["share"]` | Which receipt actions the result screen offers. `true`/`false` turns both on/off; an array names them — `["share", "print"]`, or carve one out with `["-print"]`. **Print** shows only where the device has a printer. See [Receipts](#receipts) |
+| `emailReceipt` / `smsReceipt` | boolean | `true` | Which of the receipt sheet's two fields are drawn. See [Receipts](#receipts) |
 | `receivePush` | boolean | `false` | Whether this device registers to receive pushed payments. See [Push to Terminal](#push-to-terminal) |
 | `analytics` / `crashReports` | boolean | `false` | What the SDK reports about itself. See [Telemetry](#telemetry) |
 
-A colour is `#AARRGGBB`, `0xAARRGGBB`, a bare `RRGGBB` (opaque) or a packed integer, so the same hex your `colors.xml` and your designer use goes straight in. The colours themselves are `primary`, `secondary`, `surface`, `onSurface`, `onPrimary`, `outline` and `error`; name only the ones you are changing.
+A colour is `#AARRGGBB`, `0xAARRGGBB`, a bare `RRGGBB` (opaque) or a packed integer, so the same hex your `colors.xml` and your designer use goes straight in. The colours themselves are `primary`, `secondary`, `tertiary`, `accent`, `surface`, `onSurface`, `onPrimary`, `outline` and `error`; name only the ones you are changing. `tertiary` and `accent` exist for a ramp of more than two colours. Leave them out and they are your `secondary` and `primary`.
 
-The logo is a **self-theming template SVG**, so one asset serves both surfaces. The SDK substitutes the active colour scheme into placeholder tokens before rendering: `{{PRIMARY}}`, `{{SECONDARY}}`, `{{ERROR}}`, `{{SURFACE}}`, `{{ONSURFACE}}` and `{{OUTLINE}}`. Any token left unreplaced renders as an invisible fill. Both paths are asset paths in your own APK, so a Flutter host names its bundled mark `flutter_assets/assets/brand/logo.svg`.
+The logo is a **self-theming template SVG**, so one asset serves both surfaces. The SDK substitutes the active colour scheme into placeholder tokens before rendering: `{{PRIMARY}}`, `{{SECONDARY}}`, `{{TERTIARY}}`, `{{ACCENT}}`, `{{ERROR}}`, `{{SURFACE}}`, `{{ONSURFACE}}` and `{{OUTLINE}}`. Any token left unreplaced renders as an invisible fill. Both paths are asset paths in your own APK, so a Flutter host names its bundled mark `flutter_assets/assets/brand/logo.svg`.
+
+### Fill
+
+Some surfaces carry your accent rather than sitting on the surface colour: the primary button, the top bar's action pill, the row of step dots, and any illustration drawn on your own ramp. `style` says how they are filled.
+
+| Value | What it draws |
+|-------|---------------|
+| `"HORIZONTAL"` | Your ramp, left to right. The default, and what every brand had before this key existed |
+| `"VERTICAL"` | The same ramp, stated for a host whose own splash runs top to bottom |
+| `"DIAGONAL_LEFT"` | The same ramp, stated for a host whose own splash runs from the top-left corner to the bottom-right |
+| `"DIAGONAL_RIGHT"` | The same ramp, stated for a host whose own splash runs from the top-right corner to the bottom-left |
+| `"SOLID"` | Flat `primary`, no ramp |
+
+Hyphens and spaces read as underscores, so `"diagonal-left"` is `DIAGONAL_LEFT`.
+
+**Only `SOLID` changes anything here, and that is deliberate.** A direction is a choice about a full-height backdrop, and the SDK draws none. Every ramped surface it has is a strip, and a gradient running down a strip is a gradient nobody can see. Send the whole value anyway, so that your app and the payment screens agree about what the brand asked for, and so the decision stays the SDK's if it ever grows a surface tall enough to turn.
+
+#### The ramp's colours
+
+The ramp is `secondary` running into `primary` unless you say otherwise. `gradient` says otherwise: two to four of your theme's colours, by name, in the order the ramp runs through them.
+
+```json
+{
+  "light": { "primary": "#FF440BD4", "secondary": "#FFFF0090", "tertiary": "#FF6F08C4", "accent": "#FF01FFFF" },
+  "gradient": ["secondary", "tertiary", "primary", "accent"]
+}
+```
+
+They are names rather than colours so that each scheme resolves them for itself, and the dark ramp is your dark colours. A name the SDK does not know, or fewer than two, and the whole key is ignored: a ramp missing a stop would be a different gradient, and `secondary` into `primary` is at least one your brand has seen.
+
+The buttons, the action pill and the step dots run through it, and so does your artwork. A two-stop `<linearGradient>` from `{{SECONDARY}}` to `{{PRIMARY}}` is re-stopped evenly across your ramp, keeping the axis it was drawn on. One drawn `{{PRIMARY}}` first takes the ramp reversed, so it still ends where it was drawn to. A gradient with more than two stops was drawn through your colours on purpose, like a brand mark, and is left exactly as drawn.
+
+#### Flat
+
+`SOLID` reaches your logo too. A `<linearGradient>` whose stops name **both** `{{SECONDARY}}` and `{{PRIMARY}}` is your ramp, and every ramp colour in it, `{{TERTIARY}}` and `{{ACCENT}}` included, is flattened to `primary` with the rest. A gradient that names real colours, or only one of the two, belongs to the illustrator and is left exactly as drawn, so a card scheme mark or a flag keeps its own shading. The ramp flattens to `primary` whatever `gradient` says, which means `onPrimary` is still the ink that sits on it and nothing else on the screen changes.
+
+An unknown value, or none, is `HORIZONTAL`: a host built against a newer generator does not lose its ramp to a name this version has not heard of.
 
 ### Why it is a file, not a config
 
@@ -363,7 +492,52 @@ All of this used to be parameters on [`HDConfig`](#hdconfig), and being paramete
 
 A file is in the APK before the app has run once, and on the launch nobody made. So the brand is stated where it cannot go missing, and two places answer for the SDK: **the file** for what this app is and where it talks, and **[`HDConfig`](#hdconfig)** for the live wiring, which is the one thing a file cannot hold.
 
-Your own app can still have a theme switch or a language picker. It moves your app, not the payment screens: those are the file's, so what a cardholder sees is the same whether the charge started on your keypad or arrived as a link at four in the morning.
+A **language** picker and a **light or dark** switch are the two exceptions, and they are the exceptions that draw the line. A person's choice is not something the build knows, so no file can hold it. Yet the payment screens have no picker or switch of their own to correct them with, so leaving them on the file would strand a merchant who changed your app. [`setLanguage`](#following-your-app) and [`setThemeMode`](#following-your-apps-theme) resolve it the file's way rather than a call's: the SDK *records* what you tell it, and reads it back on every bring-up, including the one at four in the morning that ran none of your code. Your colours, fill and type stay the file's, so what a cardholder sees is your brand whether the charge started on your keypad or arrived as a link.
+
+### Following your app's theme
+
+If your app lets the merchant pick light, dark or the device's setting, tell the SDK what they picked:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HaloThemeMode
+
+HaloSdkUi.setThemeMode(context, HaloThemeMode.DARK)   // null forgets it
+```
+
+Call it at startup and whenever the merchant changes it. It is cheap and idempotent, and a payment screen already showing repaints on the spot. What you pass comes ahead of your brand file's `themeMode`; `null` forgets it and puts the screens back on the file's.
+
+### Type
+
+Say nothing and the screens are set in the platform's font, which is what they always were. `font` changes that, and there are two ways to say it.
+
+**A family name**, when the typeface is one the device already has:
+
+```json
+{ "font": "Helvetica" }
+```
+
+**The family and your own files**, when it is not — and this is the only form that is certain of what gets drawn:
+
+```json
+{
+  "font": {
+    "family": "Helvetica",
+    "files": [
+      { "asset": "fonts/Helvetica.ttf", "weight": 400 },
+      { "asset": "fonts/Helvetica-Bold.ttf", "weight": 700 },
+      { "asset": "fonts/Helvetica-Italic.ttf", "weight": 400, "italic": true }
+    ]
+  }
+}
+```
+
+Each `asset` is a path in your own APK, like the logo, so a Flutter host names its bundled file `flutter_assets/assets/brand/Helvetica-Bold.ttf`. `weight` is 100 to 900 — 400 regular, 700 bold — and it defaults to 400. State it: Android's asset font takes your word for the weight rather than reading the file, so a bold cut handed over as 400 is drawn wherever regular was asked for and the bold on top of it is synthesised. A weight you ship no file for is synthesised from the nearest one you did.
+
+**Name the family even when you ship files.** It is what a cut you did not ship falls back to, and it is the same name your own screens set their text in, so the two sides of a charge cannot disagree about what the brand is.
+
+One thing to know about a bare name on Android: `helvetica`, `arial`, `tahoma` and `verdana` are aliases to the system sans-serif in the platform's own `fonts.xml`, and any family the device does not have resolves to it too. Either way you get Roboto, drawn without complaint. If the typeface matters, ship it.
+
+A file the SDK cannot open is dropped with a line in the log and the rest of the family carries on — a payment screen is never held up over a typeface.
 
 ### Text sizes
 
@@ -385,15 +559,62 @@ The defaults are the Material 3 type scale, so a brand that says nothing about t
 { "text": { "label": 14, "value": 16 } }
 ```
 
+
+## Currencies
+
+The SDK charges in rand (`ZAR`), pounds (`GBP`), euros (`EUR`) and dollars (`USD`). If your app settles in fewer, say so in your [brand file](#theming):
+
+```json
+{ "currencies": ["ZAR", "USD"] }
+```
+
+The head of the list is the one that matters: it is what the keypad opens on, and what an amount arriving with no currency of its own is denominated in. Put the currency you mostly charge in first. Say nothing and nothing is narrowed — the list is all four, headed by the rand.
+
+**The rest stay on the sheet, greyed.** Narrowing a list by deleting from it tells a merchant nothing — a sheet holding one row reads as a build that forgot the others, and "where did dollars go?" has no answer on the screen that would answer it. Greyed, the row says which of the two it is: this SDK charges in dollars, this app does not. The sheet is therefore always all four, in the SDK's own order, and your order decides the head rather than the rows.
+
+What it narrows is the merchant's **choice**. An amount that arrives already denominated — a `launch` carrying a currency, a parsed payment link, a DCC quote — is charged in the currency it came in, because re-denominating someone else's amount would charge a different sum of money under the same number.
+
+It belongs in the file rather than in a call for [the usual reason](#why-it-is-a-file-not-a-config): an inbound payment brings the keypad up with none of your code in the process to narrow anything.
+
 ## Languages
 
-The SDK ships English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`) and Portuguese (`pt`). It follows the device language by default and falls back to English for anything else. Pin one in your [brand file](#theming):
+The SDK ships English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`) and Portuguese (`pt`). Three things can answer, and they are tried in this order: what your app told it the merchant chose, then your brand file's pin, then the device. English backs anything none of them lands on, and any key a translation is missing.
+
+Pin one in your [brand file](#theming):
 
 ```json
 { "language": "af" }
 ```
 
 Say nothing and the SDK follows the device, which is what a merchant's phone already reflects.
+
+### Following your app
+
+If your app has a language picker of its own, tell the SDK what the merchant chose:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.core.HDLanguage
+
+HaloSdkUi.setLanguage(context, HDLanguage.AFRIKAANS)   // null forgets it
+```
+
+A code your app carries as a string, `"af"` or a BCP-47 tag like `"af-ZA"`, goes through `HDLanguage.fromCode`, which answers `null` for anything this release does not ship — and `null` is the right thing to pass on, since it puts the screens back on their own resolution rather than leaving them in the language chosen before.
+
+Call it wherever your app resolves its own language — at startup and on every change — and the payment screens follow. Without it they resolve on their own, so a merchant who switches your app to Afrikaans still taps the card against whatever the phone is set to: the payment screens have no picker to correct it with.
+
+What you say here comes ahead of the pin below, because your app resolved *through* that pin to reach it. The SDK records it rather than holding it, which is what carries the choice onto the flow none of your code takes part in — a payment that arrives at four in the morning is in the language your merchant chose.
+
+### The ones your app speaks
+
+Following the device is right until your app does not speak what the device does. If yours ships in English and Afrikaans, say so:
+
+```json
+{ "languages": ["en", "af"] }
+```
+
+Every candidate is then held to that list — the pin above included — so a French phone takes its payments in English rather than in a language the rest of your app has never shown. English backs the fall-through; an app that does not offer English gets the first language it does. Say nothing and nothing is narrowed.
+
+It belongs in the file rather than in a call for the sharpest version of [the usual reason](#why-it-is-a-file-not-a-config): the payment screens have no language picker of their own, so the build is the only thing that can ever narrow them — and an inbound payment narrows them with none of your code in the process.
 
 ### Saying it your way
 
@@ -419,16 +640,19 @@ The SDK's permissions merge into your manifest automatically, and the runtime on
 | Permission | Runtime prompt | Purpose |
 |------------|----------------|---------|
 | `INTERNET` | | Talking to the Halo backend |
-| `NFC` | | Reading payment cards |
+| `NFC` | | Reading payment cards — declared here, [switched on](#when-nfc-is-off) is a separate matter |
 | `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | | Feedback on card tap |
 | `BLUETOOTH` / `BLUETOOTH_ADMIN` | | External card reader support (pre-Android 12) |
 | `CAMERA` | ✓ | Device security verification |
 | `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | ✓ | Payment compliance |
 | `READ_PHONE_STATE` | | Declared by the payment SDK, never prompted for |
+| `RECORD_AUDIO` | | Declared, never prompted for, never needed; the kernel *mutes* the microphone rather than reading it |
 | `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | | External card reader support, never prompted for |
 | `POST_NOTIFICATIONS` | ✓ (Android 13+, if `receivePush`) | Push to Terminal's notification |
 
 **Declaring is free, prompting is not**, so the two columns are deliberately different. `READ_PHONE_STATE` cannot do what it is named for on any supported device, since Android 10 stopped returning IMEI or serial to a normal app, and asking would cost every merchant a Phone-group prompt that reads as a payment app asking to make calls. Bluetooth is for an external card reader, and there is no reader path in this SDK.
+
+`RECORD_AUDIO` is the one row that buys nothing at all, and is there so a host's store listing reads as it did on v1, which carried it. What the kernel does with the microphone is keep it *muted* for the length of a transaction, failing the charge with `MicrophoneWasUnmuted` if that lifts; it links no audio-input library and cannot open a microphone. A held grant would sit against that countermeasure rather than enable anything, which is why it is only ever declared. The same goes for the `microphone`, `camera.any` and `bluetooth_le` feature declarations beside it: all three are optional, so none of them filters a device off your listing.
 
 `POST_NOTIFICATIONS` is asked for on Android 13+ only when [`receivePush`](#push-to-terminal) is set, since a build that cannot be pushed to has nothing to notify anyone about. Refused, a pushed payment waits for the merchant to next open the app rather than failing.
 
@@ -617,7 +841,7 @@ The SDK can report **what it did and what went wrong** into your own Firebase pr
 
 Two switches, because they are two different bargains, and `crashReports` without `analytics` is a perfectly ordinary brand, as is the reverse. Both are off by default deliberately: this reports into *your* project, and an SDK that started writing into it uninvited would be making your privacy decision for you. It needs the same `google-services.json` [Push to Terminal](#your-firebase-project) needs and nothing else. With no project, or the flag off, no provider comes up and the SDK says so once in the log.
 
-Every signal goes through one interface, so which backends a brand reports to is a list in one file, [`HDTelemetry.kt`](https://github.com/halo-dot/halo_sdk_ui/blob/main/lib/src/main/java/za/co/synthesis/halo/sdk_ui/core/HDTelemetry.kt). Firebase Analytics and Crashlytics are the two that ship; a brand reporting to its acquirer's collector adds a provider and changes nothing else.
+Every signal goes through one interface, so which backends a brand reports to is a list in one file, <a href="https://github.com/halo-dot/halo_sdk_ui/blob/main/lib/src/main/java/za/co/synthesis/halo/sdk_ui/core/HDTelemetry.kt" target="_blank"><code>HDTelemetry.kt</code></a>. Firebase Analytics and Crashlytics are the two that ship; a brand reporting to its acquirer's collector adds a provider and changes nothing else.
 
 ### What it reports
 
@@ -652,7 +876,7 @@ Watch it on a debuggable build with `adb logcat -s HDTelemetry`. Every signal is
 
 ## Example application
 
-See the [example app](https://github.com/halo-dot/halo_sdk_ui/tree/main/example-app) for a complete working integration.
+See the <a href="https://github.com/halo-dot/halo_sdk_ui/tree/main/example-app" target="_blank">example app</a> for a complete working integration.
 
 ## License
 
@@ -660,4 +884,4 @@ Copyright © 2026 Halo Dot. All rights reserved. Use of this SDK is subject to t
 
 ## Support
 
-[Halo Developer Portal](https://docs.halodot.io/docs/category/intents)
+[Halo Developer Portal](https://docs.halodot.io)
