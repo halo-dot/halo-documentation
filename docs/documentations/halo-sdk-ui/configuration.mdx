@@ -13,7 +13,7 @@ Two fields, and both are required.
 | `activity` | `ComponentActivity` | required | The activity hosting the SDK UI. Must be a `ComponentActivity`, since the UI is Compose. |
 | `onTokenRequest` | `suspend () -> String` | required | Returns a valid Halo SDK token. A suspend context, so fetching it from your backend needs no extra plumbing. A plain lambda still fits; Kotlin converts it. |
 
-**Everything else is your [brand file](#theming)** — colours, type, the marks, the language, the scheme logos, the link scheme, the kernel your short App Links resolve against, how an inbound payment is presented, and every switch the SDK offers. There are no runtime setters either. [Why](#why-it-is-a-file-not-a-config), in one line: an inbound payment runs none of your code, so anything only a call could say is a thing that flow cannot know.
+**Everything else is your [brand file](#theming)** — colours, type, the marks, the language, the scheme logos, the link scheme, the kernel your short App Links resolve against, how an inbound payment is presented, and every switch the SDK offers. There are two runtime setters, [`setLanguage`](#following-your-app) and [`setThemeMode`](#following-your-apps-theme), and only because a merchant's own choices are the one thing no build can state. [Why](#why-it-is-a-file-not-a-config) the rest are files, in one line: an inbound payment runs none of your code, so anything only a call could say is a thing that flow cannot know.
 
 What is left is what a file genuinely cannot state: `activity` and `onTokenRequest` exist only while you are running. Your app's package name and version are read from the platform, so you do not supply those either.
 
@@ -69,7 +69,7 @@ Nothing goes in your manifest. `launch` takes its own `presentation`, so consecu
 
 **A sheet is the same screen, smaller.** Same parts, same order, same type hierarchy, laid out for a shorter surface rather than redrawn for it — every page declares a heading, a body and an optional footer, and one shell arranges them, so portrait, landscape and sheet all fall out of the same declaration. The whole charge lives in **one sheet** with pages changing inside it, so bring-up handing over to tap is not one surface closing and another opening. The keypad and the detailed breakdown stay full-screen either way.
 
-Two things belong to the sheet alone. It carries a **top bar**: your logo on the left (leading rather than centred, so it does not shift as the actions change width) and, on the right, the buttons a full-screen page puts at its foot (Cancel, Share receipt, Charge). And "Powered by Halo Dot" sits at its foot, because inside your app the payment surface has to say whose it is.
+One thing belongs to the sheet alone: a **top bar** carrying your logo on the left (leading rather than centred, so it does not shift as the actions change width) and, on the right, the buttons a full-screen page puts at its foot (Cancel, Share receipt, Charge).
 
 Swiping the sheet down, tapping the dimmed area, and pressing back all raise a cancel confirmation, on the bring-up screen as well as on tap. The sheet never simply closes, because an accidental swipe would otherwise abort a live card read.
 
@@ -118,6 +118,8 @@ val installation = HaloSdkUi.deviceInstallationId(context)
   "light": {
     "primary": "#FF6200EE",
     "secondary": "#FF3700B3",
+    "tertiary": "#FF7C4DFF",
+    "accent": "#FF03DAC6",
     "surface": "#FFFFFFFF",
     "onSurface": "#FF000000",
     "onPrimary": "#FFFFFFFF",
@@ -126,13 +128,16 @@ val installation = HaloSdkUi.deviceInstallationId(context)
   },
   "dark": { "primary": "#FFBB86FC", "surface": "#FF121212", "onSurface": "#FFFFFFFF" },
   "shape": 12,
+  "style": "HORIZONTAL",
+  "gradient": ["secondary", "tertiary", "primary"],
   "logo": "brand-logo.svg",
   "icon": "brand-icon.svg",
   "schemeLogos": { "amex": false, "discover": false },
+  "font": "Helvetica",
   "text": { "label": 14, "value": 16 },
   "scheme": "yourscheme",
   "presentation": "SHEET",
-  "shareReceipt": false
+  "receipt": ["share", "print"]
 }
 ```
 
@@ -145,24 +150,67 @@ There is no call to make and nothing to pass at `init`. Every key is optional, a
 | `light` | object | Halo's light scheme | Light-mode colours |
 | `dark` | object | Halo's dark scheme | Dark-mode colours |
 | `shape` | number | `16` | Corner radius, in dp, for buttons and containers |
+| `style` | string | `"HORIZONTAL"` | How the surfaces carrying your accent are filled: `"SOLID"` for flat `primary`; `"HORIZONTAL"`, `"VERTICAL"`, `"DIAGONAL_LEFT"` or `"DIAGONAL_RIGHT"` for your ramp — see [Fill](#fill) |
+| `gradient` | array | `["secondary", "primary"]` | The colours your ramp runs through, in order: two to four of `primary`, `secondary`, `tertiary` and `accent` — see [Fill](#fill) |
 | `logo` | string | the Halo logo | Your logo, serving both light and dark modes |
 | `icon` | string | your launcher icon | Your **square app mark**, used where the SDK has one glyph's worth of room. Today that is the small icon on a [pushed payment's](./push-to-terminal) notification |
+| `font` | string or object | the platform's own | The typeface the screens are set in: a family name, or the family plus the files you ship it as — see [Type](#type) |
 | `text` | object | the Material 3 scale | Type sizes in sp — see [Text Sizes](#text-sizes) |
 | `schemeLogos` | object | all on | Which card scheme logos are shown: `nfc`, `visa`, `mastercard`, `amex`, `discover`, `elo`, each a boolean |
-| `themeMode` | string | `"SYSTEM"` | `"LIGHT"`, `"DARK"` or follow the device |
-| `language` | string | the device's | `"en"`, `"af"`, `"zu"`, `"fr"`, `"de"`, `"es"`, `"pt"` — see [Languages](#languages) |
+| `themeMode` | string | `"SYSTEM"` | `"LIGHT"`, `"DARK"` or follow the device. A merchant's own pick, where you have passed one to [`setThemeMode`](#following-your-apps-theme), comes ahead of it |
+| `language` | string | the device's | `"en"`, `"af"`, `"zu"`, `"fr"`, `"de"`, `"es"`, `"pt"`. A merchant's own pick, where you have passed one to [`setLanguage`](#following-your-app), comes ahead of it — see [Languages](#languages) |
+| `languages` | array | all seven | The languages your app offers, e.g. `["en", "af"]`. Every candidate is held to it — the pin and the merchant's own pick included — see [The Ones Your App Speaks](#the-ones-your-app-speaks) |
+| `currencies` | array | all four | The currencies your app charges in, e.g. `["ZAR", "USD"]`. Its head is what the keypad opens on, and what an amount with no currency of its own is denominated in — see [Currencies](#currencies) |
 | `presentation` | string | `"FULL_SCREEN"` | `"SHEET"` puts inbound payments over the app that sent them — see [Presentation](#presentation) |
 | `scheme` | string | `"halo"` | The custom scheme your payment links arrive on. Must match the `halo_url_scheme` resource — see [Build Configuration](./installation#build-configuration) |
 | `kernel` | string | none | The kernel that short App Links resolve against — see [Short App Links](./inbound-payments#short-app-links) |
 | `kernelPins` | string | none | SHA-256 SPKI fingerprints for `kernel`'s TLS certificate, semicolon- or comma-separated |
 | `showTransactionResult` | boolean | `true` | Whether the SDK shows its own result screens — see [Handling Results](./usage#handling-results) |
-| `shareReceipt` | boolean | `true` | Whether the result screen offers **Send receipt** — see [Receipts](./usage#receipts) |
+| `receipt` | boolean or array | `["share"]` | Which receipt actions the result screen offers. `true`/`false` turns both on/off; an array names them — `["share", "print"]`, or carve one out with `["-print"]`. **Print** shows only where the device has a printer — see [Receipts](./usage#receipts) |
+| `emailReceipt` / `smsReceipt` | boolean | `true` | Which of the receipt sheet's two fields are drawn — see [Receipts](./usage#receipts) |
 | `receivePush` | boolean | `false` | Whether this device registers to receive pushed payments — see [Push to Terminal](./push-to-terminal) |
 | `analytics` / `crashReports` | boolean | `false` | What the SDK reports about itself — see [Telemetry](./telemetry) |
 
-A colour is `#AARRGGBB`, `0xAARRGGBB`, a bare `RRGGBB` (opaque) or a packed integer, so the same hex your `colors.xml` and your designer use goes straight in. The colours themselves are `primary`, `secondary`, `surface`, `onSurface`, `onPrimary`, `outline` and `error`; name only the ones you are changing.
+A colour is `#AARRGGBB`, `0xAARRGGBB`, a bare `RRGGBB` (opaque) or a packed integer, so the same hex your `colors.xml` and your designer use goes straight in. The colours themselves are `primary`, `secondary`, `tertiary`, `accent`, `surface`, `onSurface`, `onPrimary`, `outline` and `error`; name only the ones you are changing. `tertiary` and `accent` exist for a ramp of more than two colours. Leave them out and they are your `secondary` and `primary`.
 
-The logo is a **self-theming template SVG**, so one asset serves both surfaces. The SDK substitutes the active colour scheme into placeholder tokens before rendering: `{{PRIMARY}}`, `{{SECONDARY}}`, `{{ERROR}}`, `{{SURFACE}}`, `{{ONSURFACE}}` and `{{OUTLINE}}`. Any token left unreplaced renders as an invisible fill. Both `logo` and `icon` are asset paths in your own APK, so a Flutter host names its bundled mark `flutter_assets/assets/brand/logo.svg`.
+The logo is a **self-theming template SVG**, so one asset serves both surfaces. The SDK substitutes the active colour scheme into placeholder tokens before rendering: `{{PRIMARY}}`, `{{SECONDARY}}`, `{{TERTIARY}}`, `{{ACCENT}}`, `{{ERROR}}`, `{{SURFACE}}`, `{{ONSURFACE}}` and `{{OUTLINE}}`. Any token left unreplaced renders as an invisible fill. Both `logo` and `icon` are asset paths in your own APK, so a Flutter host names its bundled mark `flutter_assets/assets/brand/logo.svg`.
+
+### Fill
+
+Some surfaces carry your accent rather than sitting on the surface colour: the primary button, the top bar's action pill, the row of step dots, and any illustration drawn on your own ramp. `style` says how they are filled.
+
+| Value | What it draws |
+|-------|---------------|
+| `"HORIZONTAL"` | Your ramp, left to right. The default, and what every brand had before this key existed |
+| `"VERTICAL"` | The same ramp, stated for a host whose own splash runs top to bottom |
+| `"DIAGONAL_LEFT"` | The same ramp, stated for a host whose own splash runs from the top-left corner to the bottom-right |
+| `"DIAGONAL_RIGHT"` | The same ramp, stated for a host whose own splash runs from the top-right corner to the bottom-left |
+| `"SOLID"` | Flat `primary`, no ramp |
+
+Hyphens and spaces read as underscores, so `"diagonal-left"` is `DIAGONAL_LEFT`. An unknown value, or none, is `HORIZONTAL`: a host built against a newer generator does not lose its ramp to a name this version has not heard of.
+
+:::note Only `SOLID` changes anything here, and that is deliberate
+A direction is a choice about a full-height backdrop, and the SDK draws none. Every ramped surface it has is a strip, and a gradient running down a strip is a gradient nobody can see. Send the whole value anyway, so that your app and the payment screens agree about what the brand asked for, and so the decision stays the SDK's if it ever grows a surface tall enough to turn.
+:::
+
+#### The Ramp's Colours
+
+The ramp is `secondary` running into `primary` unless you say otherwise. `gradient` says otherwise: two to four of your theme's colours, by name, in the order the ramp runs through them.
+
+```json
+{
+  "light": { "primary": "#FF440BD4", "secondary": "#FFFF0090", "tertiary": "#FF6F08C4", "accent": "#FF01FFFF" },
+  "gradient": ["secondary", "tertiary", "primary", "accent"]
+}
+```
+
+They are names rather than colours so that each scheme resolves them for itself, and the dark ramp is your dark colours. A name the SDK does not know, or fewer than two, and the whole key is ignored: a ramp missing a stop would be a different gradient, and `secondary` into `primary` is at least one your brand has seen.
+
+The buttons, the action pill and the step dots run through it, and so does your artwork. A two-stop `<linearGradient>` from `{{SECONDARY}}` to `{{PRIMARY}}` is re-stopped evenly across your ramp, keeping the axis it was drawn on. One drawn `{{PRIMARY}}` first takes the ramp reversed, so it still ends where it was drawn to. A gradient with more than two stops was drawn through your colours on purpose, like a brand mark, and is left exactly as drawn.
+
+#### Flat
+
+`SOLID` reaches your logo too. A `<linearGradient>` whose stops name **both** `{{SECONDARY}}` and `{{PRIMARY}}` is your ramp, and every ramp colour in it, `{{TERTIARY}}` and `{{ACCENT}}` included, is flattened to `primary` with the rest. A gradient that names real colours, or only one of the two, belongs to the illustrator and is left exactly as drawn, so a card scheme mark or a flag keeps its own shading. The ramp flattens to `primary` whatever `gradient` says, which means `onPrimary` is still the ink that sits on it and nothing else on the screen changes.
 
 ### Why It Is a File, Not a Config
 
@@ -170,7 +218,54 @@ All of this used to be parameters on `HDConfig`, and being parameters made them 
 
 A file is in the APK before the app has run once, and on the launch nobody made. So the brand is stated where it cannot go missing, and two places answer for the SDK: **the file** for what this app is and where it talks, and **[`HDConfig`](#hdconfig)** for the live wiring, which is the one thing a file cannot hold.
 
-Your own app can still have a theme switch or a language picker. It moves your app, not the payment screens: those are the file's, so what a cardholder sees is the same whether the charge started on your keypad or arrived as a link at four in the morning.
+A **language** picker and a **light or dark** switch are the two exceptions, and they are the exceptions that draw the line. A person's choice is not something the build knows, so no file can hold it. Yet the payment screens have no picker or switch of their own to correct them with, so leaving them on the file would strand a merchant who changed your app. [`setLanguage`](#following-your-app) and [`setThemeMode`](#following-your-apps-theme) resolve it the file's way rather than a call's: the SDK *records* what you tell it, and reads it back on every bring-up, including the one at four in the morning that ran none of your code. Your colours, fill and type stay the file's, so what a cardholder sees is your brand whether the charge started on your keypad or arrived as a link.
+
+### Following Your App's Theme
+
+If your app lets the merchant pick light, dark or the device's setting, tell the SDK what they picked:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.models.HaloThemeMode
+
+HaloSdkUi.setThemeMode(context, HaloThemeMode.DARK)   // null forgets it
+```
+
+Call it at startup and whenever the merchant changes it. It is cheap and idempotent, and a payment screen already showing repaints on the spot. What you pass comes ahead of your brand file's `themeMode`; `null` forgets it and puts the screens back on the file's.
+
+### Type
+
+Say nothing and the screens are set in the platform's font, which is what they always were. `font` changes that, and there are two ways to say it.
+
+**A family name**, when the typeface is one the device already has:
+
+```json
+{ "font": "Helvetica" }
+```
+
+**The family and your own files**, when it is not — and this is the only form that is certain of what gets drawn:
+
+```json
+{
+  "font": {
+    "family": "Helvetica",
+    "files": [
+      { "asset": "fonts/Helvetica.ttf", "weight": 400 },
+      { "asset": "fonts/Helvetica-Bold.ttf", "weight": 700 },
+      { "asset": "fonts/Helvetica-Italic.ttf", "weight": 400, "italic": true }
+    ]
+  }
+}
+```
+
+Each `asset` is a path in your own APK, like the logo, so a Flutter host names its bundled file `flutter_assets/assets/brand/Helvetica-Bold.ttf`. `weight` is 100 to 900 — 400 regular, 700 bold — and it defaults to 400. State it: Android's asset font takes your word for the weight rather than reading the file, so a bold cut handed over as 400 is drawn wherever regular was asked for and the bold on top of it is synthesised. A weight you ship no file for is synthesised from the nearest one you did.
+
+**Name the family even when you ship files.** It is what a cut you did not ship falls back to, and it is the same name your own screens set their text in, so the two sides of a charge cannot disagree about what the brand is.
+
+:::caution A bare name may still be Roboto
+`helvetica`, `arial`, `tahoma` and `verdana` are aliases to the system sans-serif in Android's own `fonts.xml`, and any family the device does not have resolves to it too. Either way you get Roboto, drawn without complaint. If the typeface matters, ship it.
+:::
+
+A file the SDK cannot open is dropped with a line in the log and the rest of the family carries on — a payment screen is never held up over a typeface.
 
 ### Text Sizes
 
@@ -194,15 +289,63 @@ The defaults are the Material 3 type scale, so a brand that says nothing about t
 
 ---
 
+## Currencies
+
+The SDK charges in rand (`ZAR`), pounds (`GBP`), euros (`EUR`) and dollars (`USD`). If your app settles in fewer, say so in your [brand file](#theming):
+
+```json
+{ "currencies": ["ZAR", "USD"] }
+```
+
+The head of the list is the one that matters: it is what the keypad opens on, and what an amount arriving with no currency of its own is denominated in. Put the currency you mostly charge in first. Say nothing and nothing is narrowed — the list is all four, headed by the rand.
+
+**The rest stay on the sheet, greyed.** Narrowing a list by deleting from it tells a merchant nothing — a sheet holding one row reads as a build that forgot the others, and "where did dollars go?" has no answer on the screen that would answer it. Greyed, the row says which of the two it is: this SDK charges in dollars, this app does not. The sheet is therefore always all four, in the SDK's own order, and your order decides the head rather than the rows.
+
+What it narrows is the merchant's **choice**. An amount that arrives already denominated — a `launch` carrying a currency, a parsed payment link, a DCC quote — is charged in the currency it came in, because re-denominating someone else's amount would charge a different sum of money under the same number.
+
+It belongs in the file rather than in a call for [the usual reason](#why-it-is-a-file-not-a-config): an inbound payment brings the keypad up with none of your code in the process to narrow anything.
+
+---
+
 ## Languages
 
-The SDK ships English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`) and Portuguese (`pt`). It follows the device language by default and falls back to English for anything else. Pin one in your [brand file](#theming):
+The SDK ships English (`en`), Afrikaans (`af`), Zulu (`zu`), French (`fr`), German (`de`), Spanish (`es`) and Portuguese (`pt`). Three things can answer, and they are tried in this order: what your app told it the merchant chose, then your brand file's pin, then the device. English backs anything none of them lands on, and any key a translation is missing.
+
+Pin one in your [brand file](#theming):
 
 ```json
 { "language": "af" }
 ```
 
 Say nothing and the SDK follows the device, which is what a merchant's phone already reflects.
+
+### Following Your App
+
+If your app has a language picker of its own, tell the SDK what the merchant chose:
+
+```kotlin
+import za.co.synthesis.halo.sdk_ui.core.HDLanguage
+
+HaloSdkUi.setLanguage(context, HDLanguage.AFRIKAANS)   // null forgets it
+```
+
+A code your app carries as a string, `"af"` or a BCP-47 tag like `"af-ZA"`, goes through `HDLanguage.fromCode`, which answers `null` for anything this release does not ship — and `null` is the right thing to pass on, since it puts the screens back on their own resolution rather than leaving them in the language chosen before.
+
+Call it wherever your app resolves its own language — at startup and on every change — and the payment screens follow. Without it they resolve on their own, so a merchant who switches your app to Afrikaans still taps the card against whatever the phone is set to: the payment screens have no picker to correct it with.
+
+What you say here comes ahead of the pin above, because your app resolved *through* that pin to reach it. The SDK records it rather than holding it, which is what carries the choice onto the flow none of your code takes part in — a payment that arrives at four in the morning is in the language your merchant chose.
+
+### The Ones Your App Speaks
+
+Following the device is right until your app does not speak what the device does. If yours ships in English and Afrikaans, say so:
+
+```json
+{ "languages": ["en", "af"] }
+```
+
+Every candidate is then held to that list — the pin included — so a French phone takes its payments in English rather than in a language the rest of your app has never shown. English backs the fall-through; an app that does not offer English gets the first language it does. Say nothing and nothing is narrowed.
+
+It belongs in the file rather than in a call for the sharpest version of [the usual reason](#why-it-is-a-file-not-a-config): the payment screens have no language picker of their own, so the build is the only thing that can ever narrow them — and an inbound payment narrows them with none of your code in the process.
 
 ### Saying It Your Way
 
