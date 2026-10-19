@@ -9,6 +9,10 @@ import TabItem from '@theme/TabItem';
 
 Follow these steps to integrate the Halo UI SDK into your Android project.
 
+:::tip Building in Flutter?
+Use the <a href="https://pub.dev/packages/halo_sdk_ui" target="_blank"><code>halo_sdk_ui</code></a> plugin instead of the steps below. It declares this library for you, bridges every call to Dart, and its README covers the two lines of `MainActivity` code and the Gradle repository a Flutter host still needs. What follows is for a Kotlin host. The [brand file](./configuration#theming) and everything under [Inbound Payments](./inbound-payments) apply to both.
+:::
+
 <p align="center">
   <img alt="Integrating the Halo UI SDK: build setup, manifest resources, and the four calls in your code." src="/img/halo-sdk-ui/integration-map-light.svg" style={{ width: "100%" }} />
 </p>
@@ -23,6 +27,8 @@ Add these to your `local.properties` file:
 aws.accesskey=< PROVIDED IN EMAIL >
 aws.secretkey=< PROVIDED IN EMAIL >
 ```
+
+Temporary credentials, such as an SSO session's, carry a third value as well. Add it as `aws.token`, and replace all three when the session expires; S3 answers an expired one with `ExpiredToken`. CI has no `local.properties` and exports the same three as `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN`, which the snippet below falls back to.
 
 ## 2. Configure Repositories
 
@@ -41,17 +47,24 @@ val localProperties = Properties().apply {
     }
 }
 
+fun haloCredential(property: String, environmentVariable: String): String? =
+    localProperties.getProperty(property)?.takeIf { it.isNotBlank() }
+        ?: System.getenv(environmentVariable)?.takeIf { it.isNotBlank() }
+
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Repository where the Halo UI SDK is hosted
-        maven {
-            name = "releases"
-            url = uri("s3://synthesis-halo-artifacts/releases")
-            credentials(AwsCredentials::class) {
-                accessKey = localProperties.getProperty("aws.accesskey")
-                secretKey = localProperties.getProperty("aws.secretkey")
+        // Repositories where the Halo UI SDK is hosted
+        listOf("releases", "snapshots").forEach { repository ->
+            maven {
+                name = repository
+                url = uri("s3://synthesis-halo-artifacts/$repository")
+                credentials(AwsCredentials::class) {
+                    accessKey = haloCredential("aws.accesskey", "AWS_ACCESS_KEY_ID")
+                    secretKey = haloCredential("aws.secretkey", "AWS_SECRET_ACCESS_KEY")
+                    sessionToken = haloCredential("aws.token", "AWS_SESSION_TOKEN")
+                }
             }
         }
     }
@@ -61,21 +74,68 @@ dependencyResolutionManagement {
 </TabItem>
 </Tabs>
 
+`releases` holds the published versions and `snapshots` the candidates. A build that pins a released version never reaches the second.
+
 ## 3. Add Dependency
 
 Add the following to your module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("za.co.synthesis.halo:sdk_ui:0.0.22")
+    implementation("za.co.synthesis.halo:sdk_ui:0.0.37")
 }
 ```
 
 :::tip
-Replace `0.0.22` with the latest version available.
+Replace `0.0.37` with the latest version available.
 :::
 
 Both debug and release variants are published under this single coordinate. Gradle selects the right one automatically from its module metadata — your **debug** build pulls the debug SDK, your **release** build pulls the production SDK — so you don't declare anything variant-specific.
+
+:::caution A sandbox release build needs the debug SDK
+That pairing follows the **build type**, and the kernel you talk to is a separate choice. The debug SDK is the one that talks to the sandbox kernel. So a *release* build meant for sandbox, such as a signed QA build you hand to testers, resolves the production SDK and fails at its first transaction rather than at compile time.
+:::
+
+If you ship builds like that, force the debug artifact for them:
+
+```kotlin
+val sandbox = true  // however your build knows which kernel it is for
+
+if (sandbox) {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            val version = requested.version.orEmpty()
+            if (requested.group == "za.co.synthesis.halo" && requested.name == "sdk" &&
+                version.isNotBlank() && !version.endsWith("-debug")
+            ) {
+                useVersion("$version-debug")
+                because("a sandbox build needs the SDK's debug artifact")
+            }
+        }
+    }
+}
+```
+
+### Choosing the Payment Kernel
+
+The Halo SDK itself arrives transitively, at whatever version this release was built against, and for almost everybody that is the right answer.
+
+If your acquirer has certified a particular kernel and will not move on your schedule, pin it — a resolution rule rather than a dependency line, because this is usually a *downgrade* and Gradle resolves a conflict upwards:
+
+```kotlin
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "za.co.synthesis.halo" && requested.name == "sdk") {
+            // Keep the variant that resolved: a debug build asks for "-debug".
+            val debug = requested.version.orEmpty().endsWith("-debug")
+            useVersion(if (debug) "4.0.20-debug" else "4.0.20")
+            because("certified for 4.0.20")
+        }
+    }
+}
+```
+
+Stay within the same major line. The SDK surface this library names is a small one, and it holds still across a major, so an older kernel in the same line is the case this is built for; a different major is a different library and will not compile. Tell us which version you are pinned to — we will confirm this release works against it rather than leaving you to find out at your acquirer's lab.
 
 ## 4. Manifest
 
@@ -88,12 +148,13 @@ The SDK's permissions are merged into your app's manifest automatically. The run
 | Permission | Runtime prompt | Purpose |
 |------------|-----------------|---------|
 | `INTERNET` | — | Network communication with the Halo backend |
-| `NFC` | — | Reading payment cards |
+| `NFC` | — | Reading payment cards — declared here; [switched on](./usage#when-nfc-is-off) is a separate matter |
 | `VIBRATE` / `MODIFY_AUDIO_SETTINGS` | — | Feedback on card tap |
 | `BLUETOOTH` / `BLUETOOTH_ADMIN` | — | External card reader support (pre-Android 12) |
 | `CAMERA` | ✓ | Device security verification |
 | `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` | ✓ | Payment compliance (location verification) |
 | `READ_PHONE_STATE` | — | Declared by the payment SDK, never prompted for |
+| `RECORD_AUDIO` | — | Declared, never prompted for, never needed; the kernel *mutes* the microphone rather than reading it |
 | `BLUETOOTH_SCAN` / `BLUETOOTH_CONNECT` | — | External card reader support, never prompted for |
 | `POST_NOTIFICATIONS` | ✓ (Android 13+, if `receivePush`) | [Push to Terminal](./push-to-terminal)'s notification, backgrounded |
 
@@ -102,6 +163,8 @@ A denial doesn't abort bring-up — `init` continues and logs which permissions 
 :::note Declaring is free, prompting is not
 The two columns are deliberately different. `READ_PHONE_STATE` cannot do what it is named for on any supported device — Android 10 stopped returning IMEI or serial to a normal app — and asking would cost every merchant a Phone-group prompt that reads as a payment app asking to make calls. Bluetooth is for an external card reader, and there is no reader path in this SDK. Both stay declared, because the payment SDK declares them, and neither is ever prompted for.
 :::
+
+`RECORD_AUDIO` is the one row that buys nothing at all, and is there so a host's store listing reads as it did on v1, which carried it. What the kernel does with the microphone is keep it *muted* for the length of a transaction, failing the charge with `MicrophoneWasUnmuted` if that lifts; it links no audio-input library and cannot open a microphone. A held grant would sit against that countermeasure rather than enable anything, which is why it is only ever declared. The same goes for the `microphone`, `camera.any` and `bluetooth_le` feature declarations beside it: all three are optional, so none of them filters a device off your listing.
 
 `POST_NOTIFICATIONS` is asked for on Android 13+ **only when [`receivePush`](./push-to-terminal) is set** — a build that cannot be pushed to has nothing to notify anyone about. Refused, a pushed payment waits for the merchant to next open the app rather than failing; nothing else about Push to Terminal is affected.
 
