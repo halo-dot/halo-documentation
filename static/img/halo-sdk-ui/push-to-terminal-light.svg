@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 785" width="1040" height="785" role="img">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9198a1"/></marker></defs>
+<rect width="1040" height="785" fill="#ffffff"/>
+<text x="32" y="42" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="19" font-weight="600" fill="#1f2328" text-anchor="start">Push to Terminal</text>
+<text x="32" y="64" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="400" fill="#59636e" text-anchor="start">A payment sent to a named device. Becoming pushable costs you one flag; receiving one costs you nothing at all.</text>
+<text x="28" y="106" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">Becoming pushable — inside init()</text>
+<rect x="28" y="120" width="470" height="81.5" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="42" y="145.5" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="13.5" font-weight="400" fill="#f57500" text-anchor="start">HDConfig(receivePush = true)</text>
+<text x="42" y="167.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Plus your own google-services.json and the Google Services plugin. The</text>
+<text x="42" y="183.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">SDK never names a project — it uses your app’s own.</text>
+<path d="M 263.0 204.5 L 263.0 220.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="28" y="225.5" width="470" height="81.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="42" y="251.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">init() mints both halves, off the critical path</text>
+<text x="42" y="272.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The device installation id, from the SDK’s own device registration.</text>
+<text x="42" y="288.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The Firebase token, from the project your app stands up.</text>
+<path d="M 263.0 310.0 V 329.0 H 140.5 V 349.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 263.0 310.0 V 329.0 H 385.5 V 349.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="87.7125" y="319.0" width="105.575" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="140.5" y="333.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">nothing changed</text>
+<rect x="317.45" y="319.0" width="136.10000000000002" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="385.5" y="333.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">new or rotated token</text>
+<rect x="28" y="353.0" width="225.0" height="97.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="42" y="378.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">Skipped</text>
+<text x="42" y="400.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">A registration that would</text>
+<text x="42" y="416.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">restate what the kernel already</text>
+<text x="42" y="432.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">holds costs no network.</text>
+<rect x="273.0" y="353.0" width="225.0" height="209.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="287.0" y="378.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">GET, then POST /devices</text>
+<text x="287.0" y="400.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">An upsert, so the SDK reads the</text>
+<text x="287.0" y="416.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">estate first and keeps the</text>
+<text x="287.0" y="432.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">merchant’s own name for this</text>
+<text x="287.0" y="448.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">terminal. Only a device nobody</text>
+<text x="287.0" y="464.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">has named gets the hardware’s</text>
+<text x="287.0" y="480.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">(“Samsung SM-G991B”).</text>
+<text x="287.0" y="496.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">A failure is logged and never</text>
+<text x="287.0" y="512.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">yours to handle: the device</text>
+<text x="287.0" y="528.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">still takes payments, and the</text>
+<text x="287.0" y="544.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">next bring-up tries again.</text>
+<rect x="28" y="584.5" width="470" height="113.5" rx="12" fill="#ffebe9" stroke="#ffa5a0" stroke-width="1.5"/>
+<text x="42" y="610.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#cf222e" text-anchor="start">The one case the SDK cannot see</text>
+<text x="42" y="631.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">You delete this device’s own row on the kernel, and it keeps skipping —</text>
+<text x="42" y="647.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">the token it holds still matches.</text>
+<text x="42" y="663.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">HaloSdkUi.forgetTerminalRegistration(context) tells it, and the next</text>
+<text x="42" y="679.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">merchant token registers again.</text>
+<text x="546.0" y="106" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">Receiving one — nothing in your manifest</text>
+<rect x="546.0" y="120" width="466.0" height="65.5" rx="12" fill="#fff4e8" stroke="#f0a259" stroke-width="1.5"/>
+<text x="560.0" y="145.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#f57500" text-anchor="start">The kernel pushes at the device</text>
+<text x="560.0" y="167.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">POST /consumer/push names one of the merchant’s registered devices.</text>
+<path d="M 779.0 188.5 L 779.0 204.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="546.0" y="209.5" width="466.0" height="129.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="560.0" y="235.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">The SDK’s own FirebaseMessagingService</text>
+<text x="560.0" y="256.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The message becomes a payment URL and goes to the same activity a</text>
+<text x="560.0" y="272.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">payment link goes to.</text>
+<text x="560.0" y="288.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">No service declaration, no provider, no filter of yours: a pushed</text>
+<text x="560.0" y="304.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">payment can start the process, so nothing of yours could be relied on</text>
+<text x="560.0" y="320.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">to exist.</text>
+<path d="M 779.0 342.0 V 361.0 H 657.5 V 381.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 779.0 342.0 V 361.0 H 900.5 V 381.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<rect x="626.08" y="351.0" width="62.84" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="657.5" y="365.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">app open</text>
+<rect x="856.87" y="351.0" width="87.26" height="20" rx="10" fill="#ffffff" stroke="#d8dee4" stroke-width="1"/>
+<text x="900.5" y="365.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11" font-weight="600" fill="#59636e" text-anchor="middle">backgrounded</text>
+<rect x="546.0" y="385.0" width="223.0" height="116.0" rx="12" fill="#e9f7ee" stroke="#7ed492" stroke-width="1.5"/>
+<text x="560.0" y="410.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1a7f37" text-anchor="start">The tap screen, straight</text>
+<text x="560.0" y="429.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1a7f37" text-anchor="start">away</text>
+<text x="560.0" y="450.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">The amount is already on it.</text>
+<text x="560.0" y="466.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Nothing to show, and nothing</text>
+<text x="560.0" y="482.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">for the cardholder to scan.</text>
+<rect x="789.0" y="385.0" width="223.0" height="257.5" rx="12" fill="#f6f8fa" stroke="#d8dee4" stroke-width="1.5"/>
+<text x="803.0" y="410.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1f2328" text-anchor="start">A notification first</text>
+<text x="803.0" y="432.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Android will not let a</text>
+<text x="803.0" y="448.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">backgrounded app start an</text>
+<text x="803.0" y="464.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Activity, so the payment opens</text>
+<text x="803.0" y="480.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">when the notification is</text>
+<text x="803.0" y="496.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">tapped.</text>
+<text x="803.0" y="512.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Its copy is the SDK’s own, in</text>
+<text x="803.0" y="528.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">your language, tinted with your</text>
+<text x="803.0" y="544.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">primary colour.</text>
+<text x="803.0" y="560.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">Its small icon:</text>
+<text x="803.0" y="576.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">ic_notification, else</text>
+<text x="803.0" y="592.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">ic_launcher_foreground, else</text>
+<text x="803.0" y="608.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">HDCompanyLogo.icon, else your</text>
+<text x="803.0" y="624.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="400" fill="#59636e" text-anchor="start">launcher icon.</text>
+<path d="M 657.5 504.0 V 669.5 H 779.0 V 689.5" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ar)"/>
+<path d="M 900.5 645.5 V 669.5 H 779.0" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="546.0" y="689.5" width="466.0" height="62.0" rx="12" fill="#e9f7ee" stroke="#7ed492" stroke-width="1.5"/>
+<text x="560.0" y="715.0" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1a7f37" text-anchor="start">Either way, charged by exactly the code that charges</text>
+<text x="560.0" y="733.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#1a7f37" text-anchor="start">everything else.</text>
+<path d="M 522.0 98 V 751.5" fill="none" stroke="#d8dee4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 6"/>
+</svg>

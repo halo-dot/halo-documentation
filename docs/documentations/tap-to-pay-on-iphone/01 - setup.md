@@ -14,6 +14,15 @@ Halo.Swift enables merchants to accept contactless card payments on iPhone using
 
 Halo.Swift is distributed as the `HaloSDK` Swift module. All code examples reference the `HaloSDK` namespace.
 
+**Current version: 1.0.96**
+
+### What's new in 1.0.96
+
+- **Location is mandatory and checked before payment starts.** Denied, switched-off, or unavailable location declines with `locationError` before the Tap to Pay UI. `errorMessage` names the exact Settings path (and your app name where relevant).
+- **Security violations report their real cause.** Only screen recording returns `screenCaptureDetected` (and resets the SDK). If the app goes to the background during a payment, you get `requestInterrupted` with no SDK reset. Brief inactive states (permission prompts, Control Center, call banners) no longer fail a payment as screen capture.
+- **Offline decline message** now says "Transaction declined due to security violation" (match on error codes, not message text).
+- Add `NSLocationWhenInUseUsageDescription` to Info.plist and prefer requesting location during onboarding.
+
 ## Requirements
 
 You'll need the following before getting started:
@@ -49,7 +58,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.95")
+    .package(id: "synthesis.halosdk", from: "1.0.96")
 
 ]
 ```
@@ -228,7 +237,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `serviceConnectionError` | `serviceConnectionError` | Internal service unavailable | Show: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again." |
 | `timeout` | — | Payment session timed out | Allow retry |
 | `readNotAllowedDuringCall` | `readNotAllowedDuringCall` | Phone call in progress | Show: "Tap to Pay on iPhone can't be used while a call is in progress." |
-| `requestInterrupted` | `requestInterrupted` | App interrupted during read | Show: "Tap to Pay on iPhone was interrupted. If you're on a call, end it and try again." |
+| `requestInterrupted` | `requestInterrupted` | App interrupted during read, or the app went to the background during a payment | Bring the app to the foreground and retry. The SDK is not reset. |
 | `backgroundRequestNotAllowed` | `backgroundRequestNotAllowed` | App went to background | Bring app to foreground and retry - do not show modal alert if triggered from background init |
 | `passcodeDisabled` | `passcodeDisabled` | No passcode set on device | Show: "Tap to Pay on iPhone requires you to set a passcode on your device. To set a passcode, go to Settings > Face ID & Passcode or Settings > Touch ID & Passcode." |
 | `osVersionNotSupported` | `osVersionNotSupported` | iOS version too old | Show: "Tap to Pay on iPhone requires the latest version of iOS. To update, go to Settings > General > Software Update." |
@@ -236,10 +245,10 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `unsupported` | `unsupported` | Unsupported hardware or configuration | Show generic error alert |
 | `deviceBanned` | `deviceBanned` | Device banned by Apple | Show: "Device banned until [date]. Please contact support." |
 | `paymentInProgress` | — | Another payment is already running | Wait for current payment to finish |
-| `screenCaptureDetected` | — | Screen recording/mirroring detected | Abort payment - show security warning |
+| `screenCaptureDetected` | — | Screen recording/mirroring detected (only screen capture — other security checks report their own codes) | Abort payment - show security warning. The SDK resets and reinitializes itself. |
 | `notInitialized` | — | SDK wasn't initialized | Call `initialize()` first |
 | `authTokenUnauthorized` | — | Auth token rejected (401) | Fetch new token from backend and reinitialize SDK |
-| `locationError` | — | Location services unavailable | Guide user to enable location in Settings → Privacy → Location Services |
+| `locationError` | — | Location is denied, switched off, or unavailable (checked before the card reader appears) | Show `errorMessage` — it names the exact Settings path to fix it. See [Location Permissions](#location-permissions) |
 | `accountNotLinked` | `accountNotLinked` | Merchant account not linked | SDK automatically calls `linkAccount()` — no manual action needed |
 | `accountLinkingRequiresiCloudSignIn` | `accountLinkingRequiresiCloudSignIn` | iCloud sign-in required | Show: "Tap to Pay on iPhone requires you to sign in with an Apple Account. To sign in, go to Settings > Sign in to your iPhone." |
 | `accountLinkingFailed` | `accountLinkingFailed` | Account linking failed | Show: "An error occurred while linking the Apple Account for Tap to Pay on iPhone. Try again with a different Apple Account." |
@@ -267,7 +276,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `invalidCurrency` | — | Invalid currency code | Use valid ISO 4217 currency codes (e.g., "USD", "ZAR") |
 | `invalidReference` | — | Invalid merchant reference | Provide valid reference (max 64 characters) |
 | `transactionError` | — | Server transaction error | Show generic error alert |
-| `offlineDeclined` | — | Transaction declined offline | Show: "Transaction declined due to security validation" |
+| `offlineDeclined` | — | Transaction declined offline | Show: "Transaction declined due to security violation" |
 | `cardNotSupported` | — | Card not supported for transaction | Ask for different card or payment method |
 | `unknown` | `unknown` | Unexpected Apple error | Show generic error alert |
 | `systemError` | — | System-level error | Show generic error alert |
@@ -315,7 +324,7 @@ case .declined(let errorCode, let errorMessage):
 
     case HaloErrorCode.offlineDeclined:
 
-        // Transaction declined due to security validation
+        // Transaction declined due to security violation
 
         // Cryptogram Information Data (9F27) = 00 in purchase transactions
 
@@ -329,9 +338,9 @@ case .declined(let errorCode, let errorMessage):
 
     case HaloErrorCode.locationError:
 
-        // Location services required but unavailable
+        // Location is required for every payment
 
-        // Guide user to enable location in Settings
+        // errorMessage tells the user exactly which Settings to change
 
         break
 
@@ -467,9 +476,9 @@ case .readerError(let reason, let detail):
 
 case .locationError(let reason):
 
-    // Location services unavailable — guide user to enable in Settings
+    // Location required — show errorDescription / declined errorMessage (exact Settings path)
 
-    // reason tells you why: .servicesDisabled, .permissionDenied, .timeout, .unavailable
+    // reason: .servicesDisabled, .permissionDenied, .timeout, .unavailable
 
 case .userCancelled:
 
@@ -481,7 +490,7 @@ case .cardDeclined:
 
 case .offlineDeclined:
 
-    // Transaction declined due to offline security validation
+    // Transaction declined due to offline security violation
 
 case .cardNotSupported:
 
@@ -547,11 +556,18 @@ Consumer app should: Allow retry - user may need guidance on tapping card
 ```
 Consumer app should: Show alert — user must end the call first before retrying
 
-**`requestInterrupted`** — App interrupted during read (notification, system dialog, Face ID, etc.):
+**`requestInterrupted`** — App interrupted during read, or the app went to the background during a payment:
 ```swift
-// errorMessage: "Tap to Pay on iPhone was interrupted. If you're on a call, end it and try again."
+// errorMessage: "App went to the background during payment" (SDK security monitor)
+// or Apple's interruption message when ProximityReader reports requestInterrupted
 ```
-Consumer app should: Show alert and allow retry — note: the message mentions a call, but this error can also occur from non-call interruptions. Apple does not provide enough context to distinguish the cause.
+Consumer app should: Bring the app to the foreground and retry. The SDK is **not** reset for this case (unlike `screenCaptureDetected`).
+
+**`screenCaptureDetected`** — Screen recording or mirroring only:
+```swift
+// errorMessage: "Screen recording or mirroring detected during payment"
+```
+Consumer app should: Abort and warn the user. The SDK deinitializes and reinitializes when capture stops. Other security checks (background, jailbreak) use their own codes — do not treat every security abort as screen capture.
 
 
 **`backgroundRequestNotAllowed`** — App went to background during init or payment:
@@ -745,8 +761,7 @@ case .declined(let errorCode, let errorMessage):
         // Device incompatible - disable feature
         disableTapToPay()
         
-    case HaloErrorCode.readNotAllowedDuringCall,
-         HaloErrorCode.requestInterrupted:
+    case HaloErrorCode.readNotAllowedDuringCall:
         // Phone call in progress - show Apple's recommended alert
         showAlert(
             title: "Phone Call in Progress",
@@ -754,8 +769,9 @@ case .declined(let errorCode, let errorMessage):
             buttons: [.ok]
         )
         
-    case HaloErrorCode.backgroundRequestNotAllowed:
-        // App was backgrounded - bring to foreground and retry
+    case HaloErrorCode.backgroundRequestNotAllowed,
+         HaloErrorCode.requestInterrupted:
+        // App was backgrounded or interrupted - bring to foreground and retry
         showRetryPrompt(message: errorMessage)
         
     case HaloErrorCode.readerMemoryFull:
@@ -795,10 +811,10 @@ case .declined(let errorCode, let errorMessage):
         )
         
     case HaloErrorCode.locationError:
-        // Location permission needed
+        // Location permission needed — errorMessage names the exact Settings path
         showAlert(
             title: "Location Access Required",
-            message: "Please enable location access in Settings.",
+            message: errorMessage ?? "Please enable location access in Settings.",
             action: openSettings
         )
         
@@ -1235,13 +1251,13 @@ case .declined(let errorCode, let errorMessage):
 
     if errorCode == HaloErrorCode.offlineDeclined {
 
-        // Transaction declined due to security validation
+        // Transaction declined due to security violation
 
         // This occurs when Cryptogram Information Data (tag 9F27) equals "00" 
 
         // Only affects purchase transactions, not refunds
 
-        print("Payment declined due to security validation")
+        print("Payment declined due to security violation")
 
     }
 
@@ -1287,13 +1303,15 @@ Add this key to your app's `Info.plist`:
 
 ```
 
-**Important**: Without this Info.plist entry, iOS will not show the location permission dialog, and all payment attempts will fail.
+**Important**: Without this Info.plist entry, iOS will not show the location permission dialog, and all payment attempts will fail with `locationError` (`.unavailable`). The SDK logs an error naming the missing key.
 
 ### How Location Works
 
-1. **First payment**: When a user initiates their first payment, iOS shows a system permission dialog asking for location access
+Location is checked before the payment session starts and before security monitoring begins, so the permission dialog never interrupts the card read or gets mistaken for screen capture.
+
+1. **First payment**: If permission hasn't been asked yet, iOS shows the location permission dialog. The SDK waits for the user's answer (up to 30 seconds) before continuing
 2. **Permission granted**: The SDK captures coordinates and includes them in the `X-Location` header for all subsequent payments
-3. **Permission denied**: The payment fails immediately with a `locationError` error code before Apple's card reader UI appears
+3. **Permission denied or not answered**: The payment fails immediately with a `locationError` error code before Apple's card reader UI appears
 4. **Subsequent payments**: If permission was previously granted, location is captured automatically with no additional prompts
 
 ### Location Error Handling
@@ -1310,7 +1328,7 @@ case .declined(let errorCode, let errorMessage):
 
         // Guide user to enable location in Settings
 
-        showLocationSettingsAlert()
+        showLocationSettingsAlert(message: errorMessage)
 
     }
 
@@ -1318,12 +1336,14 @@ case .declined(let errorCode, let errorMessage):
 
 ### Location Error Reasons
 
-The SDK provides specific reasons for location failures via `HaloError.locationError(reason:)`:
+The SDK provides specific reasons for location failures via `HaloError.locationError(reason:)`. The declined `errorMessage` tells the user exactly what to change, using your app's name:
 
-- **`.servicesDisabled`**: Location Services are disabled in device Settings
-- **`.permissionDenied`**: User denied location permission for this app
-- **`.timeout`**: Location request timed out (user didn't respond to permission dialog)
-- **`.unavailable`**: Location data unavailable for other reasons
+| Reason | When | `errorMessage` |
+|--------|------|----------------|
+| `.servicesDisabled` | Location Services are off for the whole device (or restricted) | "Location Services are turned off on this iPhone. Turn them on in Settings > Privacy & Security > Location Services, then try again." |
+| `.permissionDenied` | The user denied location for your app, or didn't answer the permission dialog | "[App] needs your location to take payments. Go to Settings > [App] > Location, choose 'While Using the App', then try again." |
+| `.timeout` | Permission is granted but no location fix arrived in time | "Couldn't get your location in time. Check that Location Services are on and you're connected to the internet, then try again." |
+| `.unavailable` | Location couldn't be obtained for another reason, including a missing `NSLocationWhenInUseUsageDescription` key | "Your location isn't available right now. Check that location access is allowed for [App] in Settings, then try again." |
 
 ### Best Practices
 
@@ -1355,13 +1375,13 @@ func requestLocationPermissionEarly() {
 
 ```swift
 
-func showLocationSettingsAlert() {
+func showLocationSettingsAlert(message errorMessage: String?) {
 
     let alert = UIAlertController(
 
         title: "Location Access Required",
 
-        message: "To process payments securely, please enable location access in Settings > Privacy & Security > Location Services.",
+        message: errorMessage ?? "Location access is required to take payments. Turn it on in Settings, then try again.", // The SDK's message names the exact Settings path
 
         preferredStyle: .alert
 
@@ -1391,9 +1411,9 @@ func showLocationSettingsAlert() {
 
 - If denied: Payment fails immediately with `locationError` before card reader UI appears
 
-- If not determined: SDK requests permission automatically when payment starts
+- If not determined: SDK requests permission when payment starts and waits up to 30 seconds for the user's answer
 
-- The SDK handles location with a 5-second timeout to avoid blocking the payment flow
+- Once permission is granted, the SDK waits up to 5 seconds for a location fix
 
 ## Transaction Flow
 
@@ -1481,14 +1501,19 @@ Make sure you're running on a physical device, not the simulator. Also check tha
 
 You need the ProximityReader entitlement from Apple. This requires approval through the Apple Developer program for Tap to Pay.
 
-**Location permission denied or LOCATION_ERROR**
+**Location permission denied or `locationError`**
 
-Location access is required for all payments. If you're seeing `LOCATION_ERROR`:
+Location access is required for all payments. If you're seeing `locationError`:
 
 1. Check that `NSLocationWhenInUseUsageDescription` is in your Info.plist
 2. If the user denied permission, they must enable it manually in Settings → Your App → Location
 3. Consider pre-requesting location permission during app launch or onboarding to avoid payment-time prompts
 4. The SDK validates location before showing Apple's card reader UI, so users get immediate feedback if location is unavailable
+5. Show the declined `errorMessage` to the merchant — it names the exact Settings path (1.0.96+)
+
+**Payment failed with `screenCaptureDetected` but nobody was recording**
+
+From **1.0.96**, only real screen recording/mirroring returns `screenCaptureDetected`. If the app went to the background, expect `requestInterrupted` instead. Stop Screen Recording / Screen Mirroring / QuickTime capture, re-initialize the SDK, and retry.
 
 **Location not being sent with transactions**
 
