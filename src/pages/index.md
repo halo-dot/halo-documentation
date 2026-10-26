@@ -57,15 +57,3 @@ This extends contactless technology into online payments and other customer inte
 ## Additional information
 
 For more information about Halo Dot, please visit the Halo Dot website.
-
-### Trusted by 
-
-Visa, Mastercard, Amex, Discover and others - our solution is built for security and designed for growth.
-
-![visa](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee03db594661e1e7e3_visa-logo.svg)
-![Mastercard](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee6bfb3ab3c036d1b7_Mastercard.svg)
-![Amex](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee81ed6b3bdc49e89d_Amex.svg)
-![Discover](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee4af603717c6f273b_Discover.svg)
-![GooglePay](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eee08036a558138db64_Google_pay.svg)
-![ApplePay](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eeecd9e7bbd6e87737e_Apple_pay.svg)
-![Samsungpat](https://cdn.prod.website-files.com/63f8ad30f40a41f7b046d567/64904eef5ee9e1391db5d595_Samsung_pay.svg)
