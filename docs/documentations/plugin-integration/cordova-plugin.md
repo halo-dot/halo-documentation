@@ -43,8 +43,6 @@ A production-focused guide to integrating the **Halo Dot SDK** via the <a href="
   - [Troubleshooting](#troubleshooting)
     - [Updating Local Plugin Configurations (`HaloPlugin`)](#updating-local-plugin-configurations-haloplugin)
       - [Recommended Fix: Fast Platform Rebuild](#recommended-fix-fast-platform-rebuild)
-- [1. Remove cached native build files and local plugin links](#1-remove-cached-native-build-files-and-local-plugin-links)
-- [2. Re-add the Android platform (re-links local plugins from config.xml)](#2-re-add-the-android-platform-re-links-local-plugins-from-configxml)
 
 ## Overview
 
@@ -608,3 +606,4 @@ rm -rf platforms plugins
 
 # 2. Re-add the Android platform (re-links local plugins from config.xml)
 npx cordova platform add android
+```
