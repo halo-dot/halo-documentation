@@ -657,7 +657,7 @@ yarn lint
 
 ## License
 
-Copyright © 2026 Halo Dot. All rights reserved. See [LICENSE](https://github.com/halo-dot/halo_sdk_ui_react_native_plugin/blob/main/LICENSE).
+Copyright © 2026 Halo Dot. All rights reserved. See the `LICENSE` file in the plugin package.
 
 ## Support
 

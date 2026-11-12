@@ -5,7 +5,7 @@ sidebar_class_name: hidden
 # halo_sdk_ui_example
 
 Every call the plugin offers, on one screen, and the whole native integration in
-[`MainActivity.kt`](https://github.com/halo-dot/halo_sdk_ui_flutter_plugin/blob/main/example/android/app/src/main/kotlin/za/co/synthesis/halo/halo_sdk_ui_example/MainActivity.kt)
+`android/app/src/main/kotlin/za/co/synthesis/halo/halo_sdk_ui_example/MainActivity.kt`
 — a base class and one line.
 
 ## Running it
@@ -34,7 +34,7 @@ whichever kernel that token is issued for.
 `android/app/src/main/assets/halo/brand.json` is what the SDK reads its
 appearance and addressing from, with every key commented. It is the whole of the
 SDK's configuration that does not cross the channel — see **Branding** in the
-[plugin's README](https://github.com/halo-dot/halo_sdk_ui_flutter_plugin/blob/main/README.md).
+SDK UI guide.
 
 Telemetry is on in that file so a run shows what a host gets. This app ships no
 `google-services.json`, so the Firebase provider finds no project and retires
