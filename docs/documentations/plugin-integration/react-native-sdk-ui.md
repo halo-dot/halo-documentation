@@ -47,7 +47,7 @@ answers back to JavaScript.
 | Kotlin | **2.4.0** — `sdk_ui`'s AAR metadata is built with it, and an older compiler cannot read it. Pin it in your project `build.gradle` (see [below](#2-pin-the-toolchain-and-sdk-levels)) |
 | `minSdkVersion` | **29** or higher (the SDK's floor) |
 | `compileSdk` | **37** or higher (the SDK's AAR metadata requires it) |
-| Host `Activity` | The default `ReactActivity` already works — see [below](#1-attach-the-sdk-in-maincreate) |
+| Host `Activity` | The default `ReactActivity` already works — see [below](#1-attach-the-sdk-in-mainactivityoncreate) |
 | Halo artifact credentials | An AWS access key and secret, to resolve `sdk_ui` from the Halo S3 Maven repository |
 | A Halo SDK token (JWT) | Issued by Halo; supplied to the plugin via [`onTokenRequest`](#the-token-provider) |
 | A brand file | `android/app/src/main/assets/halo/brand.json` — see [Branding](#branding) |
