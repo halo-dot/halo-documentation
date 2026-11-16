@@ -14,13 +14,13 @@ Halo.Swift enables merchants to accept contactless card payments on iPhone using
 
 Halo.Swift is distributed as the `HaloSDK` Swift module. All code examples reference the `HaloSDK` namespace.
 
-**Current version: 1.0.97**
+**Current version: 2.0.0**
 
-### What's new in 1.0.97
+### What's new in 2.0.0
 
-- **`isoResponseCode` on `transactionResponseReceived`.** The analytics event metadata now includes the ISO response code from the authorisation response, next to `haloReference`, for approved and declined payments. A numeric code is reported as a string (`15` becomes `"15"`). The key is left out when the backend sends no code.
-- **Single Tap + PIN resubmit** emits the same `isoResponseCode`, and now also includes `haloReference`.
-- Keep using the payment result `errorCode` for application logic. `isoResponseCode` is the scheme code, for logging and support.
+- **Breaking: `.declined` has a third value, `customValues`.** A `switch` that binds two values (`case .declined(let errorCode, let errorMessage)`) no longer compiles. Add `_` or `let customValues` as the third binding, and change your package requirement to `from: "2.0.0"`.
+- **Payment provider errors.** When the payment provider rejects a transaction, `errorCode` is `209` and `customValues` can contain the provider's own `errorCode` and `errorMessage`. See [Custom Values](#custom-values).
+- Declines raised by the SDK itself (cancellation, timeouts, device and location checks) have empty `customValues`.
 
 Changes in previous versions are in the [Release Notes](/docs/documentations/tap-to-pay-on-iphone/tap-to-pay-release-notes).
 
@@ -59,7 +59,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.97")
+    .package(id: "synthesis.halosdk", from: "2.0.0")
 
 ]
 ```
@@ -203,7 +203,7 @@ case .approved(let receipt):
 
     print("Card: \(receipt.cardBrand ?? "Unknown") ending in \(receipt.last4 ?? "****")")
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     // Payment didn't go through — could be a decline, cancellation, or error
 
@@ -223,6 +223,18 @@ case .declined(let errorCode, let errorMessage):
 
 }
 
+```
+
+### Custom Values
+
+`customValues` contains additional values returned with a declined result. Which keys are present depends on your payment provider, so always treat them as optional. It is empty when the SDK declines the transaction itself, such as on cancellation or timeout.
+
+For example, when a payment provider rejects a transaction with its own error, `errorCode` is `209` (declined by payment provider) and `customValues` may contain the provider's `errorCode` and `errorMessage`:
+
+```swift
+case .declined(let errorCode, let errorMessage, let customValues):
+    let providerErrorCode = customValues["errorCode"]       // defined by the payment provider
+    let providerErrorMessage = customValues["errorMessage"] // defined by the payment provider
 ```
 
 ### Common Error Codes
@@ -282,6 +294,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `unknown` | `unknown` | Unexpected Apple error | Show generic error alert |
 | `systemError` | — | System-level error | Show generic error alert |
 | `104` | — | Server configuration error | Contact support |
+| `209` | — | Declined by the payment provider | Read the provider's error from `customValues`. See [Custom Values](#custom-values) |
 
 **Generic error alert** (for `unknown`, `systemError`, `merchantBlocked`, and any unrecognised code):
 ```
@@ -295,7 +308,7 @@ You can also check these programmatically:
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     switch errorCode {
 
@@ -717,7 +730,7 @@ case .approved(let receipt):
     // Payment successful
     showSuccessScreen(receipt: receipt)
     
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
     // Handle different error types
     switch errorCode {
     
@@ -897,7 +910,7 @@ So when you see `authTokenUnauthorized`, it means your token provider itself is 
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.authTokenUnauthorized {
 
@@ -1114,7 +1127,7 @@ HaloSDK.cancelPayment()
 
 ```
 
-This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "userCancelled", errorMessage: "Payment cancelled by user")`.
+This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "userCancelled", errorMessage: "Payment cancelled by user", customValues: [:])`.
 
 Applications should call cancelPayment() only in response to a clear user action or application-level timeout. The SDK automatically cancels the payment if required by system, security, or lifecycle conditions, and applications do not need to handle those cases explicitly.
 
@@ -1142,7 +1155,7 @@ case .approved(let receipt):
 
     print("Refund processed: \(receipt.transactionId)")
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     print("Refund failed: \(errorMessage ?? "Unknown error")")
 
@@ -1248,7 +1261,7 @@ The SDK performs automatic security validation on purchase transactions to ensur
 
 switch result {
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.offlineDeclined {
 
@@ -1321,7 +1334,7 @@ When location is unavailable or denied, the SDK returns a `.declined` result wit
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.locationError {
 
