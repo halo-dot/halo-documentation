@@ -14,13 +14,13 @@ Halo.Swift enables merchants to accept contactless card payments on iPhone using
 
 Halo.Swift is distributed as the `HaloSDK` Swift module. All code examples reference the `HaloSDK` namespace.
 
-**Current version: 2.0.0**
+**Current version: 2.0.1**
 
-### What's new in 2.0.0
+### What's new in 2.0.1
 
-- **Breaking: `.declined` has a third value, `customValues`.** A `switch` that binds two values (`case .declined(let errorCode, let errorMessage)`) no longer compiles. Add `_` or `let customValues` as the third binding, and change your package requirement to `from: "2.0.0"`.
-- **Payment provider errors.** When the payment provider rejects a transaction, `errorCode` is `209` and `customValues` can contain the provider's own `errorCode` and `errorMessage`. See [Custom Values](#custom-values).
-- Declines raised by the SDK itself (cancellation, timeouts, device and location checks) have empty `customValues`.
+- **Payments are submitted once.** If the connection drops, the request times out, or the server returns a 5xx while the payment is being submitted, the SDK no longer resends it. You get `networkError`, or the HTTP status as `errorCode` (for example `"503"`), as in 2.0.0. The payment may already have been processed, so check its status before charging the card again. To try again, start a new transaction. See [Network Errors](#network-errors).
+- **`cardNotSupported` for cards the reader doesn't accept.** A card the Tap to Pay reader doesn't accept (for example Amex where it isn't supported) now returns `cardNotSupported` instead of `systemError`. This needs iOS 26 or later; on older iOS it is still `systemError`.
+- No API changes. A `from: "2.0.0"` package requirement already resolves 2.0.1.
 
 Changes in previous versions are in the [Release Notes](/docs/documentations/tap-to-pay-on-iphone/tap-to-pay-release-notes).
 
@@ -59,7 +59,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "2.0.0")
+    .package(id: "synthesis.halosdk", from: "2.0.1")
 
 ]
 ```
@@ -290,7 +290,7 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `invalidReference` | — | Invalid merchant reference | Provide valid reference (max 64 characters) |
 | `transactionError` | — | Server transaction error | Show generic error alert |
 | `offlineDeclined` | — | Transaction declined offline | Show: "Transaction declined due to security violation" |
-| `cardNotSupported` | — | Card not supported for transaction | Ask for different card or payment method |
+| `cardNotSupported` | `cardNotSupported` | Card not supported for this transaction, or not accepted by the Tap to Pay reader | Ask for different card or payment method |
 | `unknown` | `unknown` | Unexpected Apple error | Show generic error alert |
 | `systemError` | — | System-level error | Show generic error alert |
 | `104` | — | Server configuration error | Contact support |
@@ -326,7 +326,8 @@ case .declined(let errorCode, let errorMessage, _):
 
     case HaloErrorCode.networkError:
 
-        // Network issue — worth retrying
+        // Network issue. If it happened while submitting the payment, the payment
+        // may have been processed: check its status before charging the card again
 
         break
 
@@ -597,6 +598,8 @@ Consumer app should: Bring app to foreground and retry — do not show modal ale
 // errorMessage: "Tap to Pay on iPhone requires your phone to be connected to the internet. Check your network settings and try again."
 ```
 Consumer app should: Show alert with option to retry when connectivity restored
+
+A `networkError` or a 5xx `errorCode` (for example `"503"`) while the payment is being submitted can mean the payment was processed. The SDK doesn't resend it. Check the payment's status before charging the card again, and start a new transaction to try again.
 
 #### Reader Errors
 

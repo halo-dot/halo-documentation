@@ -13,6 +13,12 @@ tags:
 
 Changes in each Halo.Swift version that affect integrators, newest first.
 
+## 2.0.1
+
+- **Payments are submitted once.** If the connection drops, the request times out, or the server returns a 5xx while the payment is being submitted, the SDK no longer resends it. You get `networkError`, or the HTTP status as `errorCode` (for example `"503"`), as in 2.0.0. The payment may already have been processed, so check its status before charging the card again. To try again, start a new transaction. See [Network Errors](/docs/documentations/tap-to-pay-on-iphone/sdk#network-errors).
+- **`cardNotSupported` for cards the reader doesn't accept.** A card the Tap to Pay reader doesn't accept (for example Amex where it isn't supported) now returns `cardNotSupported` instead of `systemError`. This needs iOS 26 or later; on older iOS it is still `systemError`.
+- No API changes. A `from: "2.0.0"` package requirement already resolves 2.0.1.
+
 ## 2.0.0
 
 - **Breaking: `.declined` has a third value, `customValues`.** A `switch` that binds two values (`case .declined(let errorCode, let errorMessage)`) no longer compiles. Add `_` or `let customValues` as the third binding, and change your package requirement to `from: "2.0.0"`.
