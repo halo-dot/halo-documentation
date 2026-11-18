@@ -14,14 +14,15 @@ Halo.Swift enables merchants to accept contactless card payments on iPhone using
 
 Halo.Swift is distributed as the `HaloSDK` Swift module. All code examples reference the `HaloSDK` namespace.
 
-**Current version: 1.0.96**
+**Current version: 2.0.1**
 
-### What's new in 1.0.96
+### What's new in 2.0.1
 
-- **Location is mandatory and checked before payment starts.** Denied, switched-off, or unavailable location declines with `locationError` before the Tap to Pay UI. `errorMessage` names the exact Settings path (and your app name where relevant).
-- **Security violations report their real cause.** Only screen recording returns `screenCaptureDetected` (and resets the SDK). If the app goes to the background during a payment, you get `requestInterrupted` with no SDK reset. Brief inactive states (permission prompts, Control Center, call banners) no longer fail a payment as screen capture.
-- **Offline decline message** now says "Transaction declined due to security violation" (match on error codes, not message text).
-- Add `NSLocationWhenInUseUsageDescription` to Info.plist and prefer requesting location during onboarding.
+- **Payments are submitted once.** If the connection drops, the request times out, or the server returns a 5xx while the payment is being submitted, the SDK no longer resends it. You get `networkError`, or the HTTP status as `errorCode` (for example `"503"`), as in 2.0.0. The payment may already have been processed, so check its status before charging the card again. To try again, start a new transaction. See [Network Errors](#network-errors).
+- **`cardNotSupported` for cards the reader doesn't accept.** A card the Tap to Pay reader doesn't accept (for example Amex where it isn't supported) now returns `cardNotSupported` instead of `systemError`. This needs iOS 26 or later; on older iOS it is still `systemError`.
+- No API changes. A `from: "2.0.0"` package requirement already resolves 2.0.1.
+
+Changes in previous versions are in the [Release Notes](/docs/documentations/tap-to-pay-on-iphone/tap-to-pay-release-notes).
 
 ## Requirements
 
@@ -58,7 +59,7 @@ Add it directly to your `Package.swift`:
 ```swift
 dependencies: [
 
-    .package(id: "synthesis.halosdk", from: "1.0.96")
+    .package(id: "synthesis.halosdk", from: "2.0.1")
 
 ]
 ```
@@ -202,7 +203,7 @@ case .approved(let receipt):
 
     print("Card: \(receipt.cardBrand ?? "Unknown") ending in \(receipt.last4 ?? "****")")
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     // Payment didn't go through — could be a decline, cancellation, or error
 
@@ -222,6 +223,18 @@ case .declined(let errorCode, let errorMessage):
 
 }
 
+```
+
+### Custom Values
+
+`customValues` contains additional values returned with a declined result. Which keys are present depends on your payment provider, so always treat them as optional. It is empty when the SDK declines the transaction itself, such as on cancellation or timeout.
+
+For example, when a payment provider rejects a transaction with its own error, `errorCode` is `209` (declined by payment provider) and `customValues` may contain the provider's `errorCode` and `errorMessage`:
+
+```swift
+case .declined(let errorCode, let errorMessage, let customValues):
+    let providerErrorCode = customValues["errorCode"]       // defined by the payment provider
+    let providerErrorMessage = customValues["errorMessage"] // defined by the payment provider
 ```
 
 ### Common Error Codes
@@ -277,10 +290,11 @@ When a payment is declined, `errorCode` identifies the outcome for application l
 | `invalidReference` | — | Invalid merchant reference | Provide valid reference (max 64 characters) |
 | `transactionError` | — | Server transaction error | Show generic error alert |
 | `offlineDeclined` | — | Transaction declined offline | Show: "Transaction declined due to security violation" |
-| `cardNotSupported` | — | Card not supported for transaction | Ask for different card or payment method |
+| `cardNotSupported` | `cardNotSupported` | Card not supported for this transaction, or not accepted by the Tap to Pay reader | Ask for different card or payment method |
 | `unknown` | `unknown` | Unexpected Apple error | Show generic error alert |
 | `systemError` | — | System-level error | Show generic error alert |
 | `104` | — | Server configuration error | Contact support |
+| `209` | — | Declined by the payment provider | Read the provider's error from `customValues`. See [Custom Values](#custom-values) |
 
 **Generic error alert** (for `unknown`, `systemError`, `merchantBlocked`, and any unrecognised code):
 ```
@@ -294,7 +308,7 @@ You can also check these programmatically:
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     switch errorCode {
 
@@ -312,7 +326,8 @@ case .declined(let errorCode, let errorMessage):
 
     case HaloErrorCode.networkError:
 
-        // Network issue — worth retrying
+        // Network issue. If it happened while submitting the payment, the payment
+        // may have been processed: check its status before charging the card again
 
         break
 
@@ -584,6 +599,8 @@ Consumer app should: Bring app to foreground and retry — do not show modal ale
 ```
 Consumer app should: Show alert with option to retry when connectivity restored
 
+A `networkError` or a 5xx `errorCode` (for example `"503"`) while the payment is being submitted can mean the payment was processed. The SDK doesn't resend it. Check the payment's status before charging the card again, and start a new transaction to try again.
+
 #### Reader Errors
 
 **`readerMemoryFull`**:
@@ -716,7 +733,7 @@ case .approved(let receipt):
     // Payment successful
     showSuccessScreen(receipt: receipt)
     
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
     // Handle different error types
     switch errorCode {
     
@@ -896,7 +913,7 @@ So when you see `authTokenUnauthorized`, it means your token provider itself is 
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.authTokenUnauthorized {
 
@@ -1113,7 +1130,7 @@ HaloSDK.cancelPayment()
 
 ```
 
-This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "userCancelled", errorMessage: "Payment cancelled by user")`.
+This stops the card reader and ends the current payment attempt. The `startContactlessPayment` call will return `.declined(errorCode: "userCancelled", errorMessage: "Payment cancelled by user", customValues: [:])`.
 
 Applications should call cancelPayment() only in response to a clear user action or application-level timeout. The SDK automatically cancels the payment if required by system, security, or lifecycle conditions, and applications do not need to handle those cases explicitly.
 
@@ -1141,7 +1158,7 @@ case .approved(let receipt):
 
     print("Refund processed: \(receipt.transactionId)")
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     print("Refund failed: \(errorMessage ?? "Unknown error")")
 
@@ -1247,7 +1264,7 @@ The SDK performs automatic security validation on purchase transactions to ensur
 
 switch result {
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.offlineDeclined {
 
@@ -1320,7 +1337,7 @@ When location is unavailable or denied, the SDK returns a `.declined` result wit
 
 ```swift
 
-case .declined(let errorCode, let errorMessage):
+case .declined(let errorCode, let errorMessage, _):
 
     if errorCode == HaloErrorCode.locationError {
 
