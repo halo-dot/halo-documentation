@@ -838,7 +838,7 @@ And the parameters of `HaloTransactionResult`:
 
     `status` is the DCC status in the payment response, or the cardholder's choice when the response has none.
 
-    A transaction where the cardholder accepted DCC can be declined with error code 219 to 222 because of its DCC quote. Ask the cardholder to tap again.
+    A transaction where the cardholder accepted DCC can be declined with error code 219 to 222, or 224 when DCC can't be applied to the payment. Ask the cardholder to tap again.
 
 6. Example HaloTransactionResult
 
