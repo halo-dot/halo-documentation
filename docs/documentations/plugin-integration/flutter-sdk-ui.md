@@ -9,7 +9,7 @@ sidebar_class_name: hidden
 [![sdk_ui](https://img.shields.io/badge/sdk__ui-0.0.44-f57500.svg)](https://docs.halodot.io)
 
 A Flutter plugin for **Halo Dot tap-on-phone payments**. It wraps the native
-[`sdk_ui`](https://docs.halodot.io) library behind one Dart class, `HaloSdkUi`,
+[`sdk_ui`](https://docs.halodot.io/docs/documentations/halo-sdk-ui/introduction) library behind one Dart class, `HaloSdkUi`,
 so a Flutter app can take a card payment on the phone itself without writing
 native code or holding a `MethodChannel`.
 
@@ -43,7 +43,7 @@ answers back to Dart.
 | `compileSdk` | **37** or higher (the SDK's AAR metadata requires it) |
 | Host `Activity` | Must be a **`FlutterFragmentActivity`** — see [below](#1-make-mainactivity-a-flutterfragmentactivity) |
 | Halo artifact credentials | An AWS access key and secret, to resolve `sdk_ui` from the Halo S3 Maven repository |
-| A Halo SDK token (JWT) | Issued by Halo; supplied to the plugin via [`onTokenRequest`](#the-token-provider) |
+| A Halo SDK token (JWT) | Signed by you with your private key from the [Halo Developer Portal](https://go.developerportal.qa.haloplus.io/); supplied to the plugin via [`onTokenRequest`](#the-token-provider) |
 | A brand file | `android/app/src/main/assets/halo/brand.json` — see [Branding](#branding) |
 
 ## Installation
@@ -200,7 +200,7 @@ import 'package:halo_sdk_ui/halo_sdk_ui.dart';
 final halo = HaloSdkUi();
 
 // 1. Tell the SDK where to get a token. Set before init.
-halo.onTokenRequest(() async => myBackend.freshJwt());
+halo.onTokenRequest(() async => getJwt());
 
 // 2. Warm the SDK at your splash. Optional, and faster.
 await halo.prepare();
@@ -300,14 +300,16 @@ plugin invokes it whenever the SDK asks:
 
 ```dart
 halo.onTokenRequest(() async {
-  // Return a fresh JWT — typically from your backend, refreshed as needed.
-  return await myBackend.freshJwt();
+  // Return a JWT that hasn't expired.
+  return await getJwt();
 });
 ```
 
 Set this **before** `init`; the SDK cannot come up without a token. The callback
-is async, so fetching the token over the network needs no extra plumbing. See
-the Halo developer portal for how the JWT is issued and what claims it carries.
+is async, so fetching the token over the network needs no extra plumbing.
+
+You build and sign the JWT yourself, with the private key and values from the
+[Halo Developer Portal](https://go.developerportal.qa.haloplus.io/).
 
 ## The receipt provider
 
@@ -393,7 +395,7 @@ for the one link shape that carries a reference and no `configJwt` — every oth
 flow reads the address off the token. Halo issues both values with your
 credentials, for the environment your token is issued for; they are not written
 down here, because a kernel address and its pin are yours and go stale. Ask your
-Halo contact, and see the `sdk_ui` documentation, which lists every key.
+Halo contact, and see the [`sdk_ui` configuration guide](https://docs.halodot.io/docs/documentations/halo-sdk-ui/configuration#brand-file-keys), which lists every key.
 
 `example/android/app/src/main/assets/halo/brand.json` is a working file with
 every key commented.
@@ -532,4 +534,4 @@ Copyright © 2026 Halo Dot. All rights reserved. See the `LICENSE` file in the p
 
 ## Support
 
-[Halo Developer Portal](https://docs.halodot.io)
+[Halo Developer Portal](https://go.developerportal.qa.haloplus.io/)

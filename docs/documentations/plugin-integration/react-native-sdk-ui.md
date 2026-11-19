@@ -9,7 +9,7 @@ sidebar_class_name: hidden
 [![sdk_ui](https://img.shields.io/badge/sdk__ui-0.0.57-f57500.svg)](https://docs.halodot.io)
 
 A React Native plugin for **Halo Dot tap-on-phone payments**. It wraps the
-native [`sdk_ui`](https://docs.halodot.io) library behind one TypeScript class,
+native [`sdk_ui`](https://docs.halodot.io/docs/documentations/halo-sdk-ui/introduction) library behind one TypeScript class,
 `HaloSdkUi`, so a React Native app can take a card payment on the phone itself
 without writing native code or holding a bridge module.
 
@@ -49,7 +49,7 @@ answers back to JavaScript.
 | `compileSdk` | **37** or higher (the SDK's AAR metadata requires it) |
 | Host `Activity` | The default `ReactActivity` already works — see [below](#1-attach-the-sdk-in-mainactivityoncreate) |
 | Halo artifact credentials | An AWS access key and secret, to resolve `sdk_ui` from the Halo S3 Maven repository |
-| A Halo SDK token (JWT) | Issued by Halo; supplied to the plugin via [`onTokenRequest`](#the-token-provider) |
+| A Halo SDK token (JWT) | Signed by you with your private key from the [Halo Developer Portal](https://go.developerportal.qa.haloplus.io/); supplied to the plugin via [`onTokenRequest`](#the-token-provider) |
 | A brand file | `android/app/src/main/assets/halo/brand.json` — see [Branding](#branding) |
 
 ## Installation
@@ -250,9 +250,9 @@ The same kind of rule pins an acquirer-certified kernel version; see "Choosing t
 ### 4. Add the plugin
 
 ```sh
-npm install halo_sdk_ui
+npm install @halodot/halo-sdk-ui
 # or
-yarn add halo_sdk_ui
+yarn add @halodot/halo-sdk-ui
 ```
 
 React Native autolinking registers the TurboModule; no manual package
@@ -261,12 +261,12 @@ registration is needed.
 ## Quick start
 
 ```ts
-import { HaloSdkUi } from 'halo_sdk_ui';
+import { HaloSdkUi } from '@halodot/halo-sdk-ui';
 
 const halo = new HaloSdkUi();
 
 // 1. Tell the SDK where to get a token. Set before init.
-halo.onTokenRequest(async () => myBackend.freshJwt());
+halo.onTokenRequest(async () => getJwt());
 
 // 2. Warm the SDK at your splash. Optional, and faster.
 await halo.prepare();
@@ -376,13 +376,17 @@ plugin invokes it whenever the SDK asks:
 
 ```ts
 halo.onTokenRequest(async () => {
-  // Return a fresh JWT — typically from your backend, refreshed as needed.
-  return await myBackend.freshJwt();
+  // Return a JWT that hasn't expired.
+  return await getJwt();
 });
 ```
 
 Set this **before** `init`; the SDK cannot come up without a token. The callback
 is async, so fetching the token over the network needs no extra plumbing.
+
+You build and sign the JWT yourself, with the private key and values from the
+[Halo Developer Portal](https://go.developerportal.qa.haloplus.io/).
+
 Register it once; a later call swaps the provider rather than stacking a second.
 The SDK asks through this callback whenever it needs a token — at bring-up and
 again later as tokens expire — so the provider should always return a
@@ -393,9 +397,8 @@ currently-valid one.
 The plugin only ever asks `onTokenRequest` for a JWT string. How you produce
 that string is up to you — there are two methods.
 
-**Method A — provide a token directly.** If you already have a valid JWT —
-minted on the [Halo developer portal](https://docs.halodot.io) or by your own
-backend — return it from the callback:
+**Method A — provide a token directly.** If you already have a valid JWT, signed
+with your private key, return it from the callback:
 
 ```ts
 const MY_JWT = 'eyJ…';
@@ -416,12 +419,11 @@ test.
 token each time the SDK asks, so it is always valid:
 
 ```ts
-halo.onTokenRequest(async () => myBackend.freshJwt());
+halo.onTokenRequest(async () => getJwt());
 ```
 
-`freshJwt()` is your own function — it returns a cached token while it has life
-left and fetches a new one as it nears expiry (your backend signs it with your
-portal RSA key, or exchanges a merchant session for it). Because the SDK asks
+`getJwt()` is your own function — it returns a cached token while it has life
+left and signs a new one, with your private key, as it nears expiry. Because the SDK asks
 through the callback whenever it needs a token, a provider that always returns a
 fresh one needs no other plumbing. Use this when the token must stay valid over
 a session.
@@ -514,7 +516,7 @@ for the one link shape that carries a reference and no `configJwt` — every oth
 flow reads the address off the token. Halo issues both values with your
 credentials, for the environment your token is issued for; they are not written
 down here, because a kernel address and its pin are yours and go stale. Ask your
-Halo contact, and see the `sdk_ui` documentation, which lists every key.
+Halo contact, and see the [`sdk_ui` configuration guide](https://docs.halodot.io/docs/documentations/halo-sdk-ui/configuration#brand-file-keys), which lists every key.
 
 `example/android/app/src/main/assets/halo/brand.json` is a working file.
 
@@ -577,7 +579,7 @@ result.
 ### Quick start
 
 ```ts
-import { HaloSdkUi, Printable } from 'halo_sdk_ui';
+import { HaloSdkUi, Printable } from '@halodot/halo-sdk-ui';
 
 const halo = new HaloSdkUi();
 
@@ -600,7 +602,7 @@ job.
 ```ts
 import {
   Printable, Receipt, TextLine, DividerLine, QrLine, FeedLine, PrintAlign,
-} from 'halo_sdk_ui';
+} from '@halodot/halo-sdk-ui';
 
 await halo.print(Printable.receipt(new Receipt([
   new TextLine('Halo Dot', { size: 34, bold: true, align: PrintAlign.center }),
@@ -661,4 +663,4 @@ Copyright © 2026 Halo Dot. All rights reserved. See the `LICENSE` file in the p
 
 ## Support
 
-[Halo Developer Portal](https://docs.halodot.io)
+[Halo Developer Portal](https://go.developerportal.qa.haloplus.io/)
