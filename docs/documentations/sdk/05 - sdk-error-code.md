@@ -67,7 +67,7 @@ Possible SDK error codes you may encounter during integration.
 | 213        | **Refund Already Processed** – The refund has already been completed.                           |
 | 214        | **Missing PFS Server Key** – Required key from the PFS server is missing.                       |
 | 219        | **DCC Quote Not Found** – The DCC quote does not exist or was not offered. Tap again.           |
-| 220        | **DCC Quote Expired** – The DCC quote expired before the payment was submitted. Tap again.      |
+| 220        | **DCC Quote Expired** – The DCC quote expired before the cardholder's choice was submitted. Tap again. |
 | 221        | **DCC Quote Already Used** – The DCC quote was used by another payment. Tap again.              |
 | 222        | **DCC Quote Mismatch** – The DCC quote was issued for a different amount, currency or tap. Tap again. |
 | 223        | **DCC Not Allowed on Refund** – A DCC choice was sent with a refund.                            |

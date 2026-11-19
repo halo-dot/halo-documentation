@@ -915,21 +915,22 @@ Example `onOtherTaskResults` payload:
 
 ## 9. Dynamic Currency Conversion (DCC)
 
-Dynamic Currency Conversion (DCC) lets a cardholder with a foreign Visa or Mastercard card pay in their own currency. DCC is available when Halo has enabled it for the acquirer and the JWT has the claim `x-dcc-enabled` set to `"true"`. The SDK then requests the quote from the Halo backend after a qualifying tap and shows its own offer screen over the app, as it does for the PIN screen. The app does not need to call a DCC API or build a screen.
+Dynamic Currency Conversion (DCC) lets a cardholder with a foreign card pay in their own currency. DCC is available when Halo has enabled it for the acquirer and the JWT has the claim `x-dcc-enabled` set to `"true"`.
 
-The SDK requests a quote for a purchase with a Visa or Mastercard card issued outside the terminal's country. It does not request one for refunds, TT3 transactions or other tasks. The Halo backend decides whether the tap qualifies and applies the card scheme rules, so a tap can still be not offered DCC, for example a Mastercard tap without cardholder verification. If the quote fails or times out, the transaction continues in the local currency.
+The Halo backend decides whether to offer DCC on each tap payment, applying the card scheme rules. Refunds, TT3 transactions and other tasks are never offered DCC. When the backend makes an offer, the SDK shows its own offer screen over the app, as it does for the PIN screen, and sends the cardholder's choice to the backend. The app does not need to call a DCC API or build a screen. When DCC can't be offered, for example because the card does not qualify or the quote failed, the payment continues in the local currency.
 
 **Transaction Sequence**
 
-If DCC is offered, the SDK shows its offer screen, or calls `IHaloDccCallbacks.onDccOffer` when the app implements it, and waits for the cardholder's choice before going online. A `Cancel` choice or a choice timeout returns a `HaloTransactionResult.resultType` of `Cancelled`.
-
-The sequence the app sees for a DCC transaction:
+The sequence the app sees for a transaction that is offered DCC:
 
 1. `onHaloUIMessage` with `CardReadOK_RemoveCard` after the tap.
-2. No callback while the SDK requests the quote, which times out after 10 seconds. Show a processing state.
-3. The SDK's offer screen, when DCC is offered, opening over the app like the PIN screen. An app that implements `IHaloDccCallbacks` gets `onDccOffer` instead and shows its own screen.
-4. The SDK's PIN screen, when the transaction needs a PIN.
-5. `onHaloTransactionResult`, with the DCC outcome in `HaloTransactionResult.dccResult`.
+2. The SDK's PIN screen, when the card asks for an online PIN.
+3. No callback while the SDK sends the payment. Show a processing state.
+4. The SDK's offer screen, opening over the app like the PIN screen. An app that implements `IHaloDccCallbacks` gets `onDccOffer` instead and shows its own screen.
+5. The SDK's PIN screen, when the payment then needs a PIN.
+6. `onHaloTransactionResult`, with the DCC outcome in `HaloTransactionResult.dccResult`.
+
+A `Cancel` choice, a choice timeout, or an offer the SDK can't show cancels the transaction and returns a `HaloTransactionResult.resultType` of `Cancelled`.
 
 **SDK Offer Screen**
 
@@ -962,7 +963,7 @@ public interface IHaloDccCallbacks {
 | `PayInLocalCurrency`      | The payment is made in the local currency, without DCC    |
 | `Cancel`                  | The transaction is cancelled                              |
 
-If `respond` is not called within the choice timeout (60 seconds, or less when the quote expires sooner), or the transaction is cancelled meanwhile, the SDK cancels the transaction and calls `onHaloTransactionResult`. If `onDccOffer` throws, the SDK treats it as `Cancel`. A PIN, when required, is captured after the choice.
+If `respond` is not called within the choice timeout (60 seconds, or less when the offer expires sooner), or the transaction is cancelled meanwhile, the SDK cancels the transaction and calls `onHaloTransactionResult`. If `onDccOffer` throws, the SDK treats it as `Cancel`.
 
 Rules for an app's own offer screen:
 
@@ -1038,7 +1039,7 @@ The hard-coded strings only illustrate the flow. Keep the screen text in string 
 
 **HaloDccResult**
 
-`HaloTransactionResult.dccResult` and `HaloTransactionReceipt.dccResult` hold the Dynamic Currency Conversion outcome. They are null when DCC is not enabled, when the SDK did not request a quote (for example for a domestic card or a refund), or when the transaction was cancelled during the offer. Amounts, rate and markup are only set when DCC was offered.
+`HaloTransactionResult.dccResult` and `HaloTransactionReceipt.dccResult` hold the Dynamic Currency Conversion outcome. They are null when DCC played no part in the transaction, for example when it is not enabled or for a refund, and when the transaction was cancelled during the offer. Amounts, rate and markup are only set when DCC was offered.
 
 | Field                   | Description                                                            |
 | ----------------------- | ---------------------------------------------------------------------- |
@@ -1057,7 +1058,7 @@ The hard-coded strings only illustrate the flow. Keep the screen text in string 
 | `NotOfferedNotQualified` | The card or transaction does not qualify for DCC                                |
 | `NotOfferedSystemError`  | DCC could not be offered because the quote failed or timed out                  |
 
-`status` is the DCC status in the payment response, or the cardholder's choice when the response has none.
+When DCC was offered, `status` is the DCC status in the payment response, or the cardholder's choice when the response has none. When DCC was not offered, it is the reason the backend gave.
 
 A transaction where the cardholder accepted DCC can be declined with error code 219 to 222, or 224 when DCC can't be applied to the payment. Ask the cardholder to tap again. See [SDK Error Codes](./sdk-error-code).
 
@@ -1098,7 +1099,7 @@ Under some situations the attempted online transaction may be declined offline b
 
 **Dynamic Currency Conversion**
 
-When DCC applies, the SDK requests a quote and waits for the cardholder's choice before going online. See [Section 9](#9-dynamic-currency-conversion-dcc).
+When the Halo backend offers DCC on the payment, the SDK shows the offer and sends the cardholder's choice before the payment completes. See [Section 9](#9-dynamic-currency-conversion-dcc).
 
 **PIN**
 
