@@ -1060,7 +1060,7 @@ The hard-coded strings only illustrate the flow. Keep the screen text in string 
 
 When DCC was offered, `status` is the DCC status in the payment response, or the cardholder's choice when the response has none. When DCC was not offered, it is the reason the backend gave.
 
-A transaction where the cardholder accepted DCC can be declined with error code 219 to 222, or 224 when DCC can't be applied to the payment. Ask the cardholder to tap again. See [SDK Error Codes](./sdk-error-code).
+A transaction that was offered DCC returns a `HaloTransactionResult.resultType` of `Declined` with error code 220 when the cardholder chose after the offer expired, or 221 when a choice was already sent for the offer. Ask the cardholder to tap again. See [SDK Error Codes](./sdk-error-code).
 
 **Receipt**
 
