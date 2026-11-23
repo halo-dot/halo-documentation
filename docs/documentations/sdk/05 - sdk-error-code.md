@@ -66,6 +66,8 @@ Possible SDK error codes you may encounter during integration.
 | 212        | **Refund Too Late** – Refund request exceeds allowed time limit.                                |
 | 213        | **Refund Already Processed** – The refund has already been completed.                           |
 | 214        | **Missing PFS Server Key** – Required key from the PFS server is missing.                       |
+| 220        | **DCC Quote Expired** – The cardholder chose after the DCC offer expired. Tap again.             |
+| 221        | **DCC Quote Already Used** – A choice was already sent for this DCC offer, or the transaction is not waiting for a DCC choice. Tap again. |
 
 ### 300– Device Error Codes
 

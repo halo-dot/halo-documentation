@@ -142,6 +142,7 @@ The JWT must make a number of claims - all of them standard except for `aud_fing
 | exp   | NumericDate | The UTC timestamp of expiration of the JWT.                                                                                                                                                                           |
 | x-tid | String      | The Terminal ID. Required when the transaction request does not include a TID. |
 | aud_fingerprints | String | Optional (ANDROID Only). A CSV list of expected SHA-256 fingerprints for the Kernel Server TLS endpoint. This list may contain multiple values to support certificate rotation. In the QA environment, the expected value as of writing this would be: "sha256/zc6c97JhKPZUa+rIrVqjknDE1lDcDK77G41sDo+1ay0=" |
+| x-dcc-enabled | String | Optional (ANDROID Only). `"true"` enables Dynamic Currency Conversion for the user, when Halo has enabled it for the acquirer. |
 
 </TabItem>
     <TabItem value="ios" label="IOS">
