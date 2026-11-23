@@ -445,6 +445,7 @@ public interface IHaloCallbacks {
     void onSecurityError(HaloErrorCode code);
     void onCameraControlLost();
     void onOtherTaskResults(HaloOtherTaskResult results);
+    boolean onDccOffer(HaloDccOffer offer, Function1<? super CardholderDccChoice, Unit> respond);
 }
 ```
 
@@ -456,8 +457,7 @@ The `IHaloCallbacks` interface encapsulates the call-back methods that the HaloS
 4. Issues with intermittent attestation checks (`onAttestationError`)
 5. Security violation detected (rooting, debugging, integrity) (`onSecurityError`)
 6. Final outcome of start other-task flow (`onOtherTaskResults`)
-
-The same object can also implement `IHaloDccCallbacks` to show the Dynamic Currency Conversion offer on the app's own screen. See [Section 9](#9-dynamic-currency-conversion-dcc).
+7. Optionally, a Dynamic Currency Conversion offer to show on the app's own screen instead of the SDK's (`onDccOffer`). See [Section 9](#9-dynamic-currency-conversion-dcc).
 
 **HaloInitializationResult**
 
@@ -917,7 +917,7 @@ Example `onOtherTaskResults` payload:
 
 Dynamic Currency Conversion (DCC) lets a cardholder with a foreign card pay in their own currency. DCC is available when Halo has enabled it for the acquirer and the JWT has the claim `x-dcc-enabled` set to `"true"`.
 
-The Halo backend decides whether to offer DCC on each tap payment, applying the card scheme rules. Refunds, TT3 transactions and other tasks are never offered DCC. When the backend makes an offer, the SDK shows its own offer screen over the app, as it does for the PIN screen, and sends the cardholder's choice to the backend. The app does not need to call a DCC API or build a screen. When DCC can't be offered, for example because the card does not qualify or the quote failed, the payment continues in the local currency.
+The Halo backend decides whether to offer DCC on each tap payment, applying the card scheme rules. Refunds, TT3 transactions, other tasks, QR code and intent payments, and secure card reader payments are never offered DCC. A refund of a DCC payment uses the original payment's currency and rate. When the backend makes an offer, the SDK shows its own offer screen over the app, as it does for the PIN screen, and sends the cardholder's choice to the backend. The app does not need to call a DCC API or build a screen. When DCC can't be offered, for example because the card does not qualify or the quote failed, the payment continues in the local currency.
 
 **Transaction Sequence**
 
@@ -926,44 +926,47 @@ The sequence the app sees for a transaction that is offered DCC:
 1. `onHaloUIMessage` with `CardReadOK_RemoveCard` after the tap.
 2. The SDK's PIN screen, when the card asks for an online PIN.
 3. No callback while the SDK sends the payment. Show a processing state.
-4. The SDK's offer screen, opening over the app like the PIN screen. An app that implements `IHaloDccCallbacks` gets `onDccOffer` instead and shows its own screen.
-5. The SDK's PIN screen, when the payment then needs a PIN.
+4. `onDccOffer`. When it returns `false`, the default, the SDK's offer screen opens over the app like the PIN screen. When it returns `true`, the app shows its own screen.
+5. The SDK's PIN screen, when the payment then needs a PIN. When the cardholder chose to pay in their own currency, it shows the amount in the cardholder's currency.
 6. `onHaloTransactionResult`, with the DCC outcome in `HaloTransactionResult.dccResult`.
 
-A `Cancel` choice, a choice timeout, or an offer the SDK can't show cancels the transaction and returns a `HaloTransactionResult.resultType` of `Cancelled`.
+A `Cancel` choice, a choice timeout, or an offer the SDK can't show cancels the transaction and returns a `HaloTransactionResult.resultType` of `Cancelled` with error code `CancelledTransaction` (317).
 
 **SDK Offer Screen**
 
-The SDK's own offer screen takes its text from these string resources. An app can translate or reword the screen by defining strings with the same names, and the same format arguments, in its own resources.
+The SDK's own offer screen shows both amounts, the rate and the markup. The markup line is hidden when the offer has no markup. The back button counts as `Cancel`. A touch through an overlay from another app also counts as `Cancel`, and the screen shows a toast saying so.
 
-| String resource    | Format arguments                                                 |
-| ------------------ | ---------------------------------------------------------------- |
-| `halo_dcc_title`   | None                                                             |
-| `halo_dcc_message` | None                                                             |
-| `halo_dcc_pay_in`  | `%1$s` formatted amount, `%2$s` alphabetic currency code         |
-| `halo_dcc_rate`    | `%1$s` local currency code, `%2$s` rate, `%3$s` cardholder currency code |
-| `halo_dcc_markup`  | `%1$s` markup percentage                                         |
-| `halo_dcc_cancel`  | None                                                             |
+The screen takes its text from these string resources. An app can translate or reword the screen by defining strings with the same names, and the same format arguments, in its own resources.
 
-**IHaloDccCallbacks**
+| String resource             | Format arguments                                                         |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `halo_dcc_title`            | None                                                                     |
+| `halo_dcc_message`          | None                                                                     |
+| `halo_dcc_pay_in`           | `%1$s` formatted amount, `%2$s` alphabetic currency code                 |
+| `halo_dcc_rate`             | `%1$s` local currency code, `%2$s` rate, `%3$s` cardholder currency code |
+| `halo_dcc_markup`           | `%1$s` markup percentage                                                 |
+| `halo_dcc_cancel`           | None                                                                     |
+| `halo_dcc_overlay_detected` | None                                                                     |
+
+**onDccOffer**
 
 ```kotlin
-import za.co.synthesis.halo.sdk.model.IHaloDccCallbacks
+import za.co.synthesis.halo.sdk.model.IHaloCallbacks
 
-public interface IHaloDccCallbacks {
-    void onDccOffer(HaloDccOffer offer, Function1<? super HaloDccChoice, Unit> respond);
+abstract class IHaloCallbacks {
+    open fun onDccOffer(offer: HaloDccOffer, respond: (CardholderDccChoice) -> Unit): Boolean = false
 }
 ```
 
-`IHaloDccCallbacks` is optional. To show the offer on the app's own screen instead of the SDK's, implement it on the same object that is passed as `haloCallBacks`. The SDK then calls `onDccOffer` instead of showing its own screen. Show the offer and call `respond` once with the cardholder's choice. `onDccOffer` may be called on a background thread, so switch to the UI thread to show the screen.
+`onDccOffer` is optional. By default it returns `false` and the SDK shows its own offer screen. To show the offer on the app's own screen instead, override it in the class that extends `IHaloCallbacks`, show the offer, return `true`, and call `respond` once with the cardholder's choice. `onDccOffer` may be called on a background thread, so switch to the UI thread to show the screen.
 
-| Choice                    | Result                                                    |
-| ------------------------- | --------------------------------------------------------- |
-| `PayInCardholderCurrency` | The payment is made in the cardholder's currency          |
-| `PayInLocalCurrency`      | The payment is made in the local currency, without DCC    |
-| `Cancel`                  | The transaction is cancelled                              |
+| CardholderDccChoice       | Result                                                 |
+| ------------------------- | ------------------------------------------------------ |
+| `PayInCardholderCurrency` | The payment is made in the cardholder's currency       |
+| `PayInLocalCurrency`      | The payment is made in the local currency, without DCC |
+| `Cancel`                  | The transaction is cancelled                           |
 
-If `respond` is not called within the choice timeout (60 seconds, or less when the offer expires sooner), or the transaction is cancelled meanwhile, the SDK cancels the transaction and calls `onHaloTransactionResult`. If `onDccOffer` throws, the SDK treats it as `Cancel`.
+The choice timeout is 60 seconds, shortened so that the offer is still valid 30 seconds after the choice. When the offer's expiry can't be read, or is less than 30 seconds away, the timeout is 60 seconds. If `respond` is not called within the choice timeout, or the transaction is cancelled meanwhile, the SDK cancels the transaction and calls `onHaloTransactionResult`. If `onDccOffer` throws, the SDK cancels the transaction without showing its own screen.
 
 Rules for an app's own offer screen:
 
@@ -977,52 +980,59 @@ Rules for an app's own offer screen:
 
 **HaloDccOffer**
 
-| Field                   | Description                                                                                              |
-| ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| localAmount             | Transaction amount in the local currency, as a `HaloDccAmount`                                           |
-| cardholderAmount        | Converted amount in the cardholder's currency, as a `HaloDccAmount`                                      |
-| conversionRate          | Rate in ISO 8583 format: the first digit is the number of decimal places, e.g. `70699952`                |
-| conversionRateFormatted | Rate as a decimal number, e.g. `0.0699952`                                                               |
-| markup                  | Markup on the rate as a percentage, e.g. `3.5`, or null                                                  |
-| cardScheme              | Card scheme of the offer, e.g. `Visa`, or null                                                           |
-| expiresAt               | When the offer expires, ISO 8601 date-time                                                               |
+| Field                               | Description                                                                               |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| amountInLocalCurrency               | Transaction amount in the local currency, as a `HaloCurrencyAmount`                       |
+| convertedAmountInCardholderCurrency | Converted amount in the cardholder's currency, as a `HaloCurrencyAmount`                  |
+| conversionRateIso8583               | Rate in ISO 8583 format: the first digit is the number of decimal places, e.g. `70699952` |
+| conversionRateDecimal               | Rate as a decimal number, e.g. `0.0699952`                                                |
+| markupPercentage                    | Markup on the rate as a percentage, e.g. `3.5`, or null                                   |
+| cardScheme                          | Card scheme of the offer, e.g. `Visa`, or null                                            |
+| expiresAtIso8601                    | When the offer expires, ISO 8601 date-time                                                |
 
-**HaloDccAmount**
+**HaloCurrencyAmount**
 
-| Field          | Description                                                                                           |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| minorUnits     | Amount in the currency's minor units, e.g. cents                                                      |
-| currencyCode   | ISO 4217 alphabetic currency code, e.g. `USD`                                                         |
-| currencyNumber | ISO 4217 numeric currency code, e.g. `840`                                                            |
-| formatted      | Amount formatted for the device locale with the currency's decimal places, e.g. `$7.00` in US English |
+| Field                  | Description                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| amountInMinorUnits     | Amount in the currency's minor units, e.g. `700` for USD 7.00                                         |
+| currencyAlphabeticCode | ISO 4217 alphabetic currency code, e.g. `USD`                                                         |
+| currencyNumericCode    | ISO 4217 numeric currency code, e.g. `840`                                                            |
+| formattedForDisplay    | Amount formatted for the device locale with the currency's decimal places, e.g. `$7.00` in US English |
 
 **Example: App Offer Screen**
 
-Only needed for an app that shows the DCC offer on its own screen. The class that extends `IHaloCallbacks` also implements `IHaloDccCallbacks`. `onDccOffer` shows the offer on the UI thread and passes the cardholder's choice to `respond`, with the back button as `Cancel`. `onHaloTransactionResult` closes the offer, since the SDK ends the transaction without a choice on a timeout or cancellation.
+Only needed for an app that shows the DCC offer on its own screen. `onDccOffer` shows the offer on the UI thread, passes the cardholder's choice to `respond`, with the back button as `Cancel`, and returns `true`. `onHaloTransactionResult` closes the offer, since the SDK ends the transaction without a choice on a timeout or cancellation.
 
 ```kotlin
-class HaloCallbacks(private val activity: Activity) : IHaloCallbacks(), IHaloDccCallbacks {
+import za.co.synthesis.halo.sdk.model.CardholderDccChoice
+import za.co.synthesis.halo.sdk.model.HaloDccOffer
+import za.co.synthesis.halo.sdk.model.IHaloCallbacks
+
+class HaloCallbacks(private val activity: Activity) : IHaloCallbacks() {
     private var dccOfferDialog: AlertDialog? = null
 
-    override fun onDccOffer(offer: HaloDccOffer, respond: (HaloDccChoice) -> Unit) {
+    override fun onDccOffer(offer: HaloDccOffer, respond: (CardholderDccChoice) -> Unit): Boolean {
+        val cardholderAmount = offer.convertedAmountInCardholderCurrency
+        val localAmount = offer.amountInLocalCurrency
         activity.runOnUiThread {
             dccOfferDialog = AlertDialog.Builder(activity)
                 .setTitle("Choose your payment currency")
                 .setMessage(
-                    "${offer.cardholderAmount.formatted} or ${offer.localAmount.formatted}\n" +
-                        "Rate: ${offer.conversionRateFormatted}\n" +
-                        "Markup: ${offer.markup?.let { "$it%" } ?: "none"}"
+                    "${cardholderAmount.formattedForDisplay} or ${localAmount.formattedForDisplay}\n" +
+                        "Rate: ${offer.conversionRateDecimal}\n" +
+                        "Markup: ${offer.markupPercentage?.let { markupPercentage -> "$markupPercentage%" } ?: "none"}"
                 )
-                .setOnCancelListener { respond(HaloDccChoice.Cancel) }
-                .setPositiveButton("Pay ${offer.cardholderAmount.currencyCode}") { _, _ ->
-                    respond(HaloDccChoice.PayInCardholderCurrency)
+                .setOnCancelListener { respond(CardholderDccChoice.Cancel) }
+                .setPositiveButton("Pay ${cardholderAmount.currencyAlphabeticCode}") { _, _ ->
+                    respond(CardholderDccChoice.PayInCardholderCurrency)
                 }
-                .setNegativeButton("Pay ${offer.localAmount.currencyCode}") { _, _ ->
-                    respond(HaloDccChoice.PayInLocalCurrency)
+                .setNegativeButton("Pay ${localAmount.currencyAlphabeticCode}") { _, _ ->
+                    respond(CardholderDccChoice.PayInLocalCurrency)
                 }
-                .setNeutralButton("Cancel") { _, _ -> respond(HaloDccChoice.Cancel) }
+                .setNeutralButton("Cancel") { _, _ -> respond(CardholderDccChoice.Cancel) }
                 .show()
         }
+        return true
     }
 
     override fun onHaloTransactionResult(result: HaloTransactionResult) {
@@ -1039,32 +1049,32 @@ The hard-coded strings only illustrate the flow. Keep the screen text in string 
 
 **HaloDccResult**
 
-`HaloTransactionResult.dccResult` and `HaloTransactionReceipt.dccResult` hold the Dynamic Currency Conversion outcome. They are null when DCC played no part in the transaction, for example when it is not enabled or for a refund, and when the transaction was cancelled during the offer. Amounts, rate and markup are only set when DCC was offered.
+`HaloTransactionResult.dccResult` and `HaloTransactionReceipt.dccResult` hold the Dynamic Currency Conversion outcome. They are null when DCC played no part in the transaction, for example when it is not enabled or for a refund, and when the transaction was cancelled during the offer. When DCC was not offered, only `status` is set. The amounts, rate, markup and consent time are set only when the cardholder chose a currency.
 
-| Field                   | Description                                                            |
-| ----------------------- | ---------------------------------------------------------------------- |
-| status                  | DCC outcome, as a `HaloDccStatus`                                      |
-| localAmount             | Transaction amount in the local currency, as a `HaloDccAmount`         |
-| cardholderAmount        | Converted amount in the cardholder's currency, as a `HaloDccAmount`    |
-| conversionRate          | Rate in ISO 8583 format                                                |
-| conversionRateFormatted | Rate as a decimal number                                               |
-| markup                  | Markup on the rate as a percentage, or null                            |
-| consentTimestamp        | When the cardholder chose, ISO 8601 date-time                          |
+| Field                               | Description                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| status                              | DCC outcome, as a `HaloDccStatus`                                        |
+| amountInLocalCurrency               | Transaction amount in the local currency, as a `HaloCurrencyAmount`      |
+| convertedAmountInCardholderCurrency | Converted amount in the cardholder's currency, as a `HaloCurrencyAmount` |
+| conversionRateIso8583               | Rate in ISO 8583 format                                                  |
+| conversionRateDecimal               | Rate as a decimal number                                                 |
+| markupPercentage                    | Markup on the rate as a percentage, or null                              |
+| consentTimestampIso8601             | When the cardholder chose, ISO 8601 date-time                            |
 
-| HaloDccStatus            | Meaning                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| `Accepted`               | The cardholder chose to pay in their own currency                               |
-| `Declined`               | The cardholder chose to pay in the local currency                               |
-| `NotOfferedNotQualified` | The card or transaction does not qualify for DCC                                |
-| `NotOfferedSystemError`  | DCC could not be offered because the quote failed or timed out                  |
+| HaloDccStatus            | Meaning                                                        |
+| ------------------------ | -------------------------------------------------------------- |
+| `Accepted`               | The cardholder chose to pay in their own currency              |
+| `Declined`               | The cardholder chose to pay in the local currency              |
+| `NotOfferedNotQualified` | The card or transaction does not qualify for DCC               |
+| `NotOfferedSystemError`  | DCC could not be offered because the quote failed or timed out |
 
-When DCC was offered, `status` is the DCC status in the payment response, or the cardholder's choice when the response has none. When DCC was not offered, it is the reason the backend gave.
+When the cardholder chose a currency, `status` is the DCC status in the payment response, or the cardholder's choice when the response has none. When DCC was not offered, it is the reason the backend gave.
 
-A transaction that was offered DCC returns a `HaloTransactionResult.resultType` of `Declined` with error code 220 when the cardholder chose after the offer expired, or 221 when a choice was already sent for the offer. Ask the cardholder to tap again. See [SDK Error Codes](./sdk-error-code).
+A transaction that was offered DCC returns a `HaloTransactionResult.resultType` of `Declined` with error code 220 when the cardholder chose after the offer expired, or 221 when a choice was already sent for the offer or the transaction is not waiting for a DCC choice. Ask the cardholder to tap again. These results still carry the `dccResult` of the cardholder's choice, which can be `Accepted`. See [SDK Error Codes](./sdk-error-code).
 
 **Receipt**
 
-When `result.dccResult?.status` is `Accepted`, print the DCC details from `result.dccResult` on the receipt as the scheme rules require: both amounts, `conversionRateFormatted`, `markup` and `consentTimestamp`. The same values are in `result.receipt?.dccResult`.
+Print the DCC details only when `result.dccResult?.status` is `Accepted` and `result.resultType` is `Approved`. Print them from `result.dccResult` as the scheme rules require: both amounts, `conversionRateDecimal`, `markupPercentage` and `consentTimestampIso8601`. The same values are in `result.receipt?.dccResult`.
 
 ## 10. SDK Async Behaviour after startTransaction Returns
 
