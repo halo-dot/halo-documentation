@@ -11,7 +11,7 @@ An attestation token is Halo Dot's signed statement of how one device attestatio
 You meet tokens in two places:
 
 - **Inside transaction data**, in `attestation_token`. Check it as part of [verifying the transaction data](/docs/4.2/documentations/core/backend/transaction-data#verifying).
-- **In a `PinAttestationFailed` result**, on its own. The token says the attestation failed, but not why: send the whole token to Halo Dot to find out.
+- **In a `PinAttestationFailed` result**, on its own. The token says the attestation failed, but not why: [look it up](#looking-up-an-attestation-result) to find out.
 
 ## Layout
 
@@ -29,7 +29,7 @@ The signer is named inside the token, so:
 
 1. **Check the version byte**, then decode the protobuf.
 2. **Check that `descriptor` is `"halo attestation-token"`.**
-3. **Get the signer's certificate chain** for `signer_serial` from Halo Dot, and cache it per serial.
+3. **Get the signer's certificate chain** for `signer_serial` from Halo Dot (TODO: endpoint), and cache it per serial.
 4. **Validate the chain** up to the Halo Dot root certificate.
 5. **Verify the signature.**
 
@@ -65,6 +65,8 @@ message AttestationToken {
   // without a PIN carries the device's latest attestation, which may name a
   // different transaction; that is not an error.
   bytes transaction_id = 8;
+
+  // TODO: attestation id (field number and type from the updated schema).
 }
 
 enum Verdict {
@@ -73,6 +75,59 @@ enum Verdict {
   FAIL = 2;
 }
 ```
+
+## Looking up an attestation result
+
+Your backend can send a token to Halo Dot to get the full result of that attestation, including why it failed. It works for any token, pass or fail.
+
+```
+POST /v1/attestation-results
+```
+
+- **Host:** TODO
+- **Authentication:** TODO
+
+### Request
+
+```json
+{
+  "token": "<the signed attestation token, Base64-encoded>"
+}
+```
+
+Send the whole token, exactly as you received it.
+
+### Response
+
+`200` with the attestation result:
+
+```json
+{
+  "attestationId": "8e2d4c1a-9b7f-4e5d-8c3b-2a1908f7e6d5",
+  "verdict": "FAIL",
+  "policy": { "schemaVersion": 1, "revision": 42 },
+  "claims": { "…": "…" },
+  "errors": [{ "code": "…", "claimPath": "…" }]
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `attestationId` | UUID | The attestation's id. TODO: relation to the token's attestation id |
+| `verdict` | `PASS` or `FAIL` | Same as the token's verdict |
+| `policy.schemaVersion` | Integer | TODO |
+| `policy.revision` | Integer | TODO |
+| `claims` | Object | What the device reported, by claim path. TODO: which claims are documented |
+| `errors` | Array | Why the attestation failed: a `code`, and the `claimPath` it applies to when there is one. Empty for a pass. TODO: published codes, or informational only |
+
+### Errors
+
+| Status | Meaning |
+| --- | --- |
+| `400` | The request or the token is invalid |
+| `401` | Your backend isn't authenticated |
+| `403` | Your backend isn't allowed to see this attestation |
+| `404` | No matching attestation result |
 
 ## Example
 

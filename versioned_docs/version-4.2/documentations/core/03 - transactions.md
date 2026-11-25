@@ -116,6 +116,14 @@ The PAN with its middle digits replaced by `*`, present whenever a PAN was read,
 
 The digits before the first `*` are the BIN. This follows PCI DSS (no more than the BIN and last four digits displayed) and the card brands' truncation rules.
 
+## Protecting card data
+
+An online request carries card data: the plaintext EMV data, the masked PAN and the signed transaction data.
+
+:::warning
+**Don't log or store transaction results.** Pass an online request to your backend for authorisation, then let it go.
+:::
+
 ## Kernel outcomes
 
 Each EMV kernel outcome maps to exactly one result. Error names are as in EMV Contactless Book C-2.

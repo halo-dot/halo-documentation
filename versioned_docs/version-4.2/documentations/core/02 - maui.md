@@ -114,27 +114,11 @@ Your backend verifies and decrypts the online request before sending it for auth
 
 ### EMV tags
 
-`plaintextTags` come back in the clear, and `encryptedTags` come back encrypted for your backend. Halo.Core never returns card data in the clear. If you put one of these tags in `plaintextTags`, it's left out of the result, with no error:
-
-`5A`, `56`, `57`, `58`, `5F20`, `5F24`, `5F53`, `9F0B`, `9F1F`, `9F20`, `9F2D`, `9F46`, `9F6B`
-
-These cover the card number, track data, cardholder name, expiry date and the card's certificates. Request them in `encryptedTags` instead.
-
-Any other tag can go in both lists, and then comes back both in the clear and encrypted. More in [EMV tags](/docs/4.2/documentations/core/tags).
+`HaloConfig.Transaction` takes `plaintextTags` and `encryptedTags` as hex strings, one tag per entry, such as `"9F02"`, in either case. Which tags come back, and how, is in [EMV tags](/docs/4.2/documentations/core/tags).
 
 ### Transaction results
 
-| Result | What it means |
-| --- | --- |
-| **`OnlineRequest`** | The card was read. Send it to your backend for authorisation |
-| **`Declined`** | Declined on the device |
-| **`Cancelled`** | Cancelled by `CancelTransaction()` or your cancellation token |
-| **`Failed`** | The transaction couldn't complete |
-| **`CardTapTimeOut`** | No card was tapped in time |
-| **`PinCancelled`** | The cardholder cancelled PIN entry |
-| **`PinAttestationFailed`** | The device's security check for this PIN transaction failed. Carries no card data |
-
-Approval happens on your backend, using the online request. Every result and its fields are described in [Transaction results](/docs/4.2/documentations/core/transactions).
+Results are Halo.Core's own types, bound into `HaloDot.Android.Core.Transaction`: match on `ITransactionResult.OnlineRequest`, `ITransactionResult.Declined` and so on. What each result means and carries is in [Transaction results](/docs/4.2/documentations/core/transactions).
 
 ### The API
 
@@ -153,16 +137,10 @@ public interface IHaloClient
 ```
 
 - Events arrive on the main thread, ready to update your UI.
-- `StartTransactionAsync` throws `TransactionStartException` if no transaction can start. It throws `InvalidOperationException` if a transaction is already running. Cancelling its token cancels the transaction, which then returns `Cancelled`.
+- `StartTransactionAsync` throws `TransactionStartException` if Halo.Core rejects the terminal configuration (for example, a malformed CA public key). It throws `InvalidOperationException` if a transaction is already running. Cancelling its token cancels the transaction, which then returns `Cancelled`.
 - `HaloConfig.Transaction`, `HaloConfig.Terminal` and `HaloConfig.Tag` build `TransactionConfig`, `TerminalConfig` and `ParsedTagValue`. Create `CaPublicKey`, `CombinationConfig` and `BlockedCard` with their own constructors.
+- The transaction result goes straight to your code. The package never keeps or logs a copy.
 - Need more? The full Halo.Core API is available through `HaloDot.Android.Core.HaloCoreAndroid.Companion.Instance`.
-## Protecting card data
-
-The transaction result carries card data and goes straight to your code. The package never keeps a copy.
-
-:::warning
-**Don't log or store the transaction result.** Pass it to your backend for authorisation, then let it go.
-:::
 
 ## Troubleshooting
 
@@ -171,9 +149,9 @@ The transaction result carries card data and goes straight to your code. The pac
 | **`Access key cannot be null`, or `Could not resolve za.co.synthesis.halo:core`** when building | Your repository credentials are missing or incorrect. See [step 2](#2-add-your-repository-credentials) |
 | **Restore fails for iOS** | The package is Android only. Reference it for `net10.0-android` only |
 | **`InitializeAsync` returns `Failure`** | The token has expired or is incorrect, `GetToken` threw, or the backend can't be reached |
-| **`TransactionStartException`** | Call `InitializeAsync` first and check that it returned `Success` |
+| **`TransactionStartException`** | Halo.Core rejected the terminal configuration, for example a malformed CA public key. Check the configuration Halo Dot supplied |
 | **`ArgumentOutOfRangeException` from `HaloConfig.Transaction`** | Amounts must be in cents, 0 to 12 digits |
-| **A tag you put in `plaintextTags` is missing from the result** | It's card data, which only comes back encrypted. Request it in `encryptedTags`. See [EMV tags](#emv-tags) |
+| **`Java.Lang.IllegalArgumentException` from `HaloConfig.Transaction`** | A tag in `plaintextTags` or `encryptedTags` isn't a valid EMV tag: hex, 1 to 3 bytes, such as `9F02` |
 | **Duplicate class errors at build** | The app also references `HaloDot.SdkUi.Maui`. Use one package or the other |
 
 Your Halo Dot contact can help with credentials, tokens, terminal configuration and anything else in your integration.
