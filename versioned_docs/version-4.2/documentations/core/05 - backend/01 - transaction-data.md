@@ -16,8 +16,8 @@ Every `OnlineRequest` carries signed transaction data. Your app passes it, with 
 [TransactionData protobuf]           to the end
 ```
 
-- The signature length is a protobuf varint.
-- The signature is DER ECDSA-SHA256 (P-256) by the device signing key, over everything after it: the version byte and the protobuf, exactly as received.
+- The signature length is a protobuf varint[^varint].
+- The signature is DER ECDSA-SHA256[^ecdsa] (P-256) by the device signing key, over everything after it: the version byte and the protobuf, exactly as received.
 - A version you don't know is a format you don't support: reject it.
 - The protobuf's `descriptor` field (`"halo transaction-data"`) identifies what was signed.
 
@@ -36,10 +36,10 @@ Act on nothing in the transaction data until every check above has passed.
 
 ## Decrypting
 
-Card data and PIN blocks are encrypted under AES DUKPT (ANSI X9.24-3) keys derived from your base derivation key (BDK).
+Card data and PIN blocks are encrypted under AES DUKPT (ANSI X9.24-3) keys, from two separate base derivation keys (BDKs): one for card data, one for PIN blocks.
 
-- **`encrypted_tlvs`**: AES-128-CBC with PKCS#7 padding and IV `data_iv`, under the DUKPT data encryption key for `data_ksn`. The cleartext is concatenated BER-TLVs, in the same format as the plaintext EMV data. Absent when none of your `encryptedTags` was produced.
-- **`pin_block`**: ISO 9564 format 4, encrypted under the DUKPT PIN encryption key for `pin_ksn` (a separate derivation from the data key). Translate it in your HSM for your processor.
+- **`encrypted_tlvs`**: AES-128-CBC with PKCS#7 padding and IV `data_iv`, under the DUKPT data encryption key for `data_ksn`, derived from your data BDK. The cleartext is concatenated BER-TLVs, in the same format as the plaintext EMV data. Absent when none of your `encryptedTags` was produced.
+- **`pin_block`**: ISO 9564 format 4, encrypted under the DUKPT PIN encryption key for `pin_ksn`, derived from your PIN BDK. Translate it in your HSM for your processor.
 
 ## Schema
 
@@ -118,3 +118,6 @@ The cleartext `5A0847617390010101195F2403281231` is encrypted into `encrypted_tl
 ```
 
 After a "PIN required" soft decline, continuing with PIN produces new transaction data with the same `transaction_id`, `encrypted_tlvs`, `data_iv` and `data_ksn`, plus `pin_block` and `pin_ksn`, a new `device_timestamp_unix` and a new attestation token.
+
+[^varint]: See [Base 128 varints](https://protobuf.dev/programming-guides/encoding/#varints) in the protobuf encoding guide.
+[^ecdsa]: ECDSA with SHA-256, as in [FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final). The signature is DER-encoded as `Ecdsa-Sig-Value` ([RFC 3279, section 2.2.3](https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3)), the form most crypto libraries produce and accept.

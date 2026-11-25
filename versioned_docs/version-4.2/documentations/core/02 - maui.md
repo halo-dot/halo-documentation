@@ -25,7 +25,7 @@ Halo.Core for .NET MAUI runs on **Android**.
 | **Device** | Android 10 (API 29) or later, with NFC |
 | **Tooling** | .NET 10 with the `maui-android` workload |
 | **Host Activity** | A `MauiAppCompatActivity` (the MAUI default) |
-| **Repository credentials** | An access key and secret from Halo Dot, used to download Halo.Core when you build |
+| **Halo Dot credentials** | An access key and secret from Halo Dot, used to download Halo.Core when you build |
 | **Token** | A Halo Dot JWT, issued through your backend |
 | **Terminal configuration** | CA public keys and kernel combinations, supplied by Halo Dot |
 
@@ -42,7 +42,7 @@ Building a cross-platform app? Reference the package for Android only, and wrap 
                   Condition="'$(TargetFramework)' == 'net10.0-android'" />
 ```
 
-## 2. Add your repository credentials
+## 2. Add your Halo Dot credentials
 
 Halo.Core is downloaded securely from Halo Dot's repository when you build your app, using the credentials Halo Dot gives you. Create a `local.properties` file next to your `.csproj`:
 
@@ -146,7 +146,7 @@ public interface IHaloClient
 
 | Problem | Likely cause |
 | --- | --- |
-| **`Access key cannot be null`, or `Could not resolve za.co.synthesis.halo:core`** when building | Your repository credentials are missing or incorrect. See [step 2](#2-add-your-repository-credentials) |
+| **`Access key cannot be null`, or `Could not resolve za.co.synthesis.halo:core`** when building | Your Halo Dot credentials are missing or incorrect. See [step 2](#2-add-your-halo-dot-credentials) |
 | **Restore fails for iOS** | The package is Android only. Reference it for `net10.0-android` only |
 | **`InitializeAsync` returns `Failure`** | The token has expired or is incorrect, `GetToken` threw, or the backend can't be reached |
 | **`TransactionStartException`** | Halo.Core rejected the terminal configuration, for example a malformed CA public key. Check the configuration Halo Dot supplied |

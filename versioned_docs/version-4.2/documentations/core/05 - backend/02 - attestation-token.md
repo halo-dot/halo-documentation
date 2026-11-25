@@ -21,7 +21,9 @@ You meet tokens in two places:
 [AttestationToken protobuf]          to the end
 ```
 
-The signature is DER ECDSA-SHA256 over the version byte and the protobuf, exactly as received.
+The signature length is a protobuf varint[^varint].
+
+The signature is DER ECDSA-SHA256[^ecdsa] over the version byte and the protobuf, exactly as received.
 
 ## Verifying
 
@@ -142,3 +144,6 @@ Send the whole token, exactly as you received it.
 30 e0a5f0d706                            expires_at_unix 1794904800
 38 01                                    verdict PASS
 ```
+
+[^varint]: See [Base 128 varints](https://protobuf.dev/programming-guides/encoding/#varints) in the protobuf encoding guide.
+[^ecdsa]: ECDSA with SHA-256, as in [FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final). The signature is DER-encoded as `Ecdsa-Sig-Value` ([RFC 3279, section 2.2.3](https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3)), the form most crypto libraries produce and accept.
