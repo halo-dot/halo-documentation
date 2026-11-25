@@ -18,7 +18,7 @@ A tag can be in both lists. If it isn't sensitive, it comes back both in the cle
 
 ## Sensitive tags
 
-Halo.Core never returns card data in the clear. These tags are only ever returned encrypted:
+Halo.SDK never returns card data in the clear. These tags are only ever returned encrypted:
 
 | Tag | Name |
 | --- | --- |
@@ -55,4 +55,4 @@ encryptedTags: ["5A", "5F24"]
 
 ## Dynamic currency conversion
 
-For DCC, list the card's currency (for example `9F42`, Application Currency Code) in `plaintextTags`, and read the BIN from the masked PAN.
+See [Dynamic currency conversion](/docs/4.2/documentations/core/transactions#dynamic-currency-conversion) for the tags DCC needs and how it works with the PIN continuation.

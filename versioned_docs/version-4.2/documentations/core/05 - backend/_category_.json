@@ -3,6 +3,6 @@
   "position": 5,
   "link": {
     "type": "generated-index",
-    "description": "Verifying and decrypting the signed transaction data Halo.Core produces, and checking attestation tokens."
+    "description": "Verifying and decrypting the signed transaction data Halo.SDK produces, and checking attestation tokens."
   }
 }
