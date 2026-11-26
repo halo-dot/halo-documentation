@@ -76,7 +76,7 @@ A result is exactly one of these:
 
 | Error | Meaning |
 | --- | --- |
-| `NotInitialized` | Halo.SDK isn't initialised and registered |
+| `NotInitialized` | Halo.SDK hasn't [initialised](/docs/4.2/documentations/core/initialization) successfully |
 | `RkiNotDone` | The device's keys haven't been loaded yet (remote key injection) |
 | `AttestationInvalid` | The device's latest attestation is missing, out of date or failed |
 | `SecurityCheckFailed` | A device security check failed at the start |

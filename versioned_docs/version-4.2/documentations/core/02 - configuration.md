@@ -68,26 +68,26 @@ One application, kernel and transaction type you accept, with the kernel configu
 
 A combination's tag database holds two kinds of tags.
 
-**Halo.SDK terminal tags** set the checks Halo.SDK runs before handing the card to the kernel: contactless limits, floor limits and zero amounts. Flags are 1 byte, `01` for on and `00` for off. Amounts are in minor units, as BCD: `000000010000` is R 100.00.
+**Halo.SDK terminal tags** set the checks Halo.SDK runs before handing the card to the kernel: contactless limits, floor limits and zero amounts. They use the range `DFC801` to `DFC87F`, which Halo.SDK reserves for its own tags. Flags are 1 byte, `01` for on and `00` for off. Amounts are in minor units, as BCD: `000000010000` is R 100.00.
 
 | Tag | Name | Format | Meaning | When left out |
 | --- | --- | --- | --- | --- |
-| `EF8101` | Reader contactless transaction limit | Amount, up to 6 bytes | Transactions at or above this amount can't use this combination. Checked only when `EF8106` is on | No limit |
-| `EF8102` | Status check supported | Flag | A transaction of exactly one unit of the currency is sent online as a status check | Off |
-| `EF8103` | Zero amount allowed | Flag | `00` refuses zero-amount transactions for this combination. When on, they're allowed and sent online | Allowed |
-| `EF8104` | Zero amount allowed offline | Flag | Zero-amount transactions skip the zero-amount checks of `EF8103` | Off |
-| `EF8106` | Reader contactless transaction limit check | Flag | Turns on the `EF8101` check | Off |
-| `EF8107` | Reader contactless floor limit check | Flag | Turns on the `DF8123` check. Must be set to `00`, not left out, for the terminal floor limit check (`EF8108`) to run | Off, and the terminal floor limit check doesn't run |
-| `EF8108` | Terminal floor limit check | Flag | Turns on the `9F1B` check. Runs only when `EF8107` is `00` | Off |
-| `EF8109` | Reader CVM required limit check | Flag | Turns on the `DF8126` check | Off |
+| `DFC801` | Reader contactless transaction limit | Amount, up to 6 bytes | Transactions at or above this amount can't use this combination. Checked only when `DFC806` is on | No limit |
+| `DFC802` | Status check supported | Flag | A transaction of exactly one unit of the currency is sent online as a status check | Off |
+| `DFC803` | Zero amount allowed | Flag | `00` refuses zero-amount transactions for this combination. When on, they're allowed and sent online | Allowed |
+| `DFC804` | Zero amount allowed offline | Flag | Zero-amount transactions skip the zero-amount checks of `DFC803` | Off |
+| `DFC806` | Reader contactless transaction limit check | Flag | Turns on the `DFC801` check | Off |
+| `DFC807` | Reader contactless floor limit check | Flag | Turns on the `DF8123` check. Must be set to `00`, not left out, for the terminal floor limit check (`DFC808`) to run | Off, and the terminal floor limit check doesn't run |
+| `DFC808` | Terminal floor limit check | Flag | Turns on the `9F1B` check. Runs only when `DFC807` is `00` | Off |
+| `DFC809` | Reader CVM required limit check | Flag | Turns on the `DF8126` check | Off |
 
 Halo.SDK also reads these standard tags from the tag database, for every kernel:
 
 | Tag | Name | Format | Meaning |
 | --- | --- | --- | --- |
-| `DF8123` | Reader contactless floor limit | Amount, BCD | Transactions above this amount are sent online. Checked only when `EF8107` is on |
-| `9F1B` | Terminal floor limit | Amount, binary | Transactions above this amount are sent online. Checked only when `EF8108` is on |
-| `DF8126` | Reader CVM required limit | Amount, BCD | Transactions at or above this amount require cardholder verification. Checked only when `EF8109` is on |
+| `DF8123` | Reader contactless floor limit | Amount, BCD | Transactions above this amount are sent online. Checked only when `DFC807` is on |
+| `9F1B` | Terminal floor limit | Amount, binary | Transactions above this amount are sent online. Checked only when `DFC808` is on |
+| `DF8126` | Reader CVM required limit | Amount, BCD | Transactions at or above this amount require cardholder verification. Checked only when `DFC809` is on |
 | `9F66` | Terminal transaction qualifiers | 4 bytes | Required. Halo.SDK sets its online and cardholder verification bits for each transaction from the checks above |
 | `DF812D` | Message hold time | 3 bytes, BCD, in units of 100 ms | How long Halo.SDK's own UI messages stay on screen. Left out, `000013` (1.3 seconds) |
 

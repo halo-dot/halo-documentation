@@ -82,9 +82,9 @@ using HaloDot.Android.Core.Transaction;
 
 // 1. Initialise once.
 var init = await halo.InitializeAsync();
-if (init is HaloInitializationResult.Failure f)
+if (init is IInitializationResult.Failed f)
 {
-    // Check f.ResultType and f.ErrorCode.
+    // Check f.Error. See Initialization for each error.
 }
 
 // 2. Show Halo.SDK's prompts ("Present card", etc.) to your merchant, in your own wording.
@@ -125,7 +125,7 @@ Results are Halo.SDK's own types, bound into `HaloDot.Android.Core.Transaction`:
 ```csharp
 public interface IHaloClient
 {
-    Task<HaloInitializationResult> InitializeAsync(CancellationToken cancellationToken = default);
+    Task<IInitializationResult> InitializeAsync(CancellationToken cancellationToken = default);
     Task<ITransactionResult> StartTransactionAsync(TransactionConfig config, CancellationToken cancellationToken = default);
     Task<ITransactionResult> ContinueWithPinAsync(ITransactionResult.OnlineRequest request);
     void CancelTransaction();
@@ -148,7 +148,7 @@ public interface IHaloClient
 | --- | --- |
 | **`Access key cannot be null`, or `Could not resolve za.co.synthesis.halo:core`** when building | Your Halo Dot credentials are missing or incorrect. See [step 2](#2-add-your-halo-dot-credentials) |
 | **Restore fails for iOS** | The package is Android only. Reference it for `net10.0-android` only |
-| **`InitializeAsync` returns `Failure`** | The token has expired or is incorrect, `GetToken` threw, or the backend can't be reached |
+| **`InitializeAsync` returns `Failed`** | Its `Error` says why. See [Initialization](/docs/4.2/documentations/core/initialization#errors) |
 | **`TransactionStartException`** | Halo.SDK rejected the terminal configuration, for example a malformed CA public key. Check the configuration Halo Dot supplied |
 | **`ArgumentOutOfRangeException` from `HaloConfig.Transaction`** | Amounts must be in cents, 0 to 12 digits |
 | **`Java.Lang.IllegalArgumentException` from `HaloConfig.Transaction`** | A tag in `plaintextTags` or `encryptedTags` isn't a valid EMV tag: hex, 1 to 3 bytes, such as `9F02` |
