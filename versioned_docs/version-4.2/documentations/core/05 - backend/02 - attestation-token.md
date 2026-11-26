@@ -39,6 +39,8 @@ Act on nothing in the token before the signature verifies. Don't assume the same
 
 There's no revocation check: validating the chain is enough.
 
+`expires_at_unix` is for freshness: [transaction data](/docs/4.2/documentations/core/backend/transaction-data#verifying) must arrive before its token expires. An expired token can still be [looked up](#looking-up-an-attestation-result).
+
 [C# samples](/docs/4.2/documentations/core/backend/csharp-samples) show these steps in .NET.
 
 ## Schema
@@ -49,30 +51,37 @@ syntax = "proto3";
 package halo.attestation_token.v1;
 
 message AttestationToken {
+  // The attestation's id: a 16-byte UUID. The same id as attestationId in
+  // the attestation result.
+  bytes attestation_id = 1;
+
   // Always "halo attestation-token": identifies what was signed.
-  string descriptor = 1;
+  string descriptor = 2;
 
   // Serial of the Halo Dot certificate that signed this token, raw bytes.
-  bytes signer_serial = 2;
+  bytes signer_serial = 3;
 
   // The attested device: Halo Dot's 16-byte device id, and the serial of its
   // device signing certificate, raw bytes.
-  bytes device_id = 3;
-  bytes device_signing_serial = 4;
+  bytes device_id = 4;
+  bytes device_signing_serial = 5;
 
   // Unix seconds, Halo Dot's clock.
-  int64 issued_at_unix = 5;
-  int64 expires_at_unix = 6;
+  int64 issued_at_unix = 6;
+  int64 expires_at_unix = 7;
 
-  Verdict verdict = 7;
+  Verdict verdict = 8;
 
   // 16 bytes. Set when the attestation was started at the beginning of a
-  // transaction: that transaction's id. Absent otherwise. A transaction
-  // without a PIN carries the device's latest attestation, which may name a
-  // different transaction; that is not an error.
-  bytes transaction_id = 8;
-
-  // TODO: attestation id (field number and type from the updated schema).
+  // transaction: that transaction's id. Absent otherwise. At that point
+  // nobody knows whether the transaction will need a PIN, so the id only
+  // says which transaction the attestation was started for.
+  //
+  // A transaction without a PIN carries the device's latest attestation, so
+  // its token may name a different transaction, or none; that is not an
+  // error. Only a transaction with a PIN requires the token's id to equal
+  // its own.
+  bytes transaction_id = 9;
 }
 
 enum Verdict {
@@ -92,7 +101,7 @@ Authorization: Bearer <the signed attestation token, Base64-encoded>
 ```
 
 - **Host:** the Halo Dot server in your JWTs' `aud` claim, the same one Halo.SDK connects to. See [Claims](/docs/4.2/documentations/core/jwt#claims).
-- **Request:** no body. The token is the credential: send the whole token, exactly as you received it, Base64-encoded. This is Halo Dot's attestation token, not a Google Play Integrity token.
+- **Request:** no body. The token is the credential: send the whole token, exactly as you received it, Base64-encoded. This is Halo Dot's attestation token, not a Google Play Integrity token. An expired token can still be looked up.
 
 ### Response
 
@@ -113,20 +122,20 @@ Authorization: Bearer <the signed attestation token, Base64-encoded>
       }
     }
   },
-  "errors": [{ "code": "…", "claimPath": "…" }]
+  "errors": [{ "code": "CLAIM_POLICY_MISMATCH", "claimPath": "…" }]
 }
 ```
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `attestationId` | UUID | The attestation's id. TODO: relation to the token's attestation id |
+| `attestationId` | UUID | The attestation's id: the token's `attestation_id`, written as a UUID |
 | `deviceInstallationId` | String | The token's `device_id`, as 32 lowercase hex characters: the same id Halo.SDK returns from [initialization](/docs/4.2/documentations/core/initialization) |
 | `transactionId` | UUID, or `null` | The token's `transaction_id`, written as a UUID. `null` when the token has none |
 | `verdict` | `PASS` or `FAIL` | Same as the token's verdict |
 | `policy.schemaVersion` | Integer | The version of Halo Dot's attestation policy format the result was checked against |
-| `policy.revision` | Integer | The revision of that policy |
+| `policy.revision` | Integer | The policy's revision within that format |
 | `claims` | Object | Left out for a pass. For a fail, only the claims that failed the policy, by provider. See [Claims](#claims) |
-| `errors` | Array | Why the attestation failed: a `code`, and the `claimPath` it applies to when there is one. TODO: published codes, or informational only |
+| `errors` | Array | Why the attestation failed: a `code`, such as `CLAIM_POLICY_MISMATCH`, and the `claimPath` it applies to when there is one. The codes aren't a closed list: treat them as opaque strings, and don't fail on one you don't know |
 
 ### Claims
 
@@ -144,7 +153,7 @@ Expect values beyond the ones listed here: Google adds new ones over time.
 | `deviceIntegrity` | List of strings | Device labels, such as `MEETS_BASIC_INTEGRITY`, `MEETS_DEVICE_INTEGRITY`, `MEETS_STRONG_INTEGRITY` and `MEETS_VIRTUAL_INTEGRITY` |
 | `appRecognition` | String | `PLAY_RECOGNIZED`, `UNRECOGNIZED_VERSION` or `UNEVALUATED` |
 | `appLicensing` | String | `LICENSED`, `UNLICENSED` or `UNEVALUATED` |
-| `certificateSha256Digest` | List of strings | SHA-256 digests of the app's signing certificates. TODO: encoding |
+| `certificateSha256Digest` | List of strings | SHA-256 digests of the app's signing certificates, in URL-safe Base64 as Google returns them: 43 characters unpadded, or 44 with a trailing `=`. Compare the decoded bytes, not the text |
 | `versionCode` | String | The app's version code, as a decimal string. Don't parse it into a fixed-size integer |
 | `packageName` | String | The app's package name |
 | `observedAt` | Timestamp | When Google answered. A plain date-time, with no requirement |
@@ -175,25 +184,27 @@ Expect values beyond the ones listed here: Google adds new ones over time.
 
 Instead of looking results up, your backend can have Halo Dot send it every attestation result as it happens. Halo Dot POSTs the same body as the [lookup response](#response) to a URL you choose.
 
-- **Setting it up:** give Halo Dot your receiver URL and one way to authenticate. TODO: how it's configured
+- **Setting it up:** send Halo Dot your receiver URL and your credentials (OAuth client credentials or an API key) in advance. Halo Dot adds them to its configuration for the environment; there's no self-service setup.
 - **Authentication:**
   - **OAuth 2 client credentials** (preferred): you provision a client for Halo Dot, which gets an access token from your token endpoint and sends it as a bearer token.
   - **API key:** a key you supply, which Halo Dot sends in `X-API-Key`.
-- **Acknowledging:** answer `200` or `204`. Any other answer isn't acknowledged, and Halo Dot may retry the delivery. TODO: retry policy
-- **Duplicates:** a retried delivery repeats a result you may already have, so handle each `attestationId` once.
+- **Acknowledging:** answer `200` or `204`.
+- **Retries:** a `5xx` answer is retried, up to three times by default. TODO: backoff schedule. A `4xx` answer isn't retried.
+- **Duplicates:** each result is delivered once, but if your acknowledgement is lost, a retry repeats it. Deduplicate by `attestationId`.
 
 ## Example
 
 ```
 48 3046…                                 signature length 72, signature
 01                                       version 1
-0a16 68616c6f206174746573746174696f6e2d746f6b656e   descriptor "halo attestation-token"
-1204 1c77e0a2                            signer_serial
-1a10 8e2d4c1a9b7f6e5d4c3b2a1908f7e6d5    device_id
-2208 4a1f0c9e7d2b33a1                    device_signing_serial
-28 d089f0d706                            issued_at_unix 1794901200
-30 e0a5f0d706                            expires_at_unix 1794904800
-38 01                                    verdict PASS
+0a10 3f6b1c9e27d44a8b9e05c1d2e3f4a5b6    attestation_id
+1216 68616c6f206174746573746174696f6e2d746f6b656e   descriptor "halo attestation-token"
+1a04 1c77e0a2                            signer_serial
+2210 8e2d4c1a9b7f6e5d4c3b2a1908f7e6d5    device_id
+2a08 4a1f0c9e7d2b33a1                    device_signing_serial
+30 d089f0d706                            issued_at_unix 1794901200
+38 e0a5f0d706                            expires_at_unix 1794904800
+40 01                                    verdict PASS
 ```
 
 [^varint]: See [Base 128 varints](https://protobuf.dev/programming-guides/encoding/#varints) in the protobuf encoding guide.

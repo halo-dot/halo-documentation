@@ -116,7 +116,7 @@ The cleartext `5A0847617390010101195F2403281231` is encrypted into `encrypted_tl
 3a20 2430cc6f…f3249590                   encrypted_tlvs (32 bytes)
 4210 a1b2c3d4e5f60718293a4b5c6d7e8f90    data_iv
 4a0c 0123456789abcdef00000007            data_ksn
-629201 4830…3801                         attestation_token (146 bytes)
+62a401 4830…4001                         attestation_token (164 bytes)
 ```
 
 After a "PIN required" soft decline, continuing with PIN produces new transaction data with the same `transaction_id`, `encrypted_tlvs`, `data_iv` and `data_ksn`, plus `pin_block` and `pin_ksn`, a new `device_timestamp_unix` and a new attestation token.

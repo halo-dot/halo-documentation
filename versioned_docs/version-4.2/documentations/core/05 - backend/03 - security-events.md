@@ -13,14 +13,20 @@ When Halo.SDK detects a threat on a device, such as root or an overlay, Halo Dot
 Halo Dot POSTs one event per request to a URL you choose:
 
 ```json
-{ "eventType": "ROOTED" }
+{
+  "eventType": "ROOTED",
+  "deviceInstallationId": "8e2d4c1a9b7f6e5d4c3b2a1908f7e6d5",
+  "timestamp": "2026-11-26T14:32:05Z"
+}
 ```
 
-For now an event carries only its type. TODO: which device it came from, and other event details
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `eventType` | String | What was detected. See [Event types](#event-types) |
+| `deviceInstallationId` | String | The device it was detected on, as 32 lowercase hex characters: the same id Halo.SDK returns from [initialization](/docs/4.2/documentations/core/initialization) |
+| `timestamp` | Date-time | When Halo.SDK observed the event, as an RFC 3339 date-time |
 
-- **Setting it up:** give Halo Dot your receiver URL and one way to authenticate. TODO: how it's configured
-- **Authentication:** the same options as the [attestation result webhook](/docs/4.2/documentations/core/backend/attestation-token#receiving-results-by-webhook): OAuth 2 client credentials (preferred), or an API key in `X-API-Key`.
-- **Acknowledging:** answer `200` or `204`. Any other answer isn't acknowledged, and Halo Dot may retry the delivery. TODO: retry policy
+Setup, authentication and retries work as for the [attestation result webhook](/docs/4.2/documentations/core/backend/attestation-token#receiving-results-by-webhook). As there, a retry after a lost acknowledgement can deliver an event you've already accepted.
 
 ## Event types
 
