@@ -98,8 +98,8 @@ Authorization: Bearer <the signed attestation token, Base64-encoded>
 
 ```json
 {
-  "attestationId": "8e2d4c1a-9b7f-4e5d-8c3b-2a1908f7e6d5",
-  "deviceInstallationId": "1c77e0a2-4a1f-4c9e-9d2b-33a1f0e8d7c6",
+  "attestationId": "3f6b1c9e-27d4-4a8b-9e05-c1d2e3f4a5b6",
+  "deviceInstallationId": "8e2d4c1a9b7f6e5d4c3b2a1908f7e6d5",
   "transactionId": null,
   "verdict": "FAIL",
   "policy": { "schemaVersion": 1, "revision": 42 },
@@ -118,7 +118,7 @@ Authorization: Bearer <the signed attestation token, Base64-encoded>
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `attestationId` | UUID | The attestation's id. TODO: relation to the token's attestation id |
-| `deviceInstallationId` | UUID | The token's `device_id`, written as a UUID |
+| `deviceInstallationId` | String | The token's `device_id`, as 32 lowercase hex characters: the same id Halo.SDK returns from [initialization](/docs/4.2/documentations/core/initialization) |
 | `transactionId` | UUID, or `null` | The token's `transaction_id`, written as a UUID. `null` when the token has none |
 | `verdict` | `PASS` or `FAIL` | Same as the token's verdict |
 | `policy.schemaVersion` | Integer | The version of Halo Dot's attestation policy format the result was checked against |
