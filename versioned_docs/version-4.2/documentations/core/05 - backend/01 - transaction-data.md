@@ -23,7 +23,7 @@ Every `OnlineRequest` carries signed transaction data. Your app passes it, with 
 
 ## Verifying
 
-1. **Validate the signing chain** from the result: the device signing certificate, then its issuer, up to the Halo Dot root certificate.
+1. **Validate the signing chain** from the result: the device signing certificate, then its issuer, up to the Halo Dot root certificate. There's no revocation check: validating the chain is enough.
 2. **Verify the signature** over the rest of the bytes (version byte and protobuf) with the device signing certificate's key.
 3. **Check the version byte, then decode the protobuf.** Check that `descriptor` is `"halo transaction-data"` before trusting any other field. `signing_serial` must equal the device signing certificate's serial.
 4. **Verify the attestation token** in `attestation_token` (see [Attestation tokens](/docs/4.2/documentations/core/backend/attestation-token)). It must have verdict `PASS`, name this device (`device_signing_serial` equal to `signing_serial`), and not have expired when the data arrived.

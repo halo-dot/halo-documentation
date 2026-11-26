@@ -23,7 +23,7 @@ You meet tokens in two places:
 
 The signature length is a protobuf varint[^varint].
 
-The signature is DER ECDSA-SHA256[^ecdsa] over the version byte and the protobuf, exactly as received.
+The signature is DER ECDSA-SHA256[^ecdsa] (P-256) by the signer's key, over the version byte and the protobuf, exactly as received.
 
 ## Verifying
 
@@ -32,10 +32,12 @@ The signer is named inside the token, so:
 1. **Check the version byte**, then decode the protobuf.
 2. **Check that `descriptor` is `"halo attestation-token"`.**
 3. **Get the signer's certificate chain** for `signer_serial` from Halo Dot (TODO: endpoint), and cache it per serial.
-4. **Validate the chain** up to the Halo Dot root certificate.
+4. **Validate the chain** up to the Halo Dot root certificate: the same root as for [transaction data](/docs/4.2/documentations/core/backend/transaction-data#verifying).
 5. **Verify the signature.**
 
 Act on nothing in the token before the signature verifies. Don't assume the same certificate signs every token: `signer_serial` says which one did.
+
+There's no revocation check: validating the chain is enough.
 
 [C# samples](/docs/4.2/documentations/core/backend/csharp-samples) show these steps in .NET.
 
@@ -89,7 +91,7 @@ POST /v1/attestation-results
 Authorization: Bearer <the signed attestation token, Base64-encoded>
 ```
 
-- **Host:** TODO
+- **Host:** the Halo Dot server in your JWTs' `aud` claim, the same one Halo.SDK connects to. See [Claims](/docs/4.2/documentations/core/jwt#claims).
 - **Request:** no body. The token is the credential: send the whole token, exactly as you received it, Base64-encoded. This is Halo Dot's attestation token, not a Google Play Integrity token.
 
 ### Response

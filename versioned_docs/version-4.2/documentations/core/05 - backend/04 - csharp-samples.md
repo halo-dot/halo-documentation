@@ -58,9 +58,8 @@ public sealed class HaloEnvelope
 {
     public const byte SupportedVersion = 1;
 
-    // A DER ECDSA P-256 signature is at most 72 bytes. The attestation token
-    // page doesn't name a curve, so this allows up to P-521's 139.
-    private const int MaxSignatureLength = 139;
+    // A DER ECDSA P-256 signature is at most 72 bytes.
+    private const int MaxSignatureLength = 72;
 
     private readonly byte[] _signature;
     private readonly byte[] _signed; // the version byte and the protobuf, exactly as received
@@ -72,22 +71,17 @@ public sealed class HaloEnvelope
     // by Decode, at the point in the verification order each page gives.
     public static HaloEnvelope Split(ReadOnlySpan<byte> data)
     {
-        int length = 0, pos = 0;
-        for (int shift = 0; ; shift += 7)
-        {
-            if (shift > 7) throw new HaloVerificationException("Signature length is too long.");
-            if (pos == data.Length) throw new HaloVerificationException("Truncated signature length.");
-            byte b = data[pos++];
-            length |= (b & 0x7F) << shift;
-            if ((b & 0x80) == 0) break;
-        }
+        // The length is a varint, but anything up to 72 is a single byte: a
+        // byte over 72, continuation bit included, is out of range.
+        if (data.IsEmpty) throw new HaloVerificationException("Truncated envelope.");
+        int length = data[0];
         if (length is 0 or > MaxSignatureLength)
-            throw new HaloVerificationException($"Signature length {length} is out of range.");
+            throw new HaloVerificationException("Signature length is out of range.");
         // The signature, then at least the version byte.
-        if (data.Length - pos < length + 1)
+        if (data.Length < 1 + length + 1)
             throw new HaloVerificationException("Truncated envelope.");
 
-        return new HaloEnvelope(data.Slice(pos, length).ToArray(), data[(pos + length)..].ToArray());
+        return new HaloEnvelope(data.Slice(1, length).ToArray(), data[(1 + length)..].ToArray());
     }
 
     // ECDSA-SHA256 over the version byte and the protobuf.
@@ -293,7 +287,8 @@ public static class HaloChain
         using var chain = new X509Chain();
         chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust; // only the pinned root, not the OS store
         chain.ChainPolicy.CustomTrustStore.Add(haloDotRoot);
-        chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;    // revocation isn't checked
+        // Chain validation only; Halo Dot doesn't use revocation for these certificates.
+        chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
         chain.ChainPolicy.DisableCertificateDownloads = true;             // no fetching missing issuers
 
         var leaf = Load(chainDer[0]);
