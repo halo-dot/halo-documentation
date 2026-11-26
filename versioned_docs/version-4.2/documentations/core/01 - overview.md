@@ -38,7 +38,7 @@ you integrate it through the .NET MAUI package, `HaloDot.Core.Maui`.
 | --- | --- |
 | **Device** | Android 10 (API 29) or later, with NFC |
 | **Halo Dot credentials** | An access key and secret from Halo Dot, used to download Halo.SDK when you build |
-| **Token** | A Halo Dot JWT, issued through your backend |
+| **Token** | A Halo Dot [JWT](/docs/4.2/documentations/core/jwt), issued through your backend |
 | **Terminal configuration** | CA public keys and kernel configuration |
 | **Your keys** | Two BDK for your devices, to decrypt card data and PIN blocks on your backend |
 

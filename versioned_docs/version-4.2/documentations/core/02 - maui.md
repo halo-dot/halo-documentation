@@ -26,7 +26,7 @@ Halo.SDK for .NET MAUI runs on **Android**.
 | **Tooling** | .NET 10 with the `maui-android` workload |
 | **Host Activity** | A `MauiAppCompatActivity` (the MAUI default) |
 | **Halo Dot credentials** | An access key and secret from Halo Dot, used to download Halo.SDK when you build |
-| **Token** | A Halo Dot JWT, issued through your backend |
+| **Token** | A Halo Dot [JWT](/docs/4.2/documentations/core/jwt), issued through your backend |
 | **Terminal configuration** | CA public keys and kernel combinations, supplied by Halo Dot |
 
 ## 1. Add the package
@@ -71,7 +71,7 @@ builder.UseMauiApp<App>()
 
 That's the whole setup. `UseHalo()` registers `IHaloClient` and connects Halo.SDK to your app's lifecycle, so your `MainActivity` needs no Halo Dot code.
 
-`GetToken` supplies a Halo Dot JWT from your backend whenever Halo.SDK asks for one. Cache the token on your side to keep things fast. If `GetToken` throws, initialisation fails.
+`GetToken` supplies a Halo Dot JWT from your backend whenever Halo.SDK asks for one. Cache the token on your side to keep things fast. If `GetToken` throws, initialisation fails. What goes in the token, and how your backend signs it, is in [JSON Web Token (JWT)](/docs/4.2/documentations/core/jwt).
 
 ## 4. Take a payment
 
@@ -87,8 +87,8 @@ if (init is HaloInitializationResult.Failure f)
     // Check f.ResultType and f.ErrorCode.
 }
 
-// 2. Show Halo.SDK's prompts ("Tap card", etc.) to your merchant.
-halo.UiMessage += (_, m) => status.Text = m.ToString();
+// 2. Show Halo.SDK's prompts ("Present card", etc.) to your merchant, in your own wording.
+halo.UiMessage += (_, m) => status.Text = Prompts.For(m.Type, m.LanguagePreference);
 
 // 3. Your terminal configuration, from Halo Dot.
 var terminal = HaloConfig.Terminal(caPublicKeys, combinations,
@@ -136,9 +136,9 @@ public interface IHaloClient
 }
 ```
 
-- Events arrive on the main thread, ready to update your UI.
+- Events arrive on the main thread, ready to update your UI. What each message means is in [UI messages](/docs/4.2/documentations/core/ui-messages).
 - `StartTransactionAsync` throws `TransactionStartException` if Halo.SDK rejects the terminal configuration (for example, a malformed CA public key). It throws `InvalidOperationException` if a transaction is already running. Cancelling its token cancels the transaction, which then returns `Cancelled`.
-- `HaloConfig.Transaction`, `HaloConfig.Terminal` and `HaloConfig.Tag` build `TransactionConfig`, `TerminalConfig` and `ParsedTagValue`. Create `CaPublicKey`, `CombinationConfig` and `BlockedCard` with their own constructors.
+- `HaloConfig.Transaction`, `HaloConfig.Terminal` and `HaloConfig.Tag` build `TransactionConfig`, `TerminalConfig` and `ParsedTagValue`. Create `CaPublicKey` and `CombinationConfig` with their own constructors, and `BlockedCard` with `BlockedCard.Companion.Create`. What each field means is in [Configuration](/docs/4.2/documentations/core/configuration).
 - The transaction result goes straight to your code. The package never keeps or logs a copy.
 - Need more? The full Halo.SDK API is available through `HaloDot.Android.Core.HaloCoreAndroid.Companion.Instance`.
 

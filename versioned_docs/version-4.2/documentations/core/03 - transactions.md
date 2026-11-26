@@ -10,7 +10,7 @@ What a transaction returns to your app. The names here are Halo.SDK's; the .NET 
 
 ## Starting and cancelling
 
-- **Start** a transaction with its configuration: amount, currency, transaction type, the [EMV tags](/docs/4.2/documentations/core/tags) you want back, and your terminal configuration. While it runs you receive UI messages to show your merchant; when it ends, you get exactly one result.
+- **Start** a transaction with its [configuration](/docs/4.2/documentations/core/configuration): amount, currency, transaction type, the [EMV tags](/docs/4.2/documentations/core/tags) you want back, and your terminal configuration. While it runs you receive [UI messages](/docs/4.2/documentations/core/ui-messages) to show your merchant; when it ends, you get exactly one result.
 - **Starting fails immediately** only when there's no transaction to report on:
 
   | Reason | Meaning |
