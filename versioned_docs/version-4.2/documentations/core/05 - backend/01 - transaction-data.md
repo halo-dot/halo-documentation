@@ -34,6 +34,8 @@ Every `OnlineRequest` carries signed transaction data. Your app passes it, with 
 Act on nothing in the transaction data until every check above has passed.
 :::
 
+[C# samples](/docs/4.2/documentations/core/backend/csharp-samples) cover steps 1 to 5.
+
 ## Decrypting
 
 Card data and PIN blocks are encrypted under AES DUKPT (ANSI X9.24-3) keys, from two separate base derivation keys (BDKs): one for card data, one for PIN blocks.

@@ -37,6 +37,8 @@ The signer is named inside the token, so:
 
 Act on nothing in the token before the signature verifies. Don't assume the same certificate signs every token: `signer_serial` says which one did.
 
+[C# samples](/docs/4.2/documentations/core/backend/csharp-samples) show these steps in .NET.
+
 ## Schema
 
 ```proto
@@ -84,20 +86,11 @@ Your backend can send a token to Halo Dot to get the full result of that attesta
 
 ```
 POST /v1/attestation-results
+Authorization: Bearer <the signed attestation token, Base64-encoded>
 ```
 
 - **Host:** TODO
-- **Authentication:** TODO
-
-### Request
-
-```json
-{
-  "token": "<the signed attestation token, Base64-encoded>"
-}
-```
-
-Send the whole token, exactly as you received it.
+- **Request:** no body. The token is the credential: send the whole token, exactly as you received it, Base64-encoded. This is Halo Dot's attestation token, not a Google Play Integrity token.
 
 ### Response
 
@@ -106,9 +99,18 @@ Send the whole token, exactly as you received it.
 ```json
 {
   "attestationId": "8e2d4c1a-9b7f-4e5d-8c3b-2a1908f7e6d5",
+  "deviceInstallationId": "1c77e0a2-4a1f-4c9e-9d2b-33a1f0e8d7c6",
+  "transactionId": null,
   "verdict": "FAIL",
   "policy": { "schemaVersion": 1, "revision": 42 },
-  "claims": { "…": "…" },
+  "claims": {
+    "playIntegrity": {
+      "deviceIntegrity": {
+        "observed": ["MEETS_BASIC_INTEGRITY"],
+        "requirement": { "contains": "MEETS_DEVICE_INTEGRITY" }
+      }
+    }
+  },
   "errors": [{ "code": "…", "claimPath": "…" }]
 }
 ```
@@ -116,20 +118,67 @@ Send the whole token, exactly as you received it.
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `attestationId` | UUID | The attestation's id. TODO: relation to the token's attestation id |
+| `deviceInstallationId` | UUID | The token's `device_id`, written as a UUID |
+| `transactionId` | UUID, or `null` | The token's `transaction_id`, written as a UUID. `null` when the token has none |
 | `verdict` | `PASS` or `FAIL` | Same as the token's verdict |
-| `policy.schemaVersion` | Integer | TODO |
-| `policy.revision` | Integer | TODO |
-| `claims` | Object | What the device reported, by claim path. TODO: which claims are documented |
-| `errors` | Array | Why the attestation failed: a `code`, and the `claimPath` it applies to when there is one. Empty for a pass. TODO: published codes, or informational only |
+| `policy.schemaVersion` | Integer | The version of Halo Dot's attestation policy format the result was checked against |
+| `policy.revision` | Integer | The revision of that policy |
+| `claims` | Object | Left out for a pass. For a fail, only the claims that failed the policy, by provider. See [Claims](#claims) |
+| `errors` | Array | Why the attestation failed: a `code`, and the `claimPath` it applies to when there is one. TODO: published codes, or informational only |
+
+### Claims
+
+Each claim gives what the device reported, `observed`, and what the policy required, `requirement`:
+
+- `observed` is the reported value, or the string `"missing"` when the device didn't report it.
+- `requirement` is `{ "equals": … }`, or `{ "contains": … }` for a list that must include a value.
+
+Expect values beyond the ones listed here: Google adds new ones over time.
+
+**`playIntegrity`**, from Google Play Integrity:
+
+| Claim | Observed | Meaning |
+| --- | --- | --- |
+| `deviceIntegrity` | List of strings | Device labels, such as `MEETS_BASIC_INTEGRITY`, `MEETS_DEVICE_INTEGRITY`, `MEETS_STRONG_INTEGRITY` and `MEETS_VIRTUAL_INTEGRITY` |
+| `appRecognition` | String | `PLAY_RECOGNIZED`, `UNRECOGNIZED_VERSION` or `UNEVALUATED` |
+| `appLicensing` | String | `LICENSED`, `UNLICENSED` or `UNEVALUATED` |
+| `certificateSha256Digest` | List of strings | SHA-256 digests of the app's signing certificates. TODO: encoding |
+| `versionCode` | String | The app's version code, as a decimal string. Don't parse it into a fixed-size integer |
+| `packageName` | String | The app's package name |
+| `observedAt` | Timestamp | When Google answered. A plain date-time, with no requirement |
+
+**`keyAttestation`**, from Android key attestation:
+
+| Claim | Observed | Meaning |
+| --- | --- | --- |
+| `attestationSecurityLevel` | String or integer | Where the attestation was made: `Software`, `TrustedEnvironment` or `StrongBox`, or the raw value if it's none of these |
+| `keymasterSecurityLevel` | String or integer | Where the key lives, with the same values |
+| `softwareEnforced`, `hardwareEnforced` | Object | The key's authorisations, as enforced by software or by secure hardware. Each can hold the claims below |
+| `….rootOfTrust.verifiedBootState` | String or integer | `Verified`, `SelfSigned`, `Unverified` or `Failed`, or the raw value if it's none of these |
+| `….rootOfTrust.deviceLocked` | Boolean | Whether the bootloader is locked |
+| `….osVersion` | Integer | The Android version |
+| `….osPatchLevel` | Integer | The security patch level |
+| `….vendorPatchLevel`, `….bootPatchLevel` | Integer | The vendor and boot image patch levels. Only from key attestation version 3, and optional there |
 
 ### Errors
 
 | Status | Meaning |
 | --- | --- |
 | `400` | The request or the token is invalid |
-| `401` | Your backend isn't authenticated |
+| `401` | The token is missing from `Authorization`, malformed, or its signature doesn't verify |
 | `403` | Your backend isn't allowed to see this attestation |
 | `404` | No matching attestation result |
+
+## Receiving results by webhook
+
+Instead of looking results up, your backend can have Halo Dot send it every attestation result as it happens. Halo Dot POSTs the same body as the [lookup response](#response) to a URL you choose.
+
+- **Setting it up:** give Halo Dot your receiver URL and one way to authenticate. TODO: how it's configured
+- **Authentication:**
+  - **OAuth 2 client credentials** (preferred): you provision a client for Halo Dot, which gets an access token from your token endpoint and sends it as a bearer token.
+  - **API key:** a key you supply, which Halo Dot sends in `X-API-Key`.
+- **Acknowledging:** answer `200` or `204`. Any other answer isn't acknowledged, and Halo Dot may retry the delivery. TODO: retry policy
+- **Duplicates:** a retried delivery repeats a result you may already have, so handle each `attestationId` once.
 
 ## Example
 
