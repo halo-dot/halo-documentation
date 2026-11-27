@@ -38,7 +38,7 @@ dotnet add package HaloDot.Core.Maui
 Building a cross-platform app? Reference the package for Android only, and wrap your Halo.SDK code in `#if ANDROID`:
 
 ```xml
-<PackageReference Include="HaloDot.Core.Maui" Version="x.y.z"
+<PackageReference Include="HaloDot.Core.Maui" Version="0.1.0"
                   Condition="'$(TargetFramework)' == 'net10.0-android'" />
 ```
 
@@ -60,6 +60,20 @@ aws.token=<your token>
 - **CI builds:** set the environment variables `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` instead (and `AWS_SESSION_TOKEN` if you have one).
 - **Different location:** build with `-p:HaloLocalProperties=<path>`.
 The package already chooses the right Halo.SDK version, so don't add Halo.SDK to your project yourself. Your first build downloads Halo.SDK once, so it takes a little longer than later builds.
+
+### Testing on a development phone
+
+Halo.SDK refuses payments while Developer options are on: every transaction returns `Failed` with `SecurityCheckFailed`, and your backend gets a [`DEVELOPER_MODE` security event](/docs/4.2/documentations/core/backend/security-events#event-types). To test on a phone with Developer options or USB debugging on, build with Halo.SDK's debug build of the same version:
+
+```xml
+<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  <HaloCoreDebug>true</HaloCoreDebug>
+</PropertyGroup>
+```
+
+:::warning
+**Never ship the debug build.** It takes payments with Developer options on, so it's for test phones only. Your build warns while it's on (`DebugCoreEnabled`), and fails if it's on in a Release build (`DebugCoreInRelease`).
+:::
 
 ## 3. Set up
 
@@ -149,6 +163,8 @@ public interface IHaloClient
 | **`Access key cannot be null`, or `Could not resolve za.co.synthesis.halo:core`** when building | Your Halo Dot credentials are missing or incorrect. See [step 2](#2-add-your-halo-dot-credentials) |
 | **Restore fails for iOS** | The package is Android only. Reference it for `net10.0-android` only |
 | **`InitializeAsync` returns `Failed`** | Its `Error` says why. See [Initialization](/docs/4.2/documentations/core/initialization#errors) |
+| **Every transaction fails with `SecurityCheckFailed` on a test phone** | Developer options are on. See [Testing on a development phone](#testing-on-a-development-phone) |
+| **`DebugCoreInRelease`** when building | `HaloCoreDebug` is on in a Release build. Set it for Debug builds only |
 | **`TransactionStartException`** | Halo.SDK rejected the terminal configuration, for example a malformed CA public key. Check the configuration Halo Dot supplied |
 | **`ArgumentOutOfRangeException` from `HaloConfig.Transaction`** | Amounts must be in cents, 0 to 12 digits |
 | **`Java.Lang.IllegalArgumentException` from `HaloConfig.Transaction`** | A tag in `plaintextTags` or `encryptedTags` isn't a valid EMV tag: hex, 1 to 3 bytes, such as `9F02` |
