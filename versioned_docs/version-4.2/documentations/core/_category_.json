@@ -1,0 +1,8 @@
+{
+  "label": "Halo.SDK",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "Halo.SDK turns your Android app into a secure Tap on Phone payment terminal."
+  }
+}

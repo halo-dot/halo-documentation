@@ -47,6 +47,11 @@ const config: Config = {
             current: {
               label: "4.0",
             },
+            "4.2": {
+              label: "4.2",
+              path: "4.2",
+              banner: "none",
+            },
             "2.1": {
               label: "2.1",
               path: "versioned_docs/version-2.1",
@@ -100,6 +105,7 @@ const config: Config = {
           type: "docsVersionDropdown",
           position: "left",
           dropdownActiveClassDisabled: true,
+          versions: ["4.2", "current", "2.1"],
         },
         // {
         //   type: 'docSidebar',
